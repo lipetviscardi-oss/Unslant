@@ -256,7 +256,7 @@ export const TAXONOMY: BiasGroup[] = [
           en: "Missing context that would change the interpretation (history, comparison, causes).",
         },
         aiHint:
-          "Use a evidência como o trecho que precisaria de contexto e explique qual contexto falta. Baseie-se em conhecimento geral amplamente aceito; não invente fatos específicos que você não pode verificar.",
+          "Use a evidência como o trecho que precisaria de contexto e explique qual contexto falta. Inclui dados ou números que deveriam estar no texto e não estão. Baseie-se em conhecimento geral amplamente aceito; não invente fatos específicos que você não pode verificar.",
       },
       {
         id: "missing_perspectives",
@@ -311,7 +311,7 @@ export const TAXONOMY: BiasGroup[] = [
           en: "Two things that happen together presented as cause and effect.",
         },
         aiHint:
-          "Afirmações causais ('X provocou Y', 'graças a X') sustentadas apenas por coincidência temporal ou correlação.",
+          "Afirmações causais ('X provocou Y', 'graças a X') sustentadas apenas por números que mostram coincidência ou correlação. Só se aplica se o texto apresentar dados; causalidade sem dados é avaliada em 'Opinião apresentada como fato'.",
       },
       {
         id: "cherry_picking",
@@ -321,7 +321,7 @@ export const TAXONOMY: BiasGroup[] = [
           en: "A hand-picked time window that shows the desired trend.",
         },
         aiHint:
-          "Comparações com anos/meses específicos que favorecem a tese, sem justificar o recorte, quando outro recorte mudaria a conclusão.",
+          "Comparações numéricas com anos/meses específicos, presentes no texto, que favorecem a tese sem justificar o recorte, quando outro recorte mudaria a conclusão. Se o texto não traz séries ou comparações numéricas, use not_applicable.",
       },
       {
         id: "unsourced_data",
@@ -330,7 +330,7 @@ export const TAXONOMY: BiasGroup[] = [
           pt: "Números ou gráficos sem indicação de onde vieram.",
           en: "Numbers or charts with no indication of where they came from.",
         },
-        aiHint: "Dados quantitativos relevantes apresentados sem qualquer fonte identificável.",
+        aiHint: "Números que APARECEM no texto sem qualquer fonte identificável. Se o texto não traz números, use not_applicable. Não aponte dados que deveriam existir e não aparecem: isso é 'Contexto relevante omitido'.",
       },
     ],
   },

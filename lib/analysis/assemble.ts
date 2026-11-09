@@ -40,6 +40,10 @@ export interface Findings {
 const CONF_RANK: Record<Confidence, number> = { low: 0, medium: 1, high: 2 };
 
 const NOTES = {
+  noNumbers: {
+    pt: "O texto não traz números ou estatísticas.",
+    en: "The text contains no numbers or statistics.",
+  },
   missing: {
     pt: "A IA não avaliou esta categoria nesta análise.",
     en: "The AI did not evaluate this category in this analysis.",
@@ -223,8 +227,22 @@ export function buildFindings(
   const groups: GroupResult[] = [];
   let discardedEvidence = 0;
 
+  // Trava: sem nenhum número no texto, as categorias de dados não se aplicam.
+  const hasNumbers = /\d/.test(text);
+
   for (const group of activeGroups(triage)) {
     const categories: CategoryResult[] = group.categories.map((cat) => {
+      if (group.id === "data" && !hasNumbers) {
+        return {
+          id: cat.id,
+          status: "not_applicable",
+          score: 0,
+          confidence: "high",
+          summary: NOTES.noNumbers[lang],
+          evidence: [],
+          discarded: 0,
+        } satisfies CategoryResult;
+      }
       const perPart: CategoryResult[] = rawParts.map((part) => {
         const raw = part.specialists[group.id]?.categories.find((c) => c.categoryId === cat.id);
         if (!raw) {
