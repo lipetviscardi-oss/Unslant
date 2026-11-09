@@ -95,11 +95,22 @@ for (const [, list] of groups) {
   const a = row(before);
   const b = row(after);
   console.table(Object.keys(a).map((k) => ({ Item: k, Antes: a[k], Depois: b[k] })));
-  if (after.stats.stages) {
-    console.log("Custo por etapa (depois):");
-    for (const [k, v] of Object.entries(after.stats.stages)) {
-      console.log(`  - ${k}: US$ ${v.costUsd.toFixed(4)} (${v.calls} chamada(s), ${v.model})`);
+  for (const [label, r] of [["antes", before], ["depois", after]]) {
+    if (!r.stats.stages) continue;
+    console.log(`Custo por etapa (${label}):`);
+    for (const [k, v] of Object.entries(r.stats.stages)) {
+      const cache = v.cacheReadTokens || v.cacheWriteTokens ? `, cache lido ${v.cacheReadTokens} / gravado ${v.cacheWriteTokens} tokens` : "";
+      const searches = v.webSearches ? `, ${v.webSearches} busca(s)` : "";
+      console.log(`  - ${k}: US$ ${v.costUsd.toFixed(4)} (${v.calls} chamada(s), ${v.model}${cache}${searches})`);
     }
+  }
+  const d = after.balance?.diagnostics;
+  if (d) {
+    console.log("Busca para equilibrar (depois):");
+    console.log(`  - rodadas: ${d.rounds}; resultados encontrados: ${d.resultsFound}; links sugeridos: ${d.proposed}; descartados: ${d.discarded.length}; modelo(s): ${d.models.join(", ") || "—"}`);
+    if (d.queries.length) console.log(`  - termos buscados: ${d.queries.map((q) => `"${q}"`).join("; ")}`);
+    for (const x of d.discarded) console.log(`  - descartado (${x.reason}): ${x.url}`);
+    for (const n of d.notes) console.log(`  - obs.: ${n}`);
   }
 }
 

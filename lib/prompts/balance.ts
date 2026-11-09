@@ -20,6 +20,10 @@ export function balancePrompt(params: {
   dispute?: DisputeResult;
   omissions: string[];
   originalOutlet?: string;
+  /** Título do texto original (ajuda a montar buscas objetivas). */
+  title?: string;
+  /** true = segunda rodada, com termos mais objetivos. */
+  retry?: boolean;
   lang: "pt" | "en";
 }) {
   const { triage, economic, social, dispute, omissions, originalOutlet, lang } = params;
@@ -31,14 +35,19 @@ export function balancePrompt(params: {
     ? `O usuário enviou uma AFIRMAÇÃO curta. Encontre fontes confiáveis que ajudem a conferir essa afirmação: dados oficiais, checagens de agências de fact-checking, reportagens explicativas ou estudos de instituições reconhecidas, preferencialmente com perspectivas diferentes.`
     : `Encontre outras coberturas do MESMO assunto ou acontecimento, de outros veículos, que ajudem o leitor a equilibrar o que leu: textos com perspectivas diferentes, com o contexto que faltou ou com dados de fontes primárias.`;
 
-  return `TAREFA: ${goal}
+  const retryNote = params.retry
+    ? `\nATENÇÃO: uma primeira rodada de buscas não encontrou textos suficientes. Agora faça buscas com termos OBJETIVOS e FACTUAIS: nomes das pessoas e instituições envolvidas + o fato principal (e a data aproximada, se souber), sem adjetivos e sem o enquadramento do texto original. Aceite qualquer veículo confiável, de qualquer linha editorial, que noticie o mesmo fato.\n`
+    : "";
 
+  return `TAREFA: ${goal}
+${retryNote}
 ${contextBlock({
     "Tipo de texto": triage.contentType,
     Tema: triage.topic,
     "Resumo do conteúdo": triage.contentSummary,
     País: triage.country,
     "Veículo original": originalOutlet || "desconhecido",
+    "Título do texto original": params.title || "desconhecido",
     "Inclinação econômica identificada": POS[economic.position],
     "Inclinação social identificada": POS[social.position],
     "Lado favorecido na disputa": favored,

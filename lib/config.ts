@@ -114,6 +114,11 @@ export const config = {
     maxArticles: 5,
     effort: "medium" as const,
     maxTokens: 12_000,
+    /**
+     * true = a busca usa o modelo mais barato (config.ai.lightModel, Haiku).
+     * Se a conta não aceitar, o site volta sozinho para o modelo principal.
+     */
+    useLightModel: true,
   },
 
   /** Download de páginas (aba "Link"). */

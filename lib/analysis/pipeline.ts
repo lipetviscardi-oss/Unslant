@@ -235,27 +235,35 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
   const balanceTask = (async (): Promise<NonNullable<AnalysisResult["balance"]>> => {
     if (!config.balance.enabled) return { status: "disabled", data: null };
     try {
-      const data = await searchBalance({
-        task: balancePrompt({
-          triage,
-          economic: findings.political.economic,
-          social: findings.political.social,
-          dispute: findings.political.dispute,
-          omissions: findings.omissions.map((o) => o.title),
-          originalOutlet: source.outlet,
-          lang,
-        }),
+      const promptParams = {
+        triage,
+        economic: findings.political.economic,
+        social: findings.political.social,
+        dispute: findings.political.dispute,
+        omissions: findings.omissions.map((o) => o.title),
+        originalOutlet: source.outlet,
+        title: source.title || triage.title,
+        lang,
+      };
+      const { data, diagnostics } = await searchBalance({
+        task: balancePrompt(promptParams),
+        retryTask: balancePrompt({ ...promptParams, retry: true }),
         countryCode: triage.countryCode,
         originalUrl: source.url,
         usage,
         signal,
       });
-      return { status: "ok", data };
+      return { status: "ok", data, diagnostics };
     } catch (err) {
       // A busca é um complemento: se falhar, o resto da análise continua valendo.
       if (signal?.aborted) throw err;
       console.warn("[unslant] busca para equilibrar falhou:", err instanceof AppError ? `${err.code} ${err.detail ?? ""}` : err);
-      return { status: "unavailable", data: null };
+      const reason = err instanceof AppError ? `${err.code}: ${(err.detail ?? "").slice(0, 200)}` : String(err).slice(0, 200);
+      return {
+        status: "unavailable",
+        data: null,
+        diagnostics: { rounds: 0, queries: [], resultsFound: 0, proposed: 0, discarded: [], models: [], notes: [`falhou: ${reason}`] },
+      };
     }
   })();
 

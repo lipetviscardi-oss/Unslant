@@ -68,6 +68,17 @@ export interface DisputeResult {
   end: number | null;
 }
 
+/** Diagnóstico da busca "Para equilibrar sua leitura". */
+export interface BalanceDiagnostics {
+  rounds: number;
+  queries: string[];
+  resultsFound: number;
+  proposed: number;
+  discarded: { url: string; reason: string }[];
+  models: string[];
+  notes: string[];
+}
+
 /** Custo e tokens de cada etapa (para medir onde o dinheiro vai). */
 export interface StageCost {
   calls: number;
@@ -129,7 +140,12 @@ export interface AnalysisResult {
    * sugestões. status: "ok", "unavailable" (a busca falhou), "disabled"
    * (desligada em config) ou "demo" (exemplo pronto, sem busca).
    */
-  balance?: { status: "ok" | "unavailable" | "disabled" | "demo"; data: BalanceOutput | null };
+  balance?: {
+    status: "ok" | "unavailable" | "disabled" | "demo";
+    data: BalanceOutput | null;
+    /** Detalhes da busca (para entender resultados vazios). */
+    diagnostics?: BalanceDiagnostics;
+  };
 
   stats: {
     model: string;
