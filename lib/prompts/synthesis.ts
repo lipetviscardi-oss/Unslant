@@ -18,9 +18,10 @@ Preencha:
 - summarySimple: o mesmo em 2 a 3 frases curtas, em linguagem bem simples, para alguém sem familiaridade com o tema.
 - rewrite: escolha UM trecho entre as evidências listadas (use o "id" dela em evidenceId) que melhor ilustra o problema principal e que possa ser reescrito de forma neutra. Em "rewritten", escreva a versão neutra (mesmo idioma do trecho original). Em "explanation", diga em 1 a 2 frases o que mudou e por quê. Se não houver nenhuma evidência, use evidenceId "" e deixe os outros campos vazios.
   REGRAS DA VERSÃO NEUTRA (obrigatórias):
-  - Use SOMENTE informações que estão no trecho original. Não acrescente fontes, números, datas, nomes, estudos ou fatos.
-  - Nunca escreva "segundo levantamento", "de acordo com dados", "pesquisas mostram" ou algo parecido se o original não citar essa fonte.
-  - Se o trecho afirma algo sem fonte, a versão neutra deve deixar isso explícito, por exemplo: "o texto não informa a fonte dessa informação" ou atribuindo a afirmação ao próprio texto ("o texto afirma que…").
+  - Escreva como um trecho de NOTÍCIA neutra, no mesmo estilo e com o mesmo assunto do original: frases afirmativas, objetivas, que poderiam estar publicadas num jornal. NUNCA escreva um comentário sobre o texto: é proibido começar com "O texto", "O autor", "A reportagem" ou equivalentes.
+  - Use SOMENTE informações que estão no trecho e no seu "contexto". Não acrescente fontes, números, datas, nomes, estudos ou fatos.
+  - Quando a afirmação não tiver fonte, atribua-a a quem a fez, conforme o contexto mostra (ex.: "Flávio afirmou que a medida não tinha precedentes"). Nunca invente uma fonte ("segundo levantamento", "dados mostram", "especialistas dizem").
+  - Se a afirmação sem fonte for do próprio autor, reescreva-a de forma descritiva e não categórica, sem transformá-la em fato (ex.: trocar "é a primeira vez na história" por "a medida seria inédita, de acordo com a campanha" apenas se o contexto disser quem defende isso; caso contrário, retire a parte não sustentada).
   - Neutralizar = trocar adjetivos e verbos carregados por termos descritivos, separar fato de opinião e atribuir opiniões a quem as emite.${retryNote ? `
   ATENÇÃO: ${retryNote}` : ""}
 

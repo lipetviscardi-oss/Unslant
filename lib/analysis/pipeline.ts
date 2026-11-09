@@ -202,7 +202,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
       stage: "síntese",
       light: true, // modelo mais barato: só resume o que os especialistas encontraram
       schema: SynthesisSchema,
-      task: synthesisPrompt(findingsForSynthesis(triage, findings), lang, retryNote),
+      task: synthesisPrompt(findingsForSynthesis(triage, findings, text), lang, retryNote),
       effort: config.ai.effort.synthesis,
       maxTokens: config.ai.maxTokens.synthesis,
       usage,
@@ -213,11 +213,11 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
     try {
       let out = await runSynthesis();
       // A versão neutra não pode inventar fontes ou números: confere e, se precisar, refaz uma vez.
-      let problem = rewriteProblem(findings, out);
+      let problem = rewriteProblem(findings, out, text);
       if (problem) {
         console.warn(`[unslant] versão neutra refeita: ${problem}`);
         out = await runSynthesis(`na tentativa anterior a versão neutra ${problem}. Isso é proibido: reescreva usando só o que está no trecho original.`);
-        problem = rewriteProblem(findings, out);
+        problem = rewriteProblem(findings, out, text);
         if (problem) {
           console.warn(`[unslant] versão neutra descartada: ${problem}`);
           out = { ...out, rewrite: { evidenceId: "", rewritten: "", explanation: "" } };

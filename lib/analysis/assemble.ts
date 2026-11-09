@@ -189,27 +189,40 @@ function mergeDisputes(ds: DisputeResult[]): DisputeResult {
   return ds.find((d) => d.status === "balanced") ?? ds.find((d) => d.status === "unidentified") ?? ds[0];
 }
 
-const SOURCE_TERMS =
-  /\b(segundo|conforme|de acordo com|levantamento|estudo|estudos|pesquisa|pesquisas|relat[óo]rio|especialistas|according to|survey|study|studies|research|report|poll|experts)\b/gi;
+/** Palavras que indicam uma fonte (estudo, levantamento...): não podem surgir do nada. */
+const SOURCE_NOUNS =
+  /\b(levantamentos?|estudos?|pesquisas?|relat[óo]rios?|especialistas|dados oficiais|surveys?|stud(y|ies)|reports?|polls?|experts|research)\b/gi;
+
+/** Reescrita que virou comentário sobre o texto ("O texto informa que..."). */
+const META_START = /^\s*(o|este|esse|a)\s+(texto|autor|autora|artigo|trecho|reportagem|matéria)\b|^\s*(the|this)\s+(text|author|article|passage|story)\b/i;
 
 /**
- * Confere se a versão neutra inventou algo: números ou referências a fontes
- * ("segundo", "levantamento", "estudo"...) que não estão no trecho original.
+ * Confere se a versão neutra é uma reescrita fiel, no estilo de notícia:
+ *  - não pode virar comentário ("O texto informa que...");
+ *  - não pode trazer números, nomes ou fontes (estudo, levantamento...) que
+ *    não aparecem em nenhum lugar do texto original.
  * Devolve a descrição do problema, ou null se estiver tudo certo.
  */
-export function rewriteProblem(findings: Findings, synthesis: SynthesisOutput): string | null {
+export function rewriteProblem(findings: Findings, synthesis: SynthesisOutput, text: string): string | null {
   const rw = synthesis.rewrite;
   if (!rw.evidenceId || !rw.rewritten.trim()) return null;
-  const ev = findings.groups.flatMap((g) => g.categories).flatMap((c) => c.evidence).find((e) => e.id === rw.evidenceId);
-  if (!ev) return null;
-  const original = ev.quote.toLowerCase();
-  const rewritten = rw.rewritten.toLowerCase();
-  const newNumbers = (rewritten.match(/\d+([.,]\d+)?/g) ?? []).filter((n) => !original.includes(n));
-  if (newNumbers.length) return `acrescentou números que não estão no original (${newNumbers.join(", ")})`;
-  const newTerms = [...new Set((rewritten.match(SOURCE_TERMS) ?? []).map((t) => t.toLowerCase()))].filter(
-    (t) => !original.includes(t),
+  const rewritten = rw.rewritten.trim();
+  if (META_START.test(rewritten)) return "virou um comentário sobre o texto em vez de uma reescrita no estilo de notícia";
+
+  const lowerText = text.toLowerCase();
+  const newNumbers = (rewritten.match(/\d+([.,]\d+)?/g) ?? []).filter((n) => !text.includes(n));
+  if (newNumbers.length) return `acrescentou números que não estão no texto original (${newNumbers.join(", ")})`;
+
+  const newSources = [...new Set((rewritten.match(SOURCE_NOUNS) ?? []).map((t) => t.toLowerCase()))].filter(
+    (t) => !lowerText.includes(t),
   );
-  if (newTerms.length) return `citou fontes que não estão no original (${newTerms.join(", ")})`;
+  if (newSources.length) return `citou fontes que não estão no texto original (${newSources.join(", ")})`;
+
+  // Nomes próprios (palavras com maiúscula fora do início da frase) que não existem no texto.
+  const newNames = [...rewritten.matchAll(/(?<![.!?:]\s|^)\b([A-ZÁÉÍÓÚÂÊÔÃÕÇ][\p{L}-]{2,})/gu)]
+    .map((m) => m[1])
+    .filter((name) => !text.includes(name));
+  if (newNames.length) return `citou nomes que não estão no texto original (${[...new Set(newNames)].join(", ")})`;
   return null;
 }
 
@@ -299,7 +312,7 @@ export function buildFindings(
 }
 
 /** Texto compacto com as conclusões, enviado à IA para a síntese. */
-export function findingsForSynthesis(triage: TriageOutput, findings: Findings): string {
+export function findingsForSynthesis(triage: TriageOutput, findings: Findings, text: string): string {
   const groups = findings.groups
     .filter((g) => g.score !== null)
     .map((g) => {
@@ -313,7 +326,13 @@ export function findingsForSynthesis(triage: TriageOutput, findings: Findings): 
             categoria: group.categories.find((x) => x.id === c.id)?.name.pt ?? c.id,
             nota: c.score,
             resumo: c.summary,
-            evidencias: c.evidence.map((e) => ({ id: e.id, trecho: e.quote, explicacao: e.explanation })),
+            evidencias: c.evidence.map((e) => ({
+              id: e.id,
+              trecho: e.quote,
+              // frase em volta do trecho, para a reescrita saber quem disse o quê
+              contexto: text.slice(Math.max(0, e.start - 220), Math.min(text.length, e.end + 220)),
+              explicacao: e.explanation,
+            })),
           })),
       };
     });
@@ -365,7 +384,7 @@ export function finalizeResult(params: {
   const { triage, findings, synthesis, text } = params;
 
   let rewrite: AnalysisResult["rewrite"] = null;
-  if (synthesis?.rewrite.evidenceId && !rewriteProblem(findings, synthesis)) {
+  if (synthesis?.rewrite.evidenceId && !rewriteProblem(findings, synthesis, text)) {
     const ev = findings.groups
       .flatMap((g) => g.categories)
       .flatMap((c) => c.evidence)
