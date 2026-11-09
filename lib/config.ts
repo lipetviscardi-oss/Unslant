@@ -21,7 +21,7 @@ export const config = {
      * Para trocar, mude a palavra abaixo e coloque a chave correspondente no
      * .env.local (GEMINI_API_KEY ou ANTHROPIC_API_KEY). Veja o README.
      */
-    provider: "gemini" as AiProvider,
+    provider: "anthropic" as AiProvider,
 
     /** Modelo usado por cada IA. */
     models: {

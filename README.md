@@ -109,8 +109,8 @@ O site funciona com duas IAs. A escolha fica em `lib/config.ts`, na linha `provi
 
 | `provider` | IA | Custo | Para quê |
 |---|---|---|---|
-| `"gemini"` (atual) | Google Gemini | **Grátis** (com limites por minuto e por dia) | Testes durante o desenvolvimento |
-| `"anthropic"` | Claude Sonnet 5.5 | Pago (créditos) | Versão final do site |
+| `"gemini"` | Google Gemini | **Grátis** (com limites por minuto e por dia) | Testes durante o desenvolvimento |
+| `"anthropic"` (atual) | Claude Sonnet 5.5 | Pago (créditos) | Versão final do site |
 
 Enquanto o Gemini estiver ligado, a página de Privacidade mostra um aviso de "versão de testes", porque no plano grátis o Google pode usar os textos enviados para melhorar os modelos dele. **Não abra o site ao público com o Gemini grátis.**
 
