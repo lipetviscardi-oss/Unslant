@@ -91,7 +91,8 @@ export async function POST(request: Request) {
         if (words > max) throw new AppError(isClaim ? "CLAIM_TOO_LONG" : "TEXT_TOO_LONG", `${words} palavras`);
 
         // 2. Já analisamos este texto antes? (cache)
-        const key = cacheKey(`${body.mode === "claim" ? `claim|${source.claimContext ?? ""}|` : ""}${text}`, lang, promptVersion());
+        // Cada campo entra separado (JSON), para que textos diferentes nunca gerem a mesma chave.
+        const key = cacheKey(JSON.stringify({ mode: body.mode, source, text }), lang, promptVersion());
         const cached = await readCache(key);
         if (cached) {
           cached.stats.fromCache = true;
