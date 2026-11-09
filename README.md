@@ -232,7 +232,7 @@ Cada arquivo tem comentários explicando o que pode ser mudado. Depois de salvar
 
 ## Quanto custa
 
-- **Com o Gemini grátis, o custo é zero.** Com a Anthropic, **cada análise de matéria deve custar cerca de US$ 0,20 a 0,30** (estimativa após a otimização; confira o valor real no fim de cada análise ou com `npm run comparar`), já incluindo até 3 buscas na web (US$ 0,01 cada; ajuste em `lib/config.ts`, seção `balance`). Papers longos ficam entre US$ 0,50 e 1,50. O custo estimado de cada análise aparece no fim da página de resultado.
+- **Com o Gemini grátis, o custo é zero.** Com a Anthropic, **cada análise de matéria deve custar cerca de US$ 0,12 a 0,18** (estimativa após a otimização; confira o valor real no fim de cada análise ou com `npm run comparar`), já incluindo até 3 buscas na web (US$ 0,01 cada; ajuste em `lib/config.ts`, seção `balance`). Papers longos ficam entre US$ 0,50 e 1,50. O custo estimado de cada análise aparece no fim da página de resultado.
 - O exemplo pronto e as análises repetidas (cache) são grátis.
 - **Proteção:** o site recusa novas análises depois de 30 por dia (ajuste em `lib/config.ts`, `globalDailyAnalyses`). Configure também o limite mensal na conta da Anthropic, como explicado acima.
 
