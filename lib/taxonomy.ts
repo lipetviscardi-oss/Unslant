@@ -743,11 +743,11 @@ export const SCORING = {
   confidenceWeight: { low: 0.6, medium: 0.85, high: 1 },
   /** Faixas da nota geral (limite superior de cada faixa). */
   labels: [
-    { max: 1.5, pt: "Viés mínimo", en: "Minimal bias", simplePt: "praticamente neutro", simpleEn: "practically neutral" },
-    { max: 3.5, pt: "Viés leve", en: "Mild bias", simplePt: "levemente enviesado", simpleEn: "slightly biased" },
-    { max: 5.5, pt: "Viés moderado", en: "Moderate bias", simplePt: "moderadamente enviesado", simpleEn: "moderately biased" },
-    { max: 7.5, pt: "Viés alto", en: "High bias", simplePt: "bastante enviesado", simpleEn: "quite biased" },
-    { max: 10, pt: "Viés muito alto", en: "Very high bias", simplePt: "muito enviesado", simpleEn: "very biased" },
+    { max: 2, pt: "Viés leve", en: "Mild bias", simplePt: "levemente enviesado", simpleEn: "slightly biased" },
+    { max: 4, pt: "Viés moderado", en: "Moderate bias", simplePt: "moderadamente enviesado", simpleEn: "moderately biased" },
+    { max: 6, pt: "Viés acentuado", en: "Marked bias", simplePt: "claramente enviesado", simpleEn: "clearly biased" },
+    { max: 8, pt: "Viés forte", en: "Strong bias", simplePt: "fortemente enviesado", simpleEn: "strongly biased" },
+    { max: 10, pt: "Viés muito forte", en: "Very strong bias", simplePt: "muito enviesado", simpleEn: "very biased" },
   ],
 } as const;
 

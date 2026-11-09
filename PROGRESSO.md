@@ -6,7 +6,7 @@ Cada item concluído é salvo no GitHub logo em seguida.
 
 | # | Item | Estado |
 |---|---|---|
-| 5 | Faixas da nota: leve / moderado / acentuado / forte / muito forte | a fazer |
+| 5 | Faixas da nota: leve / moderado / acentuado / forte / muito forte | feito |
 | 4 | Dados e estatística: só números presentes; falta de dado = omissão; sem números = não se aplica (trava no código) | a fazer |
 | 2 | Versão neutra no estilo de notícia, atribuindo a quem afirmou; checagem de nomes/fontes inventados | a fazer |
 | 3 | Bug visual no bloco da disputa (computador e celular) | a fazer |
