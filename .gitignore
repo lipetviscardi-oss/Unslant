@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# unslant: o modelo de chaves pode ir para o GitHub (sem valores reais)
+!.env.example
+
+# unslant: cache local de análises (economiza chamadas à IA durante testes)
+/.cache/
