@@ -11,7 +11,7 @@ Cada item concluído é salvo no GitHub logo em seguida.
 | 2 | Versão neutra no estilo de notícia, atribuindo a quem afirmou; checagem de nomes/fontes inventados | feito |
 | 3 | Bug visual no bloco da disputa (computador e celular) | feito (layout trocado de grade para empilhamento simples; confirmar no Safari do usuário) |
 | 1 | Busca: diagnóstico guardado, conferência tolerante (utm/AMP), segunda tentativa se < 2 textos | feito |
-| 6 | Custo (opção b): busca e identificação no Haiku (com cache aquecido), esforço baixo na visão geral, cache visível no comparar | a fazer |
+| 6 | Custo (opção b): busca e identificação no Haiku, aquecimento do cache (max_tokens 0) em paralelo, cache visível no comparar. Visão geral mantida em "medium" para compartilhar o cache | feito |
 | — | Verificação final (tipos, lint, build) + instruções para o usuário rodar os 3 artigos | a fazer |
 
 ## Decisões

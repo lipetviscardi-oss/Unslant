@@ -175,7 +175,7 @@ async function searchWithAnthropic(
     } catch (err) {
       // Só voltamos ao modelo principal em erros de configuração (não em cancelamento ou falta de crédito).
       if (!(err instanceof AppError) || err.code !== "AI_ERROR" || opts.signal?.aborted) throw err;
-      diag.notes.push(`modelo leve recusado (${(err.detail ?? "").slice(0, 120)}); usando o principal`);
+      diag.notes.push("modelo leve recusado; usando o principal (detalhes no terminal do servidor)");
       console.warn("[unslant] busca: modelo leve recusado, usando o principal:", err.detail);
     }
   }

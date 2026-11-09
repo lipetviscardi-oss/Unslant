@@ -197,6 +197,42 @@ async function callStructuredAnthropic<T extends z.ZodType>(opts: StructuredCall
   throw new AppError("AI_BAD_RESPONSE", `${opts.label}: ${lastProblem}`);
 }
 
+/**
+ * Aquece o cache do modelo principal com o documento, sem gerar resposta
+ * (max_tokens: 0). Assim os especialistas, que rodam todos ao mesmo tempo,
+ * leem o texto do cache (~10% do preço) em vez de cada um gravar o seu.
+ * Usa o mesmo esforço dos especialistas, porque o esforço faz parte do cache.
+ * Se falhar, a análise segue normalmente.
+ */
+export async function prewarmCache(documentBlock: string, usage: UsageTracker, signal?: AbortSignal) {
+  if (config.ai.provider !== "anthropic") return;
+  const model = config.ai.models.anthropic;
+  try {
+    const response = await getClient().beta.messages.create(
+      {
+        model,
+        max_tokens: 0,
+        system: SYSTEM_PROMPT,
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: documentBlock, cache_control: { type: "ephemeral" } },
+              { type: "text", text: "aquecimento" },
+            ],
+          },
+        ],
+        output_config: { effort: config.ai.effort.specialist },
+        ...(config.ai.useRefusalFallback ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" as const } : {}),
+      },
+      { signal },
+    );
+    usage.add(response.usage, "aquecimento do cache", model);
+  } catch (err) {
+    console.warn("[unslant] aquecimento do cache falhou (a análise continua):", err instanceof Error ? err.message : err);
+  }
+}
+
 /** Traduz erros da biblioteca da Anthropic para mensagens do unslant. */
 export function mapApiError(err: unknown): AppError {
   if (err instanceof AppError) return err;

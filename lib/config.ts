@@ -30,10 +30,10 @@ export const config = {
     },
 
     /**
-     * Só Anthropic: modelo mais barato para tarefas simples (resumo final e
-     * organização da busca). ~20x mais barato que o principal.
-     * A identificação fica no modelo principal de propósito: ela é a primeira
-     * chamada e "aquece" o cache do texto para os especialistas.
+     * Só Anthropic: modelo mais barato para tarefas simples (identificação,
+     * resumo final e busca na web). ~20x mais barato que o principal.
+     * Enquanto o modelo leve faz a identificação, uma chamada sem resposta
+     * "aquece" o cache do texto no modelo principal para os especialistas.
      */
     lightModel: "claude-haiku-5-5",
 
@@ -56,7 +56,7 @@ export const config = {
     effort: {
       triage: "low", // identificar tipo de texto, país e contexto
       specialist: "medium", // cada "especialista" (linguagem, fontes, dados...)
-      overview: "medium", // inclinação política, fato x opinião, omissões
+      overview: "medium", // inclinação política, fato x opinião, omissões (igual aos especialistas, para reaproveitar o cache)
       synthesis: "low", // resumo final e sugestão de reescrita
       claimCheck: "medium", // verificação de afirmações
     },

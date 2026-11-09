@@ -17,7 +17,7 @@ import { activeModel, config } from "@/lib/config";
 import { AppError } from "@/lib/errors";
 import type { Lang } from "@/lib/taxonomy";
 import { countWords, splitIntoParts } from "@/lib/text";
-import { callStructured, runLimited, UsageTracker } from "@/lib/ai/client";
+import { callStructured, prewarmCache, runLimited, UsageTracker } from "@/lib/ai/client";
 import { buildDocumentBlock, newBoundary } from "@/lib/prompts/document";
 import { triagePrompt } from "@/lib/prompts/triage";
 import { specialistPrompt } from "@/lib/prompts/specialist";
@@ -82,19 +82,30 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
   const boundary = newBoundary(); // código aleatório das marcações do documento
   const isClaim = source.type === "claim";
 
-  // 1. Identificação (usa a primeira parte, onde ficam título e resumo)
+  // 1. Identificação (modelo leve) + aquecimento do cache do modelo principal, ao mesmo tempo
   onProgress({ type: "stage", stage: "context" });
-  const identified = await callStructured({
-    label: "identificação",
-    schema: TriageSchema,
-    documentBlock: buildDocumentBlock(parts[0].text, source, boundary, { index: 0, total: parts.length }),
-    task: triagePrompt(lang, isClaim),
-    stage: "identificação",
-    effort: config.ai.effort.triage,
-    maxTokens: config.ai.maxTokens.triage,
-    usage,
-    signal,
-  });
+  const firstBlock = buildDocumentBlock(parts[0].text, source, boundary, { index: 0, total: parts.length });
+  const [identified] = await Promise.all([
+    callStructured({
+      label: "identificação",
+      stage: "identificação",
+      light: true, // tarefa simples: tipo de texto, país e contexto
+      schema: TriageSchema,
+      documentBlock: firstBlock,
+      task: triagePrompt(lang, isClaim),
+      effort: config.ai.effort.triage,
+      maxTokens: config.ai.maxTokens.triage,
+      usage,
+      signal,
+    }),
+    ...parts.map((part, i) =>
+      prewarmCache(
+        i === 0 ? firstBlock : buildDocumentBlock(part.text, source, boundary, { index: i, total: parts.length }),
+        usage,
+        signal,
+      ),
+    ),
+  ]);
 
   // Na aba "Afirmação", o tipo é sempre "afirmação" (define os grupos analisados).
   const triage: TriageOutput = isClaim ? { ...identified, contentType: "claim" } : identified;
@@ -258,7 +269,8 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
       // A busca é um complemento: se falhar, o resto da análise continua valendo.
       if (signal?.aborted) throw err;
       console.warn("[unslant] busca para equilibrar falhou:", err instanceof AppError ? `${err.code} ${err.detail ?? ""}` : err);
-      const reason = err instanceof AppError ? `${err.code}: ${(err.detail ?? "").slice(0, 200)}` : String(err).slice(0, 200);
+      // Para o navegador vai só o código do erro; o detalhe fica no terminal do servidor.
+      const reason = err instanceof AppError ? err.code : "UNKNOWN";
       return {
         status: "unavailable",
         data: null,
