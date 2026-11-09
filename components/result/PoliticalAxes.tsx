@@ -12,13 +12,24 @@ import { useDict } from "@/lib/i18n";
 const OPTIONS = ["left", "unidentified", "right"] as const;
 
 /** Faixa com três opções, uma delas destacada. */
-function Pills({ label, options, active }: { label: string; options: { id: string; text: string }[]; active: string }) {
+function Pills({
+  label,
+  options,
+  active,
+  wrap = false,
+}: {
+  label: string;
+  options: { id: string; text: string }[];
+  active: string;
+  wrap?: boolean;
+}) {
+  const shape = wrap ? "rounded-2xl" : "rounded-full";
   return (
-    <div className="grid grid-cols-3 rounded-full bg-mist p-1 text-center text-sm" role="img" aria-label={label}>
+    <div className={`grid grid-cols-3 ${shape} bg-mist p-1 text-center text-sm`} role="img" aria-label={label}>
       {options.map((o) => (
         <span
           key={o.id}
-          className={`truncate rounded-full px-2 py-1.5 ${active === o.id ? "bg-ink font-medium text-paper" : "text-muted"}`}
+          className={`${wrap ? "grid place-items-center leading-tight" : "truncate"} ${shape} px-2 py-1.5 ${active === o.id ? "bg-ink font-medium text-paper" : "text-muted"}`}
           title={o.text}
         >
           {o.text}
@@ -83,7 +94,7 @@ function Dispute({ dispute }: { dispute: DisputeResult }) {
   }
   const active =
     dispute.status === "favors_a" ? "a" : dispute.status === "favors_b" ? "b" : dispute.status === "balanced" ? "mid" : "none";
-  const middle = dispute.status === "balanced" ? D.balanced : D.unidentified;
+  const middle = dispute.status === "unidentified" ? D.unidentified : D.balanced;
   const favored = dispute.status === "favors_a" ? dispute.sideA : dispute.status === "favors_b" ? dispute.sideB : null;
   return (
     <div className="grid gap-3">
@@ -92,10 +103,11 @@ function Dispute({ dispute }: { dispute: DisputeResult }) {
         label={favored ? D.favors(favored) : middle}
         options={[
           { id: "a", text: dispute.sideA || "A" },
-          { id: dispute.status === "balanced" ? "mid" : "none", text: middle },
+          { id: dispute.status === "unidentified" ? "none" : "mid", text: middle },
           { id: "b", text: dispute.sideB || "B" },
         ]}
         active={active}
+        wrap
       />
       <p className="text-[15px] leading-relaxed">
         {favored && <span className="font-medium">{D.favors(favored)}. </span>}

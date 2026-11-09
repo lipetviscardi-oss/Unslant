@@ -199,6 +199,12 @@ Com o site ligado em `http://localhost:3000`:
 | **Link** (usa a IA) | Cole o link de uma matéria real | Título, veículo, autor e data aparecem no topo do resultado |
 | **Erros** | Cole um texto com poucas palavras, ou um link de site com paywall | Mensagem clara explicando o que fazer |
 
+**Comparar antes e depois:** depois de mudar instruções ou configurações, analise de novo os mesmos textos e rode o comando abaixo. Ele mostra, para cada texto, a análise mais antiga ao lado da mais recente (nota, inclinações, destaques, custo, tempo e custo por etapa).
+
+```bash
+npm run comparar
+```
+
 **Cache:** analisar o mesmo texto de novo é instantâneo e grátis, porque o resultado fica guardado na pasta `.cache/`. Se você editar a taxonomia ou os prompts, o cache antigo é ignorado sozinho.
 
 ---
@@ -226,7 +232,7 @@ Cada arquivo tem comentários explicando o que pode ser mudado. Depois de salvar
 
 ## Quanto custa
 
-- **Com o Gemini grátis, o custo é zero.** Com a Anthropic, **cada análise de matéria custa cerca de US$ 0,25 a 0,55**, já incluindo até 5 buscas na web (US$ 0,01 cada; ajuste em `lib/config.ts`, seção `balance`). Papers longos ficam entre US$ 0,50 e 1,50. O custo estimado de cada análise aparece no fim da página de resultado.
+- **Com o Gemini grátis, o custo é zero.** Com a Anthropic, **cada análise de matéria deve custar cerca de US$ 0,20 a 0,30** (estimativa após a otimização; confira o valor real no fim de cada análise ou com `npm run comparar`), já incluindo até 3 buscas na web (US$ 0,01 cada; ajuste em `lib/config.ts`, seção `balance`). Papers longos ficam entre US$ 0,50 e 1,50. O custo estimado de cada análise aparece no fim da página de resultado.
 - O exemplo pronto e as análises repetidas (cache) são grátis.
 - **Proteção:** o site recusa novas análises depois de 30 por dia (ajuste em `lib/config.ts`, `globalDailyAnalyses`). Configure também o limite mensal na conta da Anthropic, como explicado acima.
 

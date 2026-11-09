@@ -266,8 +266,8 @@ export const synthesis: SynthesisOutput = {
     "Esta notícia toma partido contra o corte na saúde. Ela usa palavras fortes, ouve quase só um lado e deixa para o final a informação de que o orçamento do ano anterior tinha sido maior por causa de uma epidemia.",
   rewrite: {
     evidenceId: "loaded_language-1",
-    rewritten: "Prefeitura anuncia corte de 30% no orçamento da saúde para 2027",
+    rewritten: "Prefeitura anuncia corte no orçamento da saúde; oposição diz que medida prejudica os mais pobres",
     explanation:
-      "Troquei \"impõe corte brutal\" e \"abandona os mais pobres\" por uma descrição do fato. As consequências do corte podem ser discutidas no texto, com fontes.",
+      "Troquei \"impõe corte brutal\" por uma descrição do fato e atribuí a acusação de \"abandonar os mais pobres\" a quem a faz, a oposição, em vez de apresentá-la como fato.",
   },
 };

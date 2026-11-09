@@ -77,7 +77,8 @@ export function MethodologyPt() {
         </li>
         <li>
           <strong>Síntese.</strong> Um resumo final junta os achados e sugere como um trecho problemático poderia ser
-          reescrito de forma neutra.
+          reescrito de forma neutra. A versão neutra nunca acrescenta fontes, números ou fatos que não estão no original;
+          o site confere isso automaticamente e descarta a sugestão se ela inventar algo.
         </li>
       </ol>
       <p>
@@ -87,6 +88,12 @@ export function MethodologyPt() {
       </p>
 
       <h2>Toda afirmação precisa de prova no próprio texto</h2>
+      <p>
+        Por padrão, o texto analisado mostra só os destaques de nível moderado e forte; os leves podem ser exibidos com um
+        botão. Trechos apontados em mais de uma categoria aparecem como um destaque só, com todas as explicações. Verbos
+        como &ldquo;afirmou&rdquo; ou &ldquo;alegou&rdquo; não são apontados sozinhos, só quando há tratamento desigual
+        entre os lados.
+      </p>
       <p>
         A IA só pode apontar um viés se citar o trecho exato que o demonstra. Antes de mostrar o resultado, o site procura
         cada citação no texto original, tolerando apenas diferenças de aspas, espaços e maiúsculas. Se a citação não
@@ -108,8 +115,15 @@ export function MethodologyPt() {
         <li><strong>9 e 10</strong>: distorção grave e sistemática</li>
       </ul>
       <p>
-        Cada nota vem com um nível de confiança (baixo, médio ou alto). Categorias que não fazem sentido para aquele tipo de
-        texto ficam <strong>fora da conta</strong>, em vez de contar como zero.
+        Cada nota vem com um nível de confiança (baixo, médio ou alto). A IA distingue duas situações: &ldquo;sem
+        problema&rdquo; (o texto tem material para aquela categoria e o trata bem, o que conta como 0) e &ldquo;não se
+        aplica&rdquo; (o texto não tem material para ela, como as categorias de dados num texto sem números). As
+        categorias que não se aplicam ficam <strong>fora da conta</strong>, e o resultado mostra quantas foram.
+      </p>
+      <p>
+        Para manter as notas consistentes, a IA recebe descrições de referência: nota 2 é uma notícia equilibrada com um
+        ou outro adjetivo dispensável; nota 5 é um texto que dá bem mais espaço a um lado e usa algumas palavras
+        carregadas, mas ainda informa os fatos; nota 8 é um texto de campanha disfarçado de notícia.
       </p>
       <p>
         A nota de cada grupo combina a pior categoria do grupo ({pct(SCORING.groupMaxShare)}) com a média das categorias (
@@ -130,7 +144,18 @@ export function MethodologyPt() {
       </p>
 
       <h2>Inclinação política</h2>
-      <p>A inclinação é avaliada em dois eixos independentes:</p>
+      <p>
+        A inclinação é avaliada em três partes. A primeira é o <strong>lado favorecido numa disputa</strong>: quando o
+        texto trata de uma disputa concreta (governo × oposição, candidato A × candidato B), a IA diz se ele favorece um
+        lado, se é equilibrado ou se não dá para afirmar. Para que a régua seja a mesma para os dois lados, eles são
+        sempre apresentados na mesma ordem: primeiro quem está no poder, depois quem está fora. A classificação precisa
+        de um trecho do texto como prova.
+      </p>
+      <p>
+        As outras duas são eixos ideológicos, preenchidos só quando o tema realmente envolve economia ou costumes. Uma
+        briga eleitoral, por exemplo, não é por si só um tema econômico; nesse caso o eixo aparece como &ldquo;não se
+        aplica&rdquo;.
+      </p>
       <ul>
         <li>
           <strong>Econômico</strong>: à esquerda, mais papel do Estado na economia, redistribuição e proteção social; à
@@ -286,7 +311,8 @@ export function MethodologyEn() {
         </li>
         <li>
           <strong>Synthesis.</strong> A final summary brings the findings together and suggests how a problematic passage
-          could be rewritten neutrally.
+          could be rewritten neutrally. The neutral version never adds sources, numbers or facts that are not in the
+          original; the site checks this automatically and discards the suggestion if it invents anything.
         </li>
       </ol>
       <p>
@@ -296,6 +322,12 @@ export function MethodologyEn() {
       </p>
 
       <h2>Every finding must be backed by the text itself</h2>
+      <p>
+        By default, the analyzed text shows only moderate and strong highlights; mild ones can be revealed with a button.
+        Passages flagged in more than one category appear as a single highlight with all explanations. Verbs such as
+        &ldquo;stated&rdquo; or &ldquo;claimed&rdquo; are not flagged on their own, only when the sides are treated
+        unequally.
+      </p>
       <p>
         The AI may only flag a bias if it quotes the exact passage that shows it. Before showing the result, the site
         searches for each quote in the original text, tolerating only differences in quotation marks, spacing and
@@ -317,8 +349,15 @@ export function MethodologyEn() {
         <li><strong>9 and 10</strong>: severe, systematic distortion</li>
       </ul>
       <p>
-        Each score comes with a confidence level (low, medium or high). Categories that make no sense for a given type of
-        text are <strong>left out</strong> instead of counting as zero.
+        Each score comes with a confidence level (low, medium or high). The AI distinguishes two situations: &ldquo;no
+        problem&rdquo; (the text has material for that category and handles it well, which counts as 0) and &ldquo;not
+        applicable&rdquo; (the text has no material for it, like data categories in a text without numbers). Categories
+        that do not apply are <strong>left out</strong> of the calculation, and the result shows how many there were.
+      </p>
+      <p>
+        To keep scores consistent, the AI is given reference descriptions: a 2 is a balanced story with the odd
+        unnecessary adjective; a 5 gives far more space to one side and uses some loaded words but still reports the
+        facts; an 8 is campaign material dressed up as news.
       </p>
       <p>
         Each group&rsquo;s score combines its worst category ({pct(SCORING.groupMaxShare)}) with the average of its
@@ -339,7 +378,18 @@ export function MethodologyEn() {
       </p>
 
       <h2>Political leaning</h2>
-      <p>Leaning is assessed on two independent axes:</p>
+      <p>
+        Leaning is assessed in three parts. The first is <strong>which side of a dispute the text favors</strong>: when
+        the text covers a concrete dispute (government × opposition, candidate A × candidate B), the AI says whether it
+        favors one side, is balanced, or cannot be determined. To apply the same yardstick to both sides, they are always
+        listed in the same order: first whoever holds power, then whoever is outside it. The classification must be backed
+        by a passage from the text.
+      </p>
+      <p>
+        The other two are ideological axes, filled in only when the topic really involves the economy or social values.
+        An electoral fight, for example, is not an economic topic in itself; in that case the axis shows as &ldquo;not
+        applicable&rdquo;.
+      </p>
       <ul>
         <li>
           <strong>Economic</strong>: on the left, a larger role for the state in the economy, redistribution and social
