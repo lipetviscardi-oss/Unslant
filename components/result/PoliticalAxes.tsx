@@ -25,14 +25,14 @@ function Pills({
 }) {
   const shape = wrap ? "rounded-2xl" : "rounded-full";
   return (
-    <div className={`grid grid-cols-3 ${shape} bg-mist p-1 text-center text-sm`} role="img" aria-label={label}>
+    <div className={`flex w-full items-stretch ${shape} bg-mist p-1 text-center text-sm`} role="img" aria-label={label}>
       {options.map((o) => (
         <span
           key={o.id}
-          className={`${wrap ? "grid place-items-center leading-tight" : "truncate"} ${shape} px-2 py-1.5 ${active === o.id ? "bg-ink font-medium text-paper" : "text-muted"}`}
+          className={`flex min-w-0 flex-1 basis-0 items-center justify-center ${wrap ? "break-words leading-snug" : ""} ${shape} px-2 py-1.5 ${active === o.id ? "bg-ink font-medium text-paper" : "text-muted"}`}
           title={o.text}
         >
-          {o.text}
+          <span className={wrap ? "" : "truncate"}>{o.text}</span>
         </span>
       ))}
     </div>
@@ -50,7 +50,7 @@ function Header({ name, help }: { name: string; help: string }) {
 
 function Quote({ text }: { text: string }) {
   if (!text) return null;
-  return <blockquote className="border-l-[3px] border-line pl-3 text-[15px] italic text-muted">“{text}”</blockquote>;
+  return <blockquote className="m-0 border-l-[3px] border-line pl-3 text-[15px] italic text-muted">“{text}”</blockquote>;
 }
 
 function Axis({ name, help, axis }: { name: string; help: string; axis: AxisResult }) {
@@ -58,7 +58,7 @@ function Axis({ name, help, axis }: { name: string; help: string; axis: AxisResu
   const L = t.labels.position;
   if (axis.position === "not_applicable") {
     return (
-      <div className="grid gap-2">
+      <div className="flex flex-col gap-2">
         <Header name={name} help={help} />
         <p className="text-[15px] text-muted">
           <span className="font-medium text-ink">{L.not_applicable}.</span> {axis.justification}
@@ -67,7 +67,7 @@ function Axis({ name, help, axis }: { name: string; help: string; axis: AxisResu
     );
   }
   return (
-    <div className="grid gap-3">
+    <div className="flex flex-col gap-3">
       <Header name={name} help={help} />
       <Pills label={`${name}: ${L[axis.position]}`} options={OPTIONS.map((o) => ({ id: o, text: L[o] }))} active={axis.position} />
       <p className="text-[15px] leading-relaxed">
@@ -86,7 +86,7 @@ function Dispute({ dispute }: { dispute: DisputeResult }) {
   const D = t.result.axes.dispute;
   if (dispute.status === "not_applicable") {
     return (
-      <div className="grid gap-2">
+      <div className="flex flex-col gap-2">
         <Header name={D.name} help={D.help} />
         <p className="text-[15px] text-muted">{D.notApplicable}</p>
       </div>
@@ -97,7 +97,7 @@ function Dispute({ dispute }: { dispute: DisputeResult }) {
   const middle = dispute.status === "unidentified" ? D.unidentified : D.balanced;
   const favored = dispute.status === "favors_a" ? dispute.sideA : dispute.status === "favors_b" ? dispute.sideB : null;
   return (
-    <div className="grid gap-3">
+    <div className="flex flex-col gap-3">
       <Header name={D.name} help={D.help} />
       <Pills
         label={favored ? D.favors(favored) : middle}
@@ -124,7 +124,7 @@ export function PoliticalAxes({ result }: { result: AnalysisResult }) {
   const country = result.context.country;
   const showCountry = country && !/^(não identificado|unidentified|not identified|internacional|international)$/i.test(country);
   return (
-    <section aria-labelledby="axes-title" className="grid content-start gap-6 rounded-[20px] bg-paper p-6 sm:p-7">
+    <section aria-labelledby="axes-title" className="flex flex-col gap-6 self-start rounded-[20px] bg-paper p-6 sm:p-7">
       <div>
         <h2 id="axes-title" className="text-xl font-medium">
           {t.result.axes.title}
