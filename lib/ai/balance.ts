@@ -127,9 +127,22 @@ async function searchWithAnthropic(opts: SearchOptions, blockedHost: string | nu
  * O Gemini devolve links "de passagem" do Google. Abrimos cada um (sem
  * baixar a página) só para descobrir o endereço real para onde ele leva.
  */
+const GOOGLE_REDIRECT_HOST = "vertexaisearch.cloud.google.com";
+
 async function resolveRedirect(uri: string): Promise<string | null> {
+  let parsed: URL;
   try {
-    const res = await fetch(uri, { method: "GET", redirect: "manual", signal: AbortSignal.timeout(6_000) });
+    parsed = new URL(uri);
+  } catch {
+    return null;
+  }
+  // Segurança: só abrimos o endereço de redirecionamento do Google, nunca outro.
+  if (parsed.protocol !== "https:" || parsed.hostname !== GOOGLE_REDIRECT_HOST) {
+    // Um link comum é guardado como está, sem ser acessado.
+    return parsed.protocol === "https:" || parsed.protocol === "http:" ? parsed.toString() : null;
+  }
+  try {
+    const res = await fetch(parsed, { method: "GET", redirect: "manual", signal: AbortSignal.timeout(6_000) });
     const location = res.headers.get("location");
     await res.body?.cancel();
     if (location) return new URL(location, uri).toString();
@@ -169,7 +182,7 @@ async function searchWithGemini(opts: SearchOptions, found: Found): Promise<stri
   resolved.forEach((url, i) => {
     if (!url) return;
     const key = normalizeUrl(url);
-    if (key && !hostOf(url)?.endsWith("vertexaisearch.cloud.google.com")) {
+    if (key && hostOf(url) !== GOOGLE_REDIRECT_HOST) {
       found.set(key, { url, title: chunks[i].title ?? "" });
     }
   });
