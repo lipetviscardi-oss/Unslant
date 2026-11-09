@@ -73,8 +73,8 @@ h3 {
 
 /* Trechos destacados no texto analisado */
 .hl {
-  border-radius: 4px;
-  padding: 0.05em 0.1em;
+  border-radius: 3px;
+  padding: 0.08em 0;
   cursor: pointer;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
