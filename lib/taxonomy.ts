@@ -287,8 +287,8 @@ export const TAXONOMY: BiasGroup[] = [
     name: { pt: "Dados e estatística", en: "Data and statistics" },
     shortName: { pt: "Dados", en: "Data" },
     description: {
-      pt: "Números usados de forma que engana ou não sustenta a conclusão.",
-      en: "Numbers used in misleading ways or that don't support the conclusion.",
+      pt: "Números que aparecem no texto usados de forma que engana ou não sustenta a conclusão. Dados que faltam entram em \"Omissão\".",
+      en: "Numbers that appear in the text used in misleading ways or that don't support the conclusion. Missing data counts under \"Omission\".",
     },
     weight: 0.9,
     appliesTo: ["article", "paper", "claim"],
@@ -301,7 +301,7 @@ export const TAXONOMY: BiasGroup[] = [
           en: "Numbers without a baseline, or absolute figures where relative ones matter (and vice versa).",
         },
         aiHint:
-          "Percentuais sem base, valores absolutos sem população/inflação, 'aumento de 200%' sobre base minúscula, médias que escondem distribuição. Se o texto não traz números, use not_applicable.",
+          "Avalie SOMENTE números que aparecem no texto: percentuais sem base, valores absolutos sem população/inflação, 'aumento de 200%' sobre base minúscula, médias que escondem distribuição. Se o texto não traz números, use not_applicable. A falta de um dado que deveria estar no texto NÃO é problema desta categoria: isso é 'Contexto relevante omitido'.",
       },
       {
         id: "correlation_causation",
