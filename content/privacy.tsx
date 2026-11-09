@@ -46,6 +46,13 @@ export function PrivacyPt() {
         .
       </p>
 
+      <p>
+        Para a seção &ldquo;Para equilibrar sua leitura&rdquo;, a IA faz buscas na web sobre o tema do texto, usando a
+        ferramenta de busca da Anthropic. Os termos buscados são escritos pela IA a partir do assunto, não são o texto
+        completo que você enviou. Os links recomendados levam a sites de terceiros, que têm suas próprias políticas de
+        privacidade.
+      </p>
+
       <h2>O que guardamos</h2>
       <p>
         Nesta versão, nenhum texto ou resultado é guardado em banco de dados: o resultado aparece na sua tela e some quando
@@ -111,6 +118,12 @@ export function PrivacyEn() {
           anthropic.com/legal/privacy
         </a>
         .
+      </p>
+
+      <p>
+        For the &ldquo;To balance your reading&rdquo; section, the AI runs web searches on the topic of the text, using
+        Anthropic&rsquo;s search tool. The search terms are written by the AI based on the topic; they are not the full text
+        you sent. Recommended links lead to third-party sites, which have their own privacy policies.
       </p>
 
       <h2>What we keep</h2>

@@ -170,6 +170,27 @@ export function MethodologyPt() {
         </li>
       </ul>
 
+      <h2>Para equilibrar sua leitura</h2>
+      <p>
+        Depois da análise, a IA faz algumas buscas na web (no máximo {config.balance.maxSearches}) por outras coberturas do
+        mesmo assunto, de veículos e perspectivas diferentes, além de dados e fontes primárias. Para cada texto encontrado,
+        ela explica o que ele acrescenta em relação ao original.
+      </p>
+      <ul>
+        <li>
+          <strong>Só links reais.</strong> O site guarda a lista de resultados que a busca devolveu e descarta qualquer link
+          sugerido pela IA que não esteja nessa lista.
+        </li>
+        <li>
+          <strong>Perspectivas diferentes.</strong> A IA é instruída a nunca recomendar só veículos do mesmo lado e a
+          priorizar fontes confiáveis. O veículo do texto original fica de fora.
+        </li>
+        <li>
+          <strong>Não é endosso.</strong> Recomendar um texto não significa que ele seja neutro ou correto: ele ajuda a ver o
+          assunto por outro ângulo. Vale aplicar a ele o mesmo olhar crítico.
+        </li>
+      </ul>
+
       <h2>Afirmações</h2>
       <p>
         Na aba Afirmação você pode analisar uma frase curta, como algo que ouviu numa conversa ou viu nas redes. Além dos
@@ -179,8 +200,9 @@ export function MethodologyPt() {
       </p>
       <p className="note">
         A verificação usa o conhecimento geral da IA, que tem data de corte e pode estar desatualizado ou errado. Ela não
-        consulta fontes em tempo real. Por isso a IA é orientada a preferir &ldquo;evidência insuficiente&rdquo; quando não
-        tiver segurança, e sempre indica fontes para você conferir.
+        consulta fontes durante a verificação. Por isso a IA é orientada a preferir &ldquo;evidência insuficiente&rdquo;
+        quando não tiver segurança. Logo abaixo, a seção &ldquo;Onde conferir essa afirmação&rdquo; traz fontes reais
+        encontradas na web para você checar por conta própria.
       </p>
 
       <h2>Limitações que você deve conhecer</h2>
@@ -356,6 +378,27 @@ export function MethodologyEn() {
         </li>
       </ul>
 
+      <h2>To balance your reading</h2>
+      <p>
+        After the analysis, the AI runs a few web searches (at most {config.balance.maxSearches}) for other coverage of the
+        same topic, from different outlets and perspectives, plus data and primary sources. For each text it finds, it
+        explains what that text adds compared with the original.
+      </p>
+      <ul>
+        <li>
+          <strong>Real links only.</strong> The site keeps the list of results returned by the search and discards any link
+          suggested by the AI that is not on that list.
+        </li>
+        <li>
+          <strong>Different perspectives.</strong> The AI is instructed never to recommend outlets from a single side and
+          to prioritize reliable sources. The original text&rsquo;s outlet is excluded.
+        </li>
+        <li>
+          <strong>Not an endorsement.</strong> Recommending a text does not mean it is neutral or correct: it helps you see
+          the topic from another angle. Read it with the same critical eye.
+        </li>
+      </ul>
+
       <h2>Claims</h2>
       <p>
         In the Claim tab you can analyze a short statement, such as something you heard in a conversation or saw on social
@@ -365,8 +408,9 @@ export function MethodologyEn() {
       </p>
       <p className="note">
         The claim check relies on the AI&rsquo;s general knowledge, which has a cutoff date and may be outdated or wrong.
-        It does not consult sources in real time. That is why the AI is told to prefer &ldquo;not enough evidence&rdquo;
-        when unsure, and it always suggests sources for you to check.
+        It does not consult sources during the check. That is why the AI is told to prefer &ldquo;not enough
+        evidence&rdquo; when unsure. Right below, the &ldquo;Where to check this claim&rdquo; section lists real sources
+        found on the web so you can check for yourself.
       </p>
 
       <h2>Limitations you should know about</h2>

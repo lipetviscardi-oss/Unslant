@@ -2,7 +2,7 @@
 
 O unslant analisa um texto (link de matéria, texto colado, PDF ou uma afirmação curta) e mostra os vieses que ele contém, sempre com o **trecho exato do texto** como prova. Ele também mostra a inclinação política em dois eixos e o que o texto pode estar omitindo.
 
-> Projeto em construção. Fase atual: **Fase 1**: análise completa, sem login.
+> Projeto em construção. Fases 1 e 2 prontas (análise completa e busca de textos para equilibrar), sem login.
 
 ---
 
@@ -32,6 +32,7 @@ O unslant analisa um texto (link de matéria, texto colado, PDF ou uma afirmaç�
 - **Texto original com os trechos destacados.** Ao clicar num destaque, aparecem a categoria e a explicação.
 - Resumo, proporção de fato e opinião, "o que o texto pode estar omitindo" e uma sugestão de reescrita neutra.
 - **Conferência de citações:** cada trecho citado pela IA é procurado no texto original e descartado se não for encontrado.
+- **Para equilibrar sua leitura:** depois da análise, a IA busca na web outras coberturas do mesmo assunto, de perspectivas diferentes, e explica o que cada uma acrescenta. Só aparecem links que vieram de fato da busca (o site confere).
 - **Dois exemplos prontos** (uma notícia e uma afirmação), que funcionam sem chave e sem custo.
 
 ---
@@ -176,6 +177,7 @@ Com o site ligado em `http://localhost:3000`:
 | `content/about.tsx` | Texto da página Quem somos |
 | `content/privacy.tsx` | Texto da página Privacidade (atualize antes de lançar login ou pagamentos) |
 | `lib/prompts/claimCheck.ts` | Instruções da verificação de afirmações |
+| `lib/prompts/balance.ts` | Instruções da busca de textos para equilibrar |
 
 Cada arquivo tem comentários explicando o que pode ser mudado. Depois de salvar, o site recarrega sozinho (se estiver ligado com `npm run dev`).
 
@@ -183,7 +185,7 @@ Cada arquivo tem comentários explicando o que pode ser mudado. Depois de salvar
 
 ## Quanto custa
 
-- **Cada análise de matéria custa cerca de US$ 0,20 a 0,50.** Papers longos ficam entre US$ 0,50 e 1,50. O custo estimado de cada análise aparece no fim da página de resultado.
+- **Cada análise de matéria custa cerca de US$ 0,25 a 0,55**, já incluindo até 5 buscas na web (US$ 0,01 cada; ajuste em `lib/config.ts`, seção `balance`). Papers longos ficam entre US$ 0,50 e 1,50. O custo estimado de cada análise aparece no fim da página de resultado.
 - O exemplo pronto e as análises repetidas (cache) são grátis.
 - **Proteção:** o site recusa novas análises depois de 30 por dia (ajuste em `lib/config.ts`, `globalDailyAnalyses`). Configure também o limite mensal na conta da Anthropic, como explicado acima.
 
@@ -198,6 +200,7 @@ Cada arquivo tem comentários explicando o que pode ser mudado. Depois de salvar
 | "A chave da Anthropic foi recusada" | A chave foi copiada incompleta ou com espaços. Gere outra no Console. |
 | "A conta da Anthropic está sem créditos" | Adicione créditos em **Billing**. |
 | "O site bloqueou o acesso automático" ou "paywall" | Copie o texto da matéria e use a aba **Texto**. |
+| "Não foi possível fazer a busca na web desta vez" | Confira no Console da Anthropic (configurações da organização) se a busca na web (*web search*) está ativada. O resto da análise funciona mesmo sem ela. |
 | "Esse PDF parece ser uma imagem escaneada" | O PDF não tem texto selecionável. Use outro arquivo ou cole o texto. |
 | `Port 3000 is in use` | O site já está ligado em outro terminal. Use esse ou feche-o. |
 
@@ -245,7 +248,7 @@ Detalhes técnicos:
 
 ## Próximas fases
 
-- **Fase 2:** busca na web e a seção "Para equilibrar sua leitura".
+- ~~**Fase 2:** busca na web e a seção "Para equilibrar sua leitura".~~ Pronta.
 - **Fase 3:** ~~interface em português e inglês~~ e ~~página de Metodologia~~ (já prontas); falta o modo simples e detalhado.
 - **Fase 4:** login (Supabase), histórico e limite de 3 análises por dia.
 - **Fase 5:** plano pago (Stripe).
