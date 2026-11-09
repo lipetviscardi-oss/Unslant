@@ -103,9 +103,50 @@ npm run dev
 
 ---
 
+## Qual IA o site usa
+
+O site funciona com duas IAs. A escolha fica em `lib/config.ts`, na linha `provider`:
+
+| `provider` | IA | Custo | Para quê |
+|---|---|---|---|
+| `"gemini"` (atual) | Google Gemini | **Grátis** (com limites por minuto e por dia) | Testes durante o desenvolvimento |
+| `"anthropic"` | Claude Sonnet 5.5 | Pago (créditos) | Versão final do site |
+
+Enquanto o Gemini estiver ligado, a página de Privacidade mostra um aviso de "versão de testes", porque no plano grátis o Google pode usar os textos enviados para melhorar os modelos dele. **Não abra o site ao público com o Gemini grátis.**
+
+## Chave do Gemini (grátis, para testes)
+
+1. Acesse **https://aistudio.google.com** e entre com uma conta Google.
+2. Aceite os termos, se aparecerem.
+3. Clique em **Get API key** e depois em **Create API key**.
+4. Copie a chave (começa com `AIza`). Não é preciso cartão de crédito.
+5. Na pasta do projeto, faça uma cópia do arquivo `.env.example` e dê à cópia o nome **`.env.local`** (se já tiver o `.env.local`, só edite).
+6. Na linha `GEMINI_API_KEY=`, cole a chave logo depois do `=`, sem espaços e sem aspas. Salve.
+7. No terminal, desligue o site (**Ctrl + C**) e ligue de novo com `npm run dev`.
+
+**Como funciona com o plano grátis:**
+- O site faz uma chamada de cada vez. Quando o limite por minuto é atingido, ele espera e tenta de novo sozinho. Por isso cada análise pode levar de 2 a 5 minutos.
+- Se aparecer "Limite de uso da IA atingido", você bateu o limite diário. Tente no dia seguinte.
+- As notas e os trechos apontados podem ser diferentes do que o Claude faria. Use o Gemini para testar o funcionamento do site; a calibragem fina das instruções será feita com a IA final.
+
+## Checklist: trocar para a Anthropic (versão final)
+
+1. Crie a chave da Anthropic e adicione créditos (seção abaixo).
+2. No `.env.local`, preencha `ANTHROPIC_API_KEY=`.
+3. Em `lib/config.ts`, troque `provider: "gemini"` por `provider: "anthropic"`.
+4. Reinicie o site (**Ctrl + C** e `npm run dev`).
+5. Confira:
+   - a página de **Privacidade** não mostra mais o aviso de "versão de testes";
+   - a **Metodologia** cita o Claude Sonnet 5.5;
+   - o custo estimado aparece no fim de cada análise.
+6. Rode de novo os testes com IA da tabela "Como testar", principalmente o **par espelhado**, para conferir a imparcialidade com a IA final.
+7. No Console da Anthropic, confira se a **busca na web** está ativada e defina um **limite mensal de gastos**.
+
+Todo o resto (instruções, regras, conferência de citações e de links) já está pronto e é o mesmo para as duas IAs.
+
 ## Chave da Anthropic
 
-Sem a chave, só o **exemplo pronto** funciona. Para analisar qualquer texto, você precisa de uma chave da API da Anthropic.
+Necessária quando `provider` for `"anthropic"` (versão final). Sem nenhuma chave, só os **exemplos prontos** funcionam.
 
 A **chave de API** é uma senha que permite ao site usar a IA e cobrar o uso na **sua** conta. Por isso ela é secreta: quem tiver a chave pode gastar seus créditos.
 
@@ -185,7 +226,7 @@ Cada arquivo tem comentários explicando o que pode ser mudado. Depois de salvar
 
 ## Quanto custa
 
-- **Cada análise de matéria custa cerca de US$ 0,25 a 0,55**, já incluindo até 5 buscas na web (US$ 0,01 cada; ajuste em `lib/config.ts`, seção `balance`). Papers longos ficam entre US$ 0,50 e 1,50. O custo estimado de cada análise aparece no fim da página de resultado.
+- **Com o Gemini grátis, o custo é zero.** Com a Anthropic, **cada análise de matéria custa cerca de US$ 0,25 a 0,55**, já incluindo até 5 buscas na web (US$ 0,01 cada; ajuste em `lib/config.ts`, seção `balance`). Papers longos ficam entre US$ 0,50 e 1,50. O custo estimado de cada análise aparece no fim da página de resultado.
 - O exemplo pronto e as análises repetidas (cache) são grátis.
 - **Proteção:** o site recusa novas análises depois de 30 por dia (ajuste em `lib/config.ts`, `globalDailyAnalyses`). Configure também o limite mensal na conta da Anthropic, como explicado acima.
 
@@ -196,8 +237,8 @@ Cada arquivo tem comentários explicando o que pode ser mudado. Depois de salvar
 | Mensagem ou situação | O que fazer |
 |---|---|
 | `'node' não é reconhecido` / `command not found: node` | O Node.js não foi instalado ou o terminal foi aberto antes da instalação. Feche e abra o terminal de novo. |
-| "A chave da Anthropic não está configurada" | Confira o nome do arquivo (`.env.local`, com o ponto no início) e reinicie o site (Ctrl + C e `npm run dev`). |
-| "A chave da Anthropic foi recusada" | A chave foi copiada incompleta ou com espaços. Gere outra no Console. |
+| "A chave da IA não está configurada" | Confira o nome do arquivo (`.env.local`, com o ponto no início) e reinicie o site (Ctrl + C e `npm run dev`). |
+| "A chave da IA foi recusada" | A chave foi copiada incompleta, com espaços, ou não corresponde ao `provider` escolhido em `lib/config.ts`. |
 | "A conta da Anthropic está sem créditos" | Adicione créditos em **Billing**. |
 | "O site bloqueou o acesso automático" ou "paywall" | Copie o texto da matéria e use a aba **Texto**. |
 | "Não foi possível fazer a busca na web desta vez" | Confira no Console da Anthropic (configurações da organização) se a busca na web (*web search*) está ativada. O resto da análise funciona mesmo sem ela. |
@@ -227,7 +268,9 @@ lib/
   i18n/                    textos da interface em português e inglês  ← editável
   extract/                 leitura de links (servidor) e PDF (navegador)
   analysis/                linha de montagem: etapas, citações, notas, cache
-  ai/client.ts             conversa com a IA (só no servidor)
+  ai/client.ts             conversa com a IA (Anthropic) e escolhe qual IA usar
+  ai/gemini.ts             conversa com o Google Gemini (testes grátis)
+  ai/balance.ts            busca na web e conferência dos links
   demo/                    resultado do exemplo pronto
 public/exemplos/           PDF de exemplo
 ```

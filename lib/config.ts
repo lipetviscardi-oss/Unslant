@@ -11,10 +11,23 @@
  */
 
 export const config = {
-  /** Configurações da IA (Anthropic). */
+  /** Configurações da IA. */
   ai: {
-    /** Modelo usado em todas as etapas da análise. */
-    model: "claude-sonnet-5-5",
+    /**
+     * QUAL IA USAR:
+     *   "gemini"    = Google Gemini, plano GRÁTIS. Só para testes: o Google pode
+     *                 usar os textos enviados para melhorar os modelos dele.
+     *   "anthropic" = Claude (versão final do site). Precisa de créditos.
+     * Para trocar, mude a palavra abaixo e coloque a chave correspondente no
+     * .env.local (GEMINI_API_KEY ou ANTHROPIC_API_KEY). Veja o README.
+     */
+    provider: "gemini" as AiProvider,
+
+    /** Modelo usado por cada IA. */
+    models: {
+      anthropic: "claude-sonnet-5-5",
+      gemini: "gemini-3.8-flash",
+    },
 
     /**
      * "Esforço" de raciocínio de cada etapa: "low" | "medium" | "high".
@@ -39,13 +52,14 @@ export const config = {
 
     /**
      * Quantas chamadas à IA podem acontecer ao mesmo tempo.
-     * Contas novas da Anthropic têm limites baixos; 4 é um valor seguro.
+     * Anthropic: contas novas têm limites baixos; 4 é um valor seguro.
+     * Gemini grátis: aceita poucas chamadas por minuto; 1 evita bloqueios.
      */
-    maxParallelRequests: 4,
+    maxParallelRequests: { anthropic: 4, gemini: 1 },
 
     /**
-     * Se a IA recusar um texto por motivo de segurança, tenta automaticamente
-     * com outro modelo da Anthropic (recurso "fallback"). Recomendado: true.
+     * Só Anthropic: se a IA recusar um texto por motivo de segurança, tenta
+     * automaticamente com outro modelo (recurso "fallback"). Recomendado: true.
      */
     useRefusalFallback: true,
 
@@ -119,3 +133,18 @@ export const config = {
 } as const;
 
 export type Effort = "low" | "medium" | "high";
+export type AiProvider = "anthropic" | "gemini";
+
+/** Modelo da IA escolhida em config.ai.provider. */
+export function activeModel(): string {
+  return config.ai.models[config.ai.provider];
+}
+
+/** Nome legível do modelo, para mostrar no site. */
+export function activeModelName(): string {
+  const names: Record<string, string> = {
+    "claude-sonnet-5-5": "Claude Sonnet 5.5 (Anthropic)",
+    "gemini-3.8-flash": "Gemini 3.8 Flash (Google)",
+  };
+  return names[activeModel()] ?? activeModel();
+}

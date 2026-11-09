@@ -9,11 +9,23 @@
  * ============================================================================
  */
 
+import { config } from "@/lib/config";
+
+/** Aviso mostrado enquanto o site usa o Gemini grátis (fase de testes). */
+const TESTING_WITH_GEMINI = config.ai.provider === "gemini";
+
 export const PRIVACY_UPDATED = { pt: "novembro de 2026", en: "November 2026" };
 
 export function PrivacyPt() {
   return (
     <>
+      {TESTING_WITH_GEMINI && (
+        <p className="note">
+          <strong>Versão de testes:</strong> no momento, as análises estão sendo feitas pelo Google Gemini, no plano
+          gratuito. Nesse plano, o Google pode usar o conteúdo enviado para melhorar os modelos dele. Não envie textos
+          privados. A descrição abaixo vale para a versão final do site.
+        </p>
+      )}
       <h2>Em resumo</h2>
       <ul>
         <li>Não é preciso criar conta nem informar nome ou e-mail para usar o unslant.</li>
@@ -88,6 +100,13 @@ export function PrivacyPt() {
 export function PrivacyEn() {
   return (
     <>
+      {TESTING_WITH_GEMINI && (
+        <p className="note">
+          <strong>Testing version:</strong> analyses are currently performed by Google Gemini on its free tier. On that
+          tier, Google may use submitted content to improve its models. Do not send private texts. The description below
+          applies to the final version of the site.
+        </p>
+      )}
       <h2>In short</h2>
       <ul>
         <li>You don&rsquo;t need an account, name or email to use unslant.</li>

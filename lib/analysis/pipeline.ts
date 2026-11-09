@@ -13,7 +13,7 @@
 
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { config } from "@/lib/config";
+import { activeModel, config } from "@/lib/config";
 import { AppError } from "@/lib/errors";
 import type { Lang } from "@/lib/taxonomy";
 import { countWords, splitIntoParts } from "@/lib/text";
@@ -140,7 +140,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
     });
   }
 
-  const outputs = await runLimited(tasks, config.ai.maxParallelRequests);
+  const outputs = await runLimited(tasks, config.ai.maxParallelRequests[config.ai.provider]);
 
   const rawParts: RawPart[] = parts.map((p, i) => {
     const specialists: Record<string, SpecialistOutput> = {};
@@ -220,14 +220,14 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
     claimCheck,
     balance,
     stats: {
-      model: config.ai.model,
+      model: activeModel(),
       parts: parts.length,
       durationMs: Date.now() - startedAt,
       inputTokens: usage.inputTokens,
       outputTokens: usage.outputTokens,
       cacheReadTokens: usage.cacheReadTokens,
       cacheWriteTokens: usage.cacheWriteTokens,
-      estimatedCostUsd: usage.costUsd(config.ai.model),
+      estimatedCostUsd: usage.costUsd(activeModel()),
       webSearches: usage.webSearches,
       fromCache: false,
     },

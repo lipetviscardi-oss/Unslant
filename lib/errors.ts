@@ -104,20 +104,20 @@ export const ERROR_MESSAGES: Record<ErrorCode, Record<Lang, string>> = {
     en: "This PDF looks like a scanned image with no selectable text. Try a text-based PDF or paste the text.",
   },
   MISSING_API_KEY: {
-    pt: "A chave da Anthropic não está configurada. Siga a seção \"Chave da Anthropic\" do README, ou experimente o exemplo pronto, que não precisa de chave.",
-    en: "The Anthropic API key is not configured. See the README, or try the ready-made example, which needs no key.",
+    pt: "A chave da IA não está configurada no arquivo .env.local (GEMINI_API_KEY para testes grátis, ou ANTHROPIC_API_KEY). Veja o README, ou experimente os exemplos prontos, que não precisam de chave.",
+    en: "The AI API key is not set in .env.local (GEMINI_API_KEY for free testing, or ANTHROPIC_API_KEY). See the README, or try the ready-made examples, which need no key.",
   },
   AI_AUTH: {
-    pt: "A chave da Anthropic foi recusada. Confira se ela foi copiada inteira para o arquivo .env.local.",
-    en: "The Anthropic API key was rejected. Check that it was copied completely into .env.local.",
+    pt: "A chave da IA foi recusada. Confira se ela foi copiada inteira para o arquivo .env.local e se corresponde à IA escolhida em lib/config.ts.",
+    en: "The AI API key was rejected. Check that it was copied completely into .env.local and matches the AI chosen in lib/config.ts.",
   },
   AI_NO_CREDIT: {
     pt: "A conta da Anthropic está sem créditos. Adicione créditos em console.anthropic.com (Billing).",
     en: "The Anthropic account is out of credits. Add credits at console.anthropic.com (Billing).",
   },
   AI_RATE_LIMIT: {
-    pt: "Muitas análises ao mesmo tempo. Espere um minuto e tente de novo.",
-    en: "Too many analyses at once. Wait a minute and try again.",
+    pt: "Limite de uso da IA atingido (no plano grátis do Gemini há limite por minuto e por dia). Espere um pouco e tente de novo.",
+    en: "AI usage limit reached (Gemini's free tier has per-minute and daily limits). Wait a bit and try again.",
   },
   AI_OVERLOADED: {
     pt: "O serviço de IA está sobrecarregado no momento. Tente de novo em alguns minutos.",

@@ -10,11 +10,11 @@
 
 import Link from "next/link";
 import { SCORING, TAXONOMY } from "@/lib/taxonomy";
-import { config } from "@/lib/config";
+import { activeModelName, config } from "@/lib/config";
 
 const pct = (n: number) => `${Math.round(n * 100)}%`;
 const fmt = (n: number, lang: "pt" | "en") => n.toLocaleString(lang === "pt" ? "pt-BR" : "en-US");
-const MODEL_NAME = config.ai.model === "claude-sonnet-5-5" ? "Claude Sonnet 5.5" : config.ai.model;
+const MODEL_NAME = activeModelName();
 
 function WeightsList({ lang }: { lang: "pt" | "en" }) {
   return (
@@ -235,7 +235,7 @@ export function MethodologyPt() {
 
       <h2>Tecnologia usada</h2>
       <p>
-        As análises são feitas pelo modelo de linguagem <strong>{MODEL_NAME}</strong>, da Anthropic. As respostas da IA
+        As análises são feitas pelo modelo de linguagem <strong>{MODEL_NAME}</strong>. As respostas da IA
         seguem um formato fixo, verificado automaticamente; quando uma resposta vem fora do formato, a etapa é repetida.
         A extração de páginas usa o Readability, a mesma tecnologia do modo de leitura do Firefox.
       </p>
@@ -441,7 +441,7 @@ export function MethodologyEn() {
 
       <h2>Technology</h2>
       <p>
-        Analyses are performed by the <strong>{MODEL_NAME}</strong> language model from Anthropic. The AI&rsquo;s answers
+        Analyses are performed by the <strong>{MODEL_NAME}</strong> language model. The AI&rsquo;s answers
         follow a fixed format that is checked automatically; when an answer is malformed, the step is repeated. Page
         extraction uses Readability, the same technology behind Firefox&rsquo;s reader view.
       </p>

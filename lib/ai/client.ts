@@ -1,5 +1,6 @@
 /**
- * Conversa com a IA (Anthropic). Este arquivo só roda no servidor: a chave
+ * Conversa com a IA. Por padrão, com a Anthropic; se config.ai.provider for
+ * "gemini", as chamadas vão para lib/ai/gemini.ts. Este arquivo só roda no servidor: a chave
  * da API nunca chega ao navegador.
  *
  * Cada chamada:
@@ -15,6 +16,7 @@ import type { z } from "zod";
 import { config, type Effort } from "@/lib/config";
 import { AppError } from "@/lib/errors";
 import { SYSTEM_PROMPT } from "@/lib/prompts/system";
+import { callStructuredGemini } from "./gemini";
 
 let client: Anthropic | null = null;
 
@@ -76,7 +78,13 @@ export interface StructuredCallOptions<T extends z.ZodType> {
   signal?: AbortSignal;
 }
 
+/** Chamada estruturada: vai para a IA escolhida em config.ai.provider. */
 export async function callStructured<T extends z.ZodType>(opts: StructuredCallOptions<T>): Promise<z.infer<T>> {
+  if (config.ai.provider === "gemini") return callStructuredGemini(opts);
+  return callStructuredAnthropic(opts);
+}
+
+async function callStructuredAnthropic<T extends z.ZodType>(opts: StructuredCallOptions<T>): Promise<z.infer<T>> {
   const anthropic = getClient();
 
   const content: Anthropic.Beta.BetaTextBlockParam[] = [];
@@ -95,7 +103,7 @@ export async function callStructured<T extends z.ZodType>(opts: StructuredCallOp
     try {
       response = await anthropic.beta.messages.parse(
         {
-          model: config.ai.model,
+          model: config.ai.models.anthropic,
           max_tokens: opts.maxTokens,
           system: SYSTEM_PROMPT,
           messages: [{ role: "user", content }],
