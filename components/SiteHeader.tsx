@@ -50,6 +50,7 @@ export function NavLinks({ className = "" }: { className?: string }) {
     { href: `/${lang}/methodology`, label: t.nav.methodology },
     { href: `/${lang}/glossary`, label: t.nav.glossary },
     { href: `/${lang}/privacy`, label: t.nav.privacy },
+    { href: `/${lang}/about`, label: t.nav.about },
   ];
   return (
     <ul className={className}>

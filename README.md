@@ -25,7 +25,7 @@ O unslant analisa um texto (link de matéria, texto colado, PDF ou uma afirmaç�
 - Quatro formas de enviar conteúdo: **Link**, **Texto**, **PDF** e **Afirmação** (frases curtas, como "os jovens de hoje não querem trabalhar").
 - **Site em português e inglês**: o botão de idioma no topo troca o site inteiro, e o relatório sai no mesmo idioma. Quem abre o site pela primeira vez vai para o idioma do navegador.
 - **Afirmações** têm análise própria: um grupo extra, "Vieses de raciocínio", e uma **verificação** (que tipo de afirmação é, o que se sabe, por que a ideia circula, como conferir e uma versão mais precisa).
-- Páginas **Metodologia**, **Tipos de viés** (gerada automaticamente a partir da taxonomia) e **Privacidade**, nos dois idiomas.
+- Páginas **Metodologia**, **Tipos de viés** (gerada automaticamente a partir da taxonomia), **Privacidade** e **Quem somos**, nos dois idiomas.
 - Análise em **52 categorias de viés**, organizadas em 12 grupos. O grupo de papers acadêmicos é ativado sozinho quando o texto é um paper, e o de vieses de raciocínio, nas afirmações.
 - **Nota geral de 0 a 10**, calculada pelo próprio site a partir das notas das categorias.
 - **Inclinação política** em dois eixos (econômico e social), com justificativa e trecho. Se não houver evidência suficiente, aparece "Não identificado".
@@ -173,6 +173,7 @@ Com o site ligado em `http://localhost:3000`:
 | `lib/errors.ts` | Textos das mensagens de erro |
 | `lib/i18n/pt.ts` e `lib/i18n/en.ts` | Todos os textos da interface, em português e em inglês |
 | `content/methodology.tsx` | Texto da página Metodologia |
+| `content/about.tsx` | Texto da página Quem somos |
 | `content/privacy.tsx` | Texto da página Privacidade (atualize antes de lançar login ou pagamentos) |
 | `lib/prompts/claimCheck.ts` | Instruções da verificação de afirmações |
 
@@ -245,7 +246,7 @@ Detalhes técnicos:
 ## Próximas fases
 
 - **Fase 2:** busca na web e a seção "Para equilibrar sua leitura".
-- **Fase 3:** ~~interface em português e inglês~~ e ~~página de Metodologia~~ (já prontas); falta o modo simples e detalhado e a página Quem somos.
+- **Fase 3:** ~~interface em português e inglês~~ e ~~página de Metodologia~~ (já prontas); falta o modo simples e detalhado.
 - **Fase 4:** login (Supabase), histórico e limite de 3 análises por dia.
 - **Fase 5:** plano pago (Stripe).
 - **Fase 6:** publicação na Vercel com domínio próprio.
