@@ -25,6 +25,7 @@ export const config = {
       specialist: "medium", // cada "especialista" (linguagem, fontes, dados...)
       overview: "medium", // inclinação política, fato x opinião, omissões
       synthesis: "low", // resumo final e sugestão de reescrita
+      claimCheck: "medium", // verificação de afirmações
     },
 
     /** Limite de tamanho da resposta de cada etapa (em "tokens"; 1 token ≈ 3/4 de palavra). */
@@ -33,6 +34,7 @@ export const config = {
       specialist: 16_000,
       overview: 12_000,
       synthesis: 8_000,
+      claimCheck: 8_000,
     },
 
     /**
@@ -62,6 +64,9 @@ export const config = {
      * parte e depois consolidados. Quase todo artigo e paper cabe em uma parte.
      */
     maxWordsPerPart: 30_000,
+    /** Limites para a aba "Afirmação" (frases curtas). */
+    claimMinWords: 3,
+    claimMaxWords: 300,
   },
 
   /** Download de páginas (aba "Link"). */

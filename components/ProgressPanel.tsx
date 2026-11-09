@@ -1,13 +1,9 @@
 "use client";
 
 import type { ProgressStage } from "@/lib/analysis/types";
+import { useDict } from "@/lib/i18n";
 
-const STEPS: { id: ProgressStage; label: string; detail: string }[] = [
-  { id: "extracting", label: "Extraindo o texto", detail: "Separando o texto principal de menus e anúncios." },
-  { id: "context", label: "Identificando o contexto", detail: "Tipo de texto, país e cenário político." },
-  { id: "analyzing", label: "Analisando os vieses", detail: "Linguagem, fontes, dados, falácias e mais, ao mesmo tempo." },
-  { id: "synthesizing", label: "Escrevendo o resumo", detail: "Juntando os achados e conferindo cada trecho citado." },
-];
+const STEP_IDS: ProgressStage[] = ["extracting", "context", "analyzing", "synthesizing"];
 
 export interface ProgressState {
   stage: ProgressStage;
@@ -16,28 +12,26 @@ export interface ProgressState {
 }
 
 export function ProgressPanel({ progress, onCancel }: { progress: ProgressState; onCancel: () => void }) {
-  const current = STEPS.findIndex((s) => s.id === progress.stage);
+  const t = useDict();
+  const current = STEP_IDS.indexOf(progress.stage);
 
   return (
     <section aria-labelledby="progress-title" className="mx-auto max-w-xl rounded-[20px] bg-paper p-6 sm:p-8">
       <h2 id="progress-title" className="mb-1 text-xl font-medium">
-        Analisando
+        {t.progress.title}
       </h2>
-      <p className="mb-6 text-sm text-muted">Costuma levar entre 30 segundos e 2 minutos.</p>
+      <p className="mb-6 text-sm text-muted">{t.progress.duration}</p>
 
       <ol className="grid gap-5" aria-live="polite">
-        {STEPS.map((step, i) => {
+        {STEP_IDS.map((id, i) => {
+          const step = t.progress.steps[id];
           const state = i < current ? "done" : i === current ? "active" : "pending";
           return (
-            <li key={step.id} className="grid grid-cols-[28px_1fr] gap-3">
+            <li key={id} className="grid grid-cols-[28px_1fr] gap-3">
               <span
                 aria-hidden="true"
                 className={`mt-0.5 grid h-7 w-7 place-items-center rounded-full border-2 ${
-                  state === "done"
-                    ? "border-teal bg-teal text-paper"
-                    : state === "active"
-                      ? "border-teal"
-                      : "border-line"
+                  state === "done" ? "border-teal bg-teal text-paper" : state === "active" ? "border-teal" : "border-line"
                 }`}
               >
                 {state === "done" ? (
@@ -51,12 +45,10 @@ export function ProgressPanel({ progress, onCancel }: { progress: ProgressState;
               <div className={state === "pending" ? "text-muted" : ""}>
                 <p className="font-medium">
                   {step.label}
-                  <span className="sr-only">
-                    {state === "done" ? " (concluído)" : state === "active" ? " (em andamento)" : " (aguardando)"}
-                  </span>
+                  <span className="sr-only"> ({t.progress.state[state]})</span>
                 </p>
                 {state === "active" && <p className="text-sm text-muted">{step.detail}</p>}
-                {state === "active" && step.id === "analyzing" && progress.total ? (
+                {state === "active" && id === "analyzing" && progress.total ? (
                   <div className="mt-2">
                     <div className="h-2 overflow-hidden rounded-full bg-mist">
                       <div
@@ -64,9 +56,7 @@ export function ProgressPanel({ progress, onCancel }: { progress: ProgressState;
                         style={{ width: `${Math.round(((progress.done ?? 0) / progress.total) * 100)}%` }}
                       />
                     </div>
-                    <p className="mt-1 text-sm text-muted">
-                      {progress.done ?? 0} de {progress.total} aspectos concluídos
-                    </p>
+                    <p className="mt-1 text-sm text-muted">{t.progress.doneCount(progress.done ?? 0, progress.total)}</p>
                   </div>
                 ) : null}
               </div>
@@ -76,7 +66,7 @@ export function ProgressPanel({ progress, onCancel }: { progress: ProgressState;
       </ol>
 
       <button type="button" onClick={onCancel} className="mt-8 text-sm text-muted underline underline-offset-4 hover:text-ink">
-        Cancelar análise
+        {t.progress.cancel}
       </button>
     </section>
   );

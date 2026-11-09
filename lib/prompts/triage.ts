@@ -6,11 +6,11 @@
 
 import { languageInstruction } from "./document";
 
-export function triagePrompt(lang: "pt" | "en") {
+export function triagePrompt(lang: "pt" | "en", isClaim = false) {
   return `TAREFA: identificar o tipo e o contexto do documento acima, antes da análise de viés.
-
+${isClaim ? "\nO documento é uma AFIRMAÇÃO curta (algo que alguém disse ou que circula), não um artigo. Use contentType \"claim\" e deixe title, author, outlet e publishedAt vazios.\n" : ""}
 Preencha:
-- contentType: um de "news" (notícia/reportagem), "opinion" (artigo de opinião, coluna, editorial), "analysis" (análise/explicativo assinado), "academic_paper" (artigo científico ou acadêmico, preprint, relatório de pesquisa), "press_release" (comunicado de imprensa), "blog" (post pessoal ou de blog), "other".
+- contentType: um de "claim" (afirmação curta), "news" (notícia/reportagem), "opinion" (artigo de opinião, coluna, editorial), "analysis" (análise/explicativo assinado), "academic_paper" (artigo científico ou acadêmico, preprint, relatório de pesquisa), "press_release" (comunicado de imprensa), "blog" (post pessoal ou de blog), "other".
 - country: país cuja política/sociedade o texto trata principalmente, escrito por extenso no idioma pedido (ex.: "Brasil", "Estados Unidos", "Reino Unido"). Use "Internacional" se não for um país específico e "Não identificado" se não der para saber.
 - countryCode: código ISO de 2 letras do país (ex.: "BR", "US") ou "" se não houver.
 - politicalContext: 1 a 3 frases sobre o contexto político relevante para interpretar este texto naquele país (ex.: quem governa, quais são os polos do debate sobre o tema). Use conhecimento geral; não invente fatos específicos e recentes que você não pode verificar.

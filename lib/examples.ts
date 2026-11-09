@@ -10,10 +10,12 @@
  * O PDF do paper fica em public/exemplos/paper-exemplo.pdf (para testar a aba PDF).
  */
 
+import type { Localized } from "@/lib/taxonomy";
+
 export interface Example {
   id: string;
-  label: string;
-  description: string;
+  label: Localized;
+  description: Localized;
   text: string;
   /** Existe um resultado pronto (sem custo) para este exemplo? */
   hasDemo?: boolean;
@@ -97,36 +99,53 @@ Todos sabem que sem disciplina não há aprendizado. Se a cidade rejeitar a orde
 export const EXAMPLES: Example[] = [
   {
     id: "noticia-pt",
-    label: "Notícia brasileira",
-    description: "Corte no orçamento da saúde de uma cidade fictícia.",
+    label: { pt: "Notícia brasileira", en: "Brazilian news story" },
+    description: { pt: "Corte no orçamento da saúde de uma cidade fictícia.", en: "Health budget cut in a fictional city (in Portuguese)." },
     text: NOTICIA_PT,
     hasDemo: true,
   },
   {
     id: "noticia-en",
-    label: "Notícia em inglês",
-    description: "Lei ambiental numa cidade americana fictícia (viés no sentido oposto).",
+    label: { pt: "Notícia em inglês", en: "US news story" },
+    description: { pt: "Lei ambiental numa cidade americana fictícia (viés no sentido oposto).", en: "Green mandate in a fictional US city." },
     text: NOTICIA_EN,
   },
   {
     id: "paper",
-    label: "Paper científico",
-    description: "Estudo fictício sobre uma bebida e ansiedade. Também disponível em PDF.",
+    label: { pt: "Paper científico", en: "Scientific paper" },
+    description: { pt: "Estudo fictício sobre uma bebida e ansiedade. Também disponível em PDF.", en: "Fictional study on a drink and anxiety. Also available as PDF." },
     text: PAPER,
   },
   {
     id: "espelho-esquerda",
-    label: "Par espelhado (A)",
-    description: "Escolas cívico-militares, com viés contrário ao projeto.",
+    label: { pt: "Par espelhado (A)", en: "Mirrored pair (A)" },
+    description: { pt: "Escolas cívico-militares, com viés contrário ao projeto.", en: "Civic-military schools, slanted against (in Portuguese)." },
     text: ESPELHO_ESQUERDA,
   },
   {
     id: "espelho-direita",
-    label: "Par espelhado (B)",
-    description: "O mesmo fato, com viés favorável ao projeto.",
+    label: { pt: "Par espelhado (B)", en: "Mirrored pair (B)" },
+    description: { pt: "O mesmo fato, com viés favorável ao projeto.", en: "The same event, slanted in favor (in Portuguese)." },
     text: ESPELHO_DIREITA,
   },
 ];
+
+/**
+ * Exemplos de afirmações (aba "Afirmação"): uma sem lado político claro,
+ * uma que costuma circular mais à direita e outra mais à esquerda.
+ */
+export const CLAIM_EXAMPLES: Record<"pt" | "en", string[]> = {
+  pt: [
+    "Os jovens de hoje não querem mais trabalhar, só querem saber de ficar no celular.",
+    "O Brasil é o país que mais cobra impostos no mundo e não devolve nada em serviços.",
+    "Todo bilionário ficou rico explorando trabalhador; ninguém enriquece honestamente.",
+  ],
+  en: [
+    "Young people today just don't want to work anymore; they're always on their phones.",
+    "Crime has exploded everywhere since cities cut police budgets.",
+    "Every billionaire got rich by exploiting workers; nobody gets that rich honestly.",
+  ],
+};
 
 export function getExample(id: string) {
   return EXAMPLES.find((e) => e.id === id);

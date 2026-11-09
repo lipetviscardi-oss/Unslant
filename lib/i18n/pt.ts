@@ -1,0 +1,247 @@
+/**
+ * ============================================================================
+ *  TEXTOS DO SITE EM PORTUGUÊS
+ * ============================================================================
+ *  Todos os textos da interface ficam aqui (o equivalente em inglês está em
+ *  en.ts). Para mudar uma frase, edite o texto entre aspas.
+ *  Alguns itens são pequenas funções, como (n) => `${n} palavras`: edite só
+ *  o texto entre as crases (`), sem mexer no ${n}.
+ * ============================================================================
+ */
+
+const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
+const num = (n: number) => n.toLocaleString("pt-BR");
+
+export const pt = {
+  meta: {
+    title: "unslant: descubra os vieses de um texto",
+    description:
+      "Envie um link, texto, PDF ou afirmação e veja os vieses que ele contém, com trechos do próprio texto como evidência.",
+  },
+
+  nav: {
+    home: "unslant, página inicial",
+    methodology: "Metodologia",
+    glossary: "Tipos de viés",
+    privacy: "Privacidade",
+    about: "Quem somos",
+    menu: "Menu do site",
+    otherLanguage: "English",
+    otherLanguageAria: "Read this site in English",
+  },
+
+  footer: {
+    disclaimer:
+      "O unslant usa inteligência artificial, que também pode ter vieses e errar. Leia a análise como um ponto de partida para pensar, não como veredito.",
+  },
+
+  home: {
+    title: "Veja como um texto tenta convencer você.",
+    intro:
+      "Envie uma notícia, um artigo de opinião, um paper ou uma afirmação que você ouviu por aí. O unslant aponta vieses de linguagem, fontes, dados e lógica, sempre com o trecho exato como prova, e mostra a inclinação política quando ela existe.",
+    tabsLabel: "Tipo de conteúdo",
+    tabs: { url: "Link", text: "Texto", pdf: "PDF", claim: "Afirmação" },
+    url: {
+      label: "Link da matéria ou artigo",
+      help: "Alguns sites bloqueiam leitura automática ou têm paywall. Nesses casos, copie o texto e use a aba Texto.",
+    },
+    text: {
+      label: "Texto para analisar",
+      placeholder: "Cole aqui o texto completo, de preferência com o título na primeira linha.",
+      empty: "Mínimo de 80 palavras.",
+      count: (n: number, min: number) =>
+        `${num(n)} ${plural(n, "palavra", "palavras")}${n < min ? ` (mínimo de ${min})` : ""}`,
+    },
+    pdf: {
+      label: "Arquivo PDF (artigos e papers)",
+      choose: "Escolher arquivo",
+      dropHelp: "ou arraste o PDF para cá. O arquivo é lido no seu navegador.",
+      reading: (name: string) => `Lendo ${name}…`,
+      extracted: (n: number) => `(${num(n)} palavras extraídas)`,
+      notPdf: "Esse arquivo não é um PDF.",
+    },
+    claim: {
+      label: "Afirmação para analisar",
+      placeholder: "Ex.: Os jovens de hoje não querem mais trabalhar.",
+      help: "Uma frase ou um parágrafo curto: algo que você ouviu, leu num grupo ou viu nas redes.",
+      contextLabel: "Onde você viu ou ouviu isso? (opcional)",
+      contextPlaceholder: "Ex.: grupo de família, vídeo nas redes, fala de um político",
+      examplesLabel: "Experimente:",
+      count: (n: number) => `${num(n)} ${plural(n, "palavra", "palavras")} (de 3 a 300)`,
+    },
+    submit: "Analisar",
+    reportLanguage: "O relatório sai em português. Para receber em inglês, mude o idioma no topo da página.",
+    examples: {
+      title: "Sem um texto em mãos?",
+      demoTitle: "Ver uma análise pronta",
+      demoDesc: "Notícia fictícia sobre corte na saúde. Grátis, sem usar a IA.",
+      demoClaimTitle: "Ver uma afirmação analisada",
+      demoClaimDesc: "\"Os jovens de hoje não querem mais trabalhar…\" Grátis, sem usar a IA.",
+      hint: "Ou carregue um texto de exemplo (fictício) na aba Texto. Analisar esses textos usa a IA normalmente.",
+      downloadPdf: "Baixar o paper em PDF",
+    },
+    unexpectedError: "Ocorreu um erro inesperado. Tente de novo.",
+    networkError: "Sem conexão com o servidor. Confira sua internet e tente de novo.",
+  },
+
+  progress: {
+    title: "Analisando",
+    duration: "Costuma levar entre 30 segundos e 2 minutos.",
+    steps: {
+      extracting: { label: "Extraindo o texto", detail: "Separando o texto principal de menus e anúncios." },
+      context: { label: "Identificando o contexto", detail: "Tipo de texto, país e cenário político." },
+      analyzing: { label: "Analisando os vieses", detail: "Linguagem, fontes, dados, falácias e mais, ao mesmo tempo." },
+      synthesizing: { label: "Escrevendo o resumo", detail: "Juntando os achados e conferindo cada trecho citado." },
+    },
+    doneCount: (done: number, total: number) => `${done} de ${total} aspectos concluídos`,
+    state: { done: "concluído", active: "em andamento", pending: "aguardando" },
+    cancel: "Cancelar análise",
+  },
+
+  result: {
+    newAnalysis: "Nova análise",
+    demoNote: "Exemplo pronto: resultado preparado à mão, sem usar a IA.",
+    cacheNote: "Este texto já tinha sido analisado. Mostrando o resultado guardado.",
+    openOriginal: "Abrir a página original",
+    untitled: "Texto analisado",
+    claimHeading: "Afirmação analisada",
+    claimSeenAt: "Vista ou ouvida em:",
+    summaryTitle: "Resumo da análise",
+    contextConsidered: "Contexto considerado: ",
+    languageNote: (lang: string) => `Este resultado foi gerado em ${lang}.`,
+
+    score: {
+      srTitle: "Nota geral de viés",
+      outOf: "de 10",
+      explanation:
+        "A nota mede o quanto o texto é enviesado de forma geral (linguagem, fontes, dados, lógica…), não só politicamente. 0 é um texto equilibrado; 10, uma distorção grave.",
+    },
+
+    axes: {
+      title: "Inclinação política",
+      countryNote: (country: string) => `Avaliada segundo o espectro político do país do texto (${country}). `,
+      unidentifiedNote: "“Não identificado” significa que o texto não dá evidência suficiente.",
+      economic: { name: "Econômico", help: "Estado e mercado" },
+      social: { name: "Social", help: "Costumes e valores" },
+    },
+
+    factOpinion: {
+      title: "Fato e opinião",
+      aria: (fact: number) => `Cerca de ${fact}% de fatos e ${100 - fact}% de opinião`,
+      facts: "fatos verificáveis",
+      opinion: "opinião e interpretação",
+    },
+
+    groups: {
+      title: "Onde o texto pesa",
+      description: "Nota de cada aspecto, de 0 (sem problema) a 10. Clique num aspecto para ver os detalhes.",
+      notApplicable: "não se aplica",
+      radarAria: "Gráfico de radar com a nota de cada aspecto",
+    },
+
+    text: {
+      title: "O texto, com os trechos destacados",
+      titleClaim: "A afirmação, com os trechos destacados",
+      count: (n: number) =>
+        `${n} ${plural(n, "trecho foi apontado", "trechos foram apontados")}. Clique num destaque para ver o motivo.`,
+      none: "Nenhum trecho foi apontado como problemático.",
+      legendAria: "Legenda das cores",
+      legend: { low: "problema leve", mid: "moderado", high: "forte" },
+      asideHint: "Clique num trecho destacado para ver que tipo de viés ele indica e por quê.",
+      detailsOne: "O que este trecho indica",
+      detailsMany: (n: number) => `Este trecho aparece em ${n} categorias`,
+      close: "Fechar",
+      dialogAria: "Detalhes do trecho",
+      markAria: (slice: string, names: string) => `${slice}. Trecho destacado: ${names}`,
+    },
+
+    omissions: {
+      title: "O que o texto pode estar omitindo",
+      titleClaim: "O que essa afirmação deixa de fora",
+      none: "Nenhuma omissão relevante foi identificada.",
+    },
+
+    rewrite: {
+      title: "Como ficaria mais neutro",
+      original: "Trecho original",
+      suggested: "Versão neutra sugerida",
+      show: "Ver o trecho no texto",
+    },
+
+    claim: {
+      title: "Verificação da afirmação",
+      type: "Tipo",
+      verifiability: "Dá para verificar?",
+      assessment: "O que as evidências indicam",
+      whatIsKnown: "O que se sabe",
+      origins: "Por que essa ideia circula",
+      howToVerify: "Como conferir",
+      moreAccurate: "Uma versão mais precisa",
+      disclaimer:
+        "Esta verificação usa o conhecimento geral da IA, que tem data de corte e pode errar. Ela não consulta fontes em tempo real. Confira nas fontes sugeridas antes de compartilhar.",
+    },
+
+    details: {
+      title: "Todas as categorias",
+      description: "Cada categoria com nota, nível de confiança e os trechos que sustentam o apontamento.",
+      groupNotApplicable: "Não se aplica a este texto",
+      groupNoProblems: "Nenhum problema encontrado",
+      groupFound: (found: number, total: number) => `${found} de ${total} categorias com problemas`,
+      status: {
+        none_found: "Sem problemas encontrados",
+        not_applicable: "Não se aplica a este texto",
+      },
+      showInText: "Ver no texto",
+      discarded: (n: number) =>
+        `${n === 1 ? "1 trecho citado pela IA foi descartado" : `${n} trechos citados pela IA foram descartados`} por não existir no texto original.`,
+    },
+
+    stats: {
+      aria: "Informações técnicas da análise",
+      model: "Modelo: ",
+      cost: "Custo estimado: ",
+      costCached: "US$ 0 (resultado guardado)",
+      time: "Tempo: ",
+      discarded: "Trechos descartados: ",
+      parts: (n: number) => `O texto foi dividido em ${n} partes e os resultados foram consolidados.`,
+      demoModel: "exemplo pronto (sem IA)",
+    },
+  },
+
+  labels: {
+    contentType: {
+      news: "Notícia",
+      opinion: "Opinião",
+      analysis: "Análise",
+      academic_paper: "Artigo acadêmico",
+      press_release: "Comunicado de imprensa",
+      blog: "Blog",
+      other: "Outro tipo de texto",
+      claim: "Afirmação",
+    },
+    confidence: { low: "confiança baixa", medium: "confiança média", high: "confiança alta" },
+    position: { left: "Esquerda", right: "Direita", unidentified: "Não identificado" },
+    claimType: {
+      factual: "Afirmação de fato",
+      opinion: "Opinião",
+      prediction: "Previsão",
+      value_judgment: "Juízo de valor",
+      mixed: "Mistura de fato e opinião",
+    },
+    verifiability: {
+      verifiable: "Sim",
+      partially_verifiable: "Em parte",
+      not_verifiable: "Não",
+    },
+    assessment: {
+      consistent: "Bate com as evidências",
+      partially_consistent: "Tem fundo de verdade, mas exagera ou simplifica",
+      inconsistent: "Contradiz as evidências",
+      insufficient_evidence: "Evidência insuficiente para afirmar",
+      not_applicable: "É opinião: não se verifica como verdadeiro ou falso",
+    },
+    languageName: { pt: "português", en: "inglês" },
+  },
+};
+
+export type Dict = typeof pt;

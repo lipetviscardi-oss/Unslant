@@ -6,11 +6,14 @@
  */
 
 import type { AnalysisResult, AxisResult } from "@/lib/analysis/types";
-import { CONFIDENCE_LABEL, POSITION_LABEL } from "@/lib/client/format";
+import { useDict } from "@/lib/i18n";
 
 const OPTIONS = ["left", "unidentified", "right"] as const;
 
 function Axis({ name, help, axis }: { name: string; help: string; axis: AxisResult }) {
+  const t = useDict();
+  const POSITION_LABEL = t.labels.position;
+  const CONFIDENCE_LABEL = t.labels.confidence;
   return (
     <div className="grid gap-3">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3">
@@ -39,21 +42,22 @@ function Axis({ name, help, axis }: { name: string; help: string; axis: AxisResu
 }
 
 export function PoliticalAxes({ result }: { result: AnalysisResult }) {
+  const t = useDict();
+  const country = result.context.country;
+  const showCountry = country && !/^(não identificado|unidentified|not identified|internacional|international)$/i.test(country);
   return (
     <section aria-labelledby="axes-title" className="grid content-start gap-6 rounded-[20px] bg-paper p-6 sm:p-7">
       <div>
         <h2 id="axes-title" className="text-xl font-medium">
-          Inclinação política
+          {t.result.axes.title}
         </h2>
         <p className="mt-1 text-sm text-muted">
-          {result.context.country && result.context.country !== "Não identificado"
-            ? `Avaliada segundo o espectro político do país do texto (${result.context.country}). `
-            : ""}
-          &ldquo;Não identificado&rdquo; significa que o texto não dá evidência suficiente.
+          {showCountry ? t.result.axes.countryNote(country) : ""}
+          {t.result.axes.unidentifiedNote}
         </p>
       </div>
-      <Axis name="Econômico" help="Estado e mercado" axis={result.political.economic} />
-      <Axis name="Social" help="Costumes e valores" axis={result.political.social} />
+      <Axis name={t.result.axes.economic.name} help={t.result.axes.economic.help} axis={result.political.economic} />
+      <Axis name={t.result.axes.social.name} help={t.result.axes.social.help} axis={result.political.social} />
     </section>
   );
 }

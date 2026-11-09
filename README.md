@@ -1,6 +1,6 @@
 # unslant
 
-O unslant analisa um texto (link de matéria, texto colado ou PDF) e mostra os vieses que ele contém, sempre com o **trecho exato do texto** como prova. Ele também mostra a inclinação política em dois eixos e o que o texto pode estar omitindo.
+O unslant analisa um texto (link de matéria, texto colado, PDF ou uma afirmação curta) e mostra os vieses que ele contém, sempre com o **trecho exato do texto** como prova. Ele também mostra a inclinação política em dois eixos e o que o texto pode estar omitindo.
 
 > Projeto em construção. Fase atual: **Fase 1**: análise completa, sem login.
 
@@ -22,14 +22,17 @@ O unslant analisa um texto (link de matéria, texto colado ou PDF) e mostra os v
 
 ## O que já funciona
 
-- Três formas de enviar conteúdo: **Link**, **Texto** e **PDF**.
-- Análise em **46 categorias de viés**, organizadas em 11 grupos. O grupo de papers acadêmicos é ativado sozinho quando o texto é um paper.
+- Quatro formas de enviar conteúdo: **Link**, **Texto**, **PDF** e **Afirmação** (frases curtas, como "os jovens de hoje não querem trabalhar").
+- **Site em português e inglês**: o botão de idioma no topo troca o site inteiro, e o relatório sai no mesmo idioma. Quem abre o site pela primeira vez vai para o idioma do navegador.
+- **Afirmações** têm análise própria: um grupo extra, "Vieses de raciocínio", e uma **verificação** (que tipo de afirmação é, o que se sabe, por que a ideia circula, como conferir e uma versão mais precisa).
+- Páginas **Metodologia**, **Tipos de viés** (gerada automaticamente a partir da taxonomia) e **Privacidade**, nos dois idiomas.
+- Análise em **52 categorias de viés**, organizadas em 12 grupos. O grupo de papers acadêmicos é ativado sozinho quando o texto é um paper, e o de vieses de raciocínio, nas afirmações.
 - **Nota geral de 0 a 10**, calculada pelo próprio site a partir das notas das categorias.
 - **Inclinação política** em dois eixos (econômico e social), com justificativa e trecho. Se não houver evidência suficiente, aparece "Não identificado".
 - **Texto original com os trechos destacados.** Ao clicar num destaque, aparecem a categoria e a explicação.
 - Resumo, proporção de fato e opinião, "o que o texto pode estar omitindo" e uma sugestão de reescrita neutra.
 - **Conferência de citações:** cada trecho citado pela IA é procurado no texto original e descartado se não for encontrado.
-- **Exemplo pronto**, que funciona sem chave e sem custo.
+- **Dois exemplos prontos** (uma notícia e uma afirmação), que funcionam sem chave e sem custo.
 
 ---
 
@@ -142,6 +145,10 @@ Com o site ligado em `http://localhost:3000`:
 | Teste | Como fazer | O que deve acontecer |
 |---|---|---|
 | **Exemplo pronto** (grátis) | Clique em **Ver uma análise pronta** | Nota 5,9 ("Viés alto"), inclinação econômica "Esquerda", social "Não identificado" e dezenas de trechos destacados |
+| **Afirmação pronta** (grátis) | Clique em **Ver uma afirmação analisada** | Nota 3,7 ("Viés moderado") e o quadro "Verificação da afirmação" |
+| **Idioma** (grátis) | Clique em **English** no topo | O site inteiro muda para inglês (endereço `/en`); o botão vira **Português** |
+| **Páginas** (grátis) | Clique em **Metodologia**, **Tipos de viés** e **Privacidade** no topo (no celular, ficam no rodapé) | Textos completos nos dois idiomas |
+| **Afirmação** (usa a IA) | Aba **Afirmação** → clique num dos exemplos → **Analisar** | Resultado com a verificação e o grupo "Vieses de raciocínio" |
 | **Destaques** | Clique num trecho colorido do texto | Aparecem a categoria e a explicação (ao lado no computador, embaixo no celular) |
 | **Ver no texto** | Em "Todas as categorias", abra um grupo e clique em **Ver no texto** | A página rola até o trecho, que pisca |
 | **Texto colado** (usa a IA) | Clique em **Notícia em inglês** e depois em **Analisar texto** | Progresso em 4 etapas e resultado em 30 s a 2 min |
@@ -164,6 +171,10 @@ Com o site ligado em `http://localhost:3000`:
 | `app/globals.css` | Cores e fontes do site |
 | `lib/examples.ts` | Textos de exemplo |
 | `lib/errors.ts` | Textos das mensagens de erro |
+| `lib/i18n/pt.ts` e `lib/i18n/en.ts` | Todos os textos da interface, em português e em inglês |
+| `content/methodology.tsx` | Texto da página Metodologia |
+| `content/privacy.tsx` | Texto da página Privacidade (atualize antes de lançar login ou pagamentos) |
+| `lib/prompts/claimCheck.ts` | Instruções da verificação de afirmações |
 
 Cada arquivo tem comentários explicando o que pode ser mudado. Depois de salvar, o site recarrega sozinho (se estiver ligado com `npm run dev`).
 
@@ -195,14 +206,21 @@ Cada arquivo tem comentários explicando o que pode ser mudado. Depois de salvar
 
 ```
 app/
-  page.tsx                 página inicial (formulário, progresso e resultado)
+  [lang]/                  páginas em cada idioma (/pt/... e /en/...)
+    page.tsx               página inicial
+    methodology/           Metodologia
+    glossary/              Tipos de viés
+    privacy/               Privacidade
   api/analyze/route.ts     servidor: recebe o pedido e executa a análise
+proxy.ts                   envia quem abre "/" para /pt ou /en
 components/                partes da tela (formulário, nota, destaques...)
+content/                   textos das páginas Metodologia e Privacidade  ← editável
 lib/
   taxonomy.ts              categorias de viés e pesos  ← editável
   config.ts                configurações gerais        ← editável
   prompts/                 instruções da IA            ← editável
   examples.ts              textos de exemplo
+  i18n/                    textos da interface em português e inglês  ← editável
   extract/                 leitura de links (servidor) e PDF (navegador)
   analysis/                linha de montagem: etapas, citações, notas, cache
   ai/client.ts             conversa com a IA (só no servidor)
@@ -227,7 +245,7 @@ Detalhes técnicos:
 ## Próximas fases
 
 - **Fase 2:** busca na web e a seção "Para equilibrar sua leitura".
-- **Fase 3:** interface em português e inglês, modo simples e detalhado, página de Metodologia.
+- **Fase 3:** ~~interface em português e inglês~~ e ~~página de Metodologia~~ (já prontas); falta o modo simples e detalhado e a página Quem somos.
 - **Fase 4:** login (Supabase), histórico e limite de 3 análises por dia.
 - **Fase 5:** plano pago (Stripe).
 - **Fase 6:** publicação na Vercel com domínio próprio.

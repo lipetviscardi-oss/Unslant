@@ -7,6 +7,8 @@
  */
 
 import type { OverviewOutput, SpecialistOutput, SynthesisOutput, TriageOutput } from "@/lib/analysis/schemas";
+import type { SourceInfo } from "@/lib/analysis/types";
+import { getExample } from "@/lib/examples";
 
 type Cat = SpecialistOutput["categories"][number];
 
@@ -33,6 +35,16 @@ const none = (categoryId: string, summary: string, confidence: Cat["confidence"]
   summary,
   evidence: [],
 });
+
+export const text = getExample("noticia-pt")!.text;
+
+export const source: SourceInfo = {
+  type: "text",
+  title: "Prefeitura impõe corte brutal na saúde e abandona os mais pobres",
+  outlet: "Jornal Exemplo (fictício)",
+};
+
+export const claimCheck = null;
 
 export const triage: TriageOutput = {
   contentType: "news",

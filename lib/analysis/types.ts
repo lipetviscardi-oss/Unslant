@@ -3,10 +3,10 @@
  * Este formato também é o que será salvo no banco de dados na Fase 4.
  */
 
-import type { AxisPosition, CategoryStatus, Confidence, ContentType } from "./schemas";
+import type { AxisPosition, CategoryStatus, ClaimCheckOutput, Confidence, ContentType } from "./schemas";
 import type { Lang } from "@/lib/taxonomy";
 
-export type SourceType = "url" | "text" | "pdf";
+export type SourceType = "url" | "text" | "pdf" | "claim";
 
 export interface SourceInfo {
   type: SourceType;
@@ -16,6 +16,8 @@ export interface SourceInfo {
   /** Nome do veículo/site. */
   outlet?: string;
   publishedAt?: string;
+  /** Afirmações: onde a pessoa viu ou ouviu (informado pelo usuário). */
+  claimContext?: string;
 }
 
 export interface Evidence {
@@ -96,6 +98,8 @@ export interface AnalysisResult {
     end: number;
   } | null;
   groups: GroupResult[];
+  /** Só para afirmações: o que se sabe, de onde a ideia vem, como verificar. */
+  claimCheck?: ClaimCheckOutput | null;
 
   stats: {
     model: string;

@@ -9,6 +9,7 @@ import { useMemo } from "react";
 import type { AnalysisResult } from "@/lib/analysis/types";
 import { buildSegments, type EvidenceRef } from "@/lib/client/evidence";
 import { formatScore, severity, SEVERITY_SOFT, SEVERITY_TEXT } from "@/lib/client/format";
+import { useDict, useLang } from "@/lib/i18n";
 
 interface Props {
   result: AnalysisResult;
@@ -18,14 +19,16 @@ interface Props {
 }
 
 function EvidenceDetails({ refs, onClose }: { refs: EvidenceRef[]; onClose: () => void }) {
+  const t = useDict();
+  const lang = useLang();
   return (
     <div className="grid gap-4">
       <div className="flex items-start justify-between gap-3">
         <p className="font-display font-medium">
-          {refs.length === 1 ? "O que este trecho indica" : `Este trecho aparece em ${refs.length} categorias`}
+          {refs.length === 1 ? t.result.text.detailsOne : t.result.text.detailsMany(refs.length)}
         </p>
         <button type="button" onClick={onClose} className="rounded-full px-2 text-sm text-muted underline underline-offset-4 hover:text-ink">
-          Fechar
+          {t.result.text.close}
         </button>
       </div>
       <ul className="grid gap-4">
@@ -34,12 +37,12 @@ function EvidenceDetails({ refs, onClose }: { refs: EvidenceRef[]; onClose: () =
           return (
             <li key={r.evidence.id} className="grid gap-1.5 border-t border-line pt-3 first:border-0 first:pt-0">
               <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                <p className="font-medium">{r.categoryDef?.name.pt ?? r.category.id}</p>
+                <p className="font-medium">{r.categoryDef?.name[lang] ?? r.category.id}</p>
                 <span className={`rounded-full px-2 py-0.5 text-sm ${SEVERITY_SOFT[sev]} ${SEVERITY_TEXT[sev]}`}>
-                  {formatScore(r.category.score)}/10
+                  {formatScore(r.category.score, lang)}/10
                 </span>
               </div>
-              <p className="text-sm text-muted">{r.groupDef?.name.pt}</p>
+              <p className="text-sm text-muted">{r.groupDef?.name[lang]}</p>
               <p className="text-[15px] leading-relaxed">{r.evidence.explanation}</p>
             </li>
           );
@@ -50,40 +53,39 @@ function EvidenceDetails({ refs, onClose }: { refs: EvidenceRef[]; onClose: () =
 }
 
 export function HighlightedText({ result, index, selected, onSelect }: Props) {
+  const t = useDict();
+  const lang = useLang();
   const segments = useMemo(() => buildSegments(result.text.length, index), [result.text.length, index]);
   const selectedRefs = selected.map((id) => index.get(id)).filter((r): r is EvidenceRef => Boolean(r));
   const selectedKey = selected.join("|");
+  const isClaim = result.context.contentType === "claim";
 
   return (
     <section aria-labelledby="text-title" className="grid gap-5">
       <div>
         <h2 id="text-title" className="text-2xl font-medium">
-          O texto, com os trechos destacados
+          {isClaim ? t.result.text.titleClaim : t.result.text.title}
         </h2>
-        <p className="mt-1 text-muted">
-          {index.size > 0
-            ? `${index.size} trechos foram apontados. Clique num destaque para ver o motivo.`
-            : "Nenhum trecho foi apontado como problemático."}
-        </p>
+        <p className="mt-1 text-muted">{index.size > 0 ? t.result.text.count(index.size) : t.result.text.none}</p>
         {index.size > 0 && (
-          <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-muted" aria-label="Legenda das cores">
-            <li className="flex items-center gap-2"><span className="hl hl-low">abc</span> problema leve</li>
-            <li className="flex items-center gap-2"><span className="hl hl-mid">abc</span> moderado</li>
-            <li className="flex items-center gap-2"><span className="hl hl-high">abc</span> forte</li>
+          <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-muted" aria-label={t.result.text.legendAria}>
+            <li className="flex items-center gap-2"><span className="hl hl-low">abc</span> {t.result.text.legend.low}</li>
+            <li className="flex items-center gap-2"><span className="hl hl-mid">abc</span> {t.result.text.legend.mid}</li>
+            <li className="flex items-center gap-2"><span className="hl hl-high">abc</span> {t.result.text.legend.high}</li>
           </ul>
         )}
       </div>
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <article className="rounded-[20px] bg-paper px-5 py-6 sm:px-8 sm:py-8">
-          <div className="max-w-[68ch] whitespace-pre-wrap text-[17px] leading-[1.8]">
+          <div className={`max-w-[68ch] whitespace-pre-wrap leading-[1.8] ${isClaim ? "text-[19px]" : "text-[17px]"}`}>
             {segments.map((seg) => {
               const slice = result.text.slice(seg.start, seg.end);
               if (seg.ids.length === 0) return <span key={seg.start}>{slice}</span>;
               const maxScore = Math.max(...seg.ids.map((id) => index.get(id)?.category.score ?? 0));
               const sev = severity(maxScore);
               const isSelected = seg.ids.join("|") === selectedKey;
-              const names = seg.ids.map((id) => index.get(id)?.categoryDef?.name.pt).filter(Boolean).join(", ");
+              const names = seg.ids.map((id) => index.get(id)?.categoryDef?.name[lang]).filter(Boolean).join(", ");
               return (
                 <mark
                   key={seg.start}
@@ -92,7 +94,7 @@ export function HighlightedText({ result, index, selected, onSelect }: Props) {
                   role="button"
                   tabIndex={0}
                   aria-pressed={isSelected}
-                  aria-label={`${slice}. Trecho destacado: ${names}`}
+                  aria-label={t.result.text.markAria(slice, names)}
                   onClick={() => onSelect(seg.ids)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
@@ -114,9 +116,7 @@ export function HighlightedText({ result, index, selected, onSelect }: Props) {
           {selectedRefs.length > 0 ? (
             <EvidenceDetails refs={selectedRefs} onClose={() => onSelect([])} />
           ) : (
-            <p className="text-[15px] text-muted">
-              Clique num trecho destacado para ver que tipo de viés ele indica e por quê.
-            </p>
+            <p className="text-[15px] text-muted">{t.result.text.asideHint}</p>
           )}
         </aside>
       </div>
@@ -126,7 +126,7 @@ export function HighlightedText({ result, index, selected, onSelect }: Props) {
         <div
           className="fixed inset-x-0 bottom-0 z-30 max-h-[62vh] overflow-y-auto rounded-t-[20px] border-t border-line bg-paper px-5 pt-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[0_-8px_30px_rgba(31,47,56,0.15)] lg:hidden"
           role="dialog"
-          aria-label="Detalhes do trecho"
+          aria-label={t.result.text.dialogAria}
         >
           <EvidenceDetails refs={selectedRefs} onClose={() => onSelect([])} />
         </div>

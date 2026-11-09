@@ -37,7 +37,14 @@ export function buildDocumentBlock(
   if (source.author) meta.push(`Autor: ${cleanMeta(source.author)}`);
   if (source.publishedAt) meta.push(`Data: ${cleanMeta(source.publishedAt)}`);
   if (source.url) meta.push(`Endereço: ${cleanMeta(source.url)}`);
-  meta.push(`Origem: ${source.type === "url" ? "página da web" : source.type === "pdf" ? "arquivo PDF" : "texto colado pelo usuário"}`);
+  const origin = {
+    url: "página da web",
+    pdf: "arquivo PDF",
+    text: "texto colado pelo usuário",
+    claim: "afirmação curta enviada pelo usuário (algo que alguém disse ou que circula)",
+  }[source.type];
+  meta.push(`Origem: ${origin}`);
+  if (source.claimContext) meta.push(`Onde a afirmação foi vista ou ouvida (segundo o usuário): ${cleanMeta(source.claimContext)}`);
 
   const partNote =
     part && part.total > 1

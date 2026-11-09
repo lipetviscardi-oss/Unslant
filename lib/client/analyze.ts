@@ -11,6 +11,7 @@ export type AnalyzeRequest =
   | { mode: "url"; url: string; lang: Lang }
   | { mode: "text"; text: string; lang: Lang }
   | { mode: "pdf"; text: string; meta: { title?: string; author?: string }; lang: Lang }
+  | { mode: "claim"; text: string; meta: { context?: string }; lang: Lang }
   | { mode: "demo"; demoId: string; lang: Lang };
 
 export class AnalyzeError extends Error {
@@ -36,7 +37,7 @@ export async function requestAnalysis(
       signal,
     });
   } catch {
-    throw new AnalyzeError("NETWORK", "Sem conexão com o servidor. Confira sua internet e tente de novo.");
+    throw new AnalyzeError("NETWORK", errorMessage("UNKNOWN", req.lang));
   }
   if (!res.ok || !res.body) {
     const data = await res.json().catch(() => null);

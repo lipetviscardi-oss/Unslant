@@ -8,8 +8,11 @@
 import type { GroupResult } from "@/lib/analysis/types";
 import { TAXONOMY } from "@/lib/taxonomy";
 import { formatScore, severity, SEVERITY_BG } from "@/lib/client/format";
+import { useDict, useLang } from "@/lib/i18n";
 
 function Radar({ groups }: { groups: (GroupResult & { score: number })[] }) {
+  const t = useDict();
+  const lang = useLang();
   const n = groups.length;
   if (n < 3) return null;
   const cx = 220;
@@ -23,7 +26,7 @@ function Radar({ groups }: { groups: (GroupResult & { score: number })[] }) {
   const polygon = groups.map((g, i) => point(i, g.score).join(",")).join(" ");
 
   return (
-    <svg viewBox="0 0 440 300" className="mx-auto w-full max-w-[460px]" role="img" aria-label="Gráfico de radar com a nota de cada aspecto">
+    <svg viewBox="0 0 440 300" className="mx-auto w-full max-w-[460px]" role="img" aria-label={t.result.groups.radarAria}>
       {[2.5, 5, 7.5, 10].map((ring) => (
         <polygon
           key={ring}
@@ -46,7 +49,7 @@ function Radar({ groups }: { groups: (GroupResult & { score: number })[] }) {
         const [x, y] = point(i, 12.2);
         const cos = Math.cos(angle(i));
         const anchor = Math.abs(cos) < 0.2 ? "middle" : cos > 0 ? "start" : "end";
-        const name = TAXONOMY.find((t) => t.id === g.id)?.shortName.pt ?? g.id;
+        const name = TAXONOMY.find((x) => x.id === g.id)?.shortName[lang] ?? g.id;
         return (
           <text key={g.id} x={x} y={y + 4} textAnchor={anchor} fontSize="12" fill="var(--color-muted)" fontFamily="var(--font-sans)">
             {name}
@@ -60,6 +63,8 @@ function Radar({ groups }: { groups: (GroupResult & { score: number })[] }) {
 }
 
 export function GroupOverview({ groups, onSelectGroup }: { groups: GroupResult[]; onSelectGroup: (id: string) => void }) {
+  const t = useDict();
+  const lang = useLang();
   const scored = groups.filter((g): g is GroupResult & { score: number } => g.score !== null);
   const sorted = [...groups].sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
 
@@ -67,15 +72,15 @@ export function GroupOverview({ groups, onSelectGroup }: { groups: GroupResult[]
     <section aria-labelledby="groups-title" className="grid gap-6">
       <div>
         <h2 id="groups-title" className="text-2xl font-medium">
-          Onde o texto pesa
+          {t.result.groups.title}
         </h2>
-        <p className="mt-1 text-muted">Nota de cada aspecto, de 0 (sem problema) a 10. Clique num aspecto para ver os detalhes.</p>
+        <p className="mt-1 text-muted">{t.result.groups.description}</p>
       </div>
       <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <Radar groups={scored} />
         <ul className="grid gap-2.5">
           {sorted.map((g) => {
-            const group = TAXONOMY.find((t) => t.id === g.id);
+            const group = TAXONOMY.find((x) => x.id === g.id);
             return (
               <li key={g.id}>
                 <button
@@ -83,9 +88,9 @@ export function GroupOverview({ groups, onSelectGroup }: { groups: GroupResult[]
                   onClick={() => onSelectGroup(g.id)}
                   className="grid w-full grid-cols-[minmax(0,13rem)_minmax(0,1fr)_2.5rem] items-center gap-3 rounded-lg px-2 py-1.5 text-left hover:bg-paper"
                 >
-                  <span className="truncate text-[15px]">{group?.name.pt ?? g.id}</span>
+                  <span className="truncate text-[15px]">{group?.name[lang] ?? g.id}</span>
                   {g.score === null ? (
-                    <span className="col-span-2 text-sm text-muted">não se aplica</span>
+                    <span className="col-span-2 text-sm text-muted">{t.result.groups.notApplicable}</span>
                   ) : (
                     <>
                       <span className="h-2.5 overflow-hidden rounded-full bg-mist-deep">
@@ -94,7 +99,7 @@ export function GroupOverview({ groups, onSelectGroup }: { groups: GroupResult[]
                           style={{ width: `${Math.max(2, g.score * 10)}%` }}
                         />
                       </span>
-                      <span className="text-right font-display text-[15px] tabular-nums">{formatScore(g.score)}</span>
+                      <span className="text-right font-display text-[15px] tabular-nums">{formatScore(g.score, lang)}</span>
                     </>
                   )}
                 </button>

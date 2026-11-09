@@ -7,11 +7,12 @@
  */
 
 import { config } from "@/lib/config";
-import { TAXONOMY, type BiasGroup, type Lang } from "@/lib/taxonomy";
+import { TAXONOMY, type BiasGroup, type ContentKind, type Lang } from "@/lib/taxonomy";
 import { createQuoteMatcher, type QuoteMatcher } from "./verify";
 import { clamp, scoreGroup, scoreOverall } from "./scoring";
 import type {
   AxisPosition,
+  ClaimCheckOutput,
   Confidence,
   OverviewOutput,
   SpecialistOutput,
@@ -53,10 +54,17 @@ const NOTES = {
   },
 };
 
-/** Grupos ativos para o tipo de texto (o grupo acadêmico só vale para papers). */
+/** Tipo de conteúdo usado para escolher os grupos de viés. */
+export function contentKind(triage: TriageOutput): ContentKind {
+  if (triage.contentType === "claim") return "claim";
+  if (triage.contentType === "academic_paper") return "paper";
+  return "article";
+}
+
+/** Grupos ativos para o tipo de conteúdo (ver "appliesTo" em lib/taxonomy.ts). */
 export function activeGroups(triage: TriageOutput): BiasGroup[] {
-  const isPaper = triage.contentType === "academic_paper";
-  return TAXONOMY.filter((g) => g.appliesTo === "all" || (g.appliesTo === "paper" && isPaper));
+  const kind = contentKind(triage);
+  return TAXONOMY.filter((g) => g.appliesTo.includes(kind));
 }
 
 function verifyCategory(
@@ -273,6 +281,7 @@ export function finalizeResult(params: {
   triage: TriageOutput;
   findings: Findings;
   synthesis: SynthesisOutput | null;
+  claimCheck?: ClaimCheckOutput | null;
   stats: Omit<AnalysisResult["stats"], "discardedEvidence">;
 }): AnalysisResult {
   const { triage, findings, synthesis, text } = params;
@@ -331,6 +340,7 @@ export function finalizeResult(params: {
     omissions: findings.omissions,
     rewrite,
     groups: findings.groups,
+    claimCheck: params.claimCheck ?? null,
     stats: { ...params.stats, discardedEvidence: findings.discardedEvidence },
   };
 }

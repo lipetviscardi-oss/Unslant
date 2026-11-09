@@ -7,80 +7,78 @@
 import { useCallback, useMemo, useState } from "react";
 import type { AnalysisResult } from "@/lib/analysis/types";
 import { buildEvidenceIndex } from "@/lib/client/evidence";
-import { CONTENT_TYPE_LABEL, formatDate } from "@/lib/client/format";
+import { formatDate } from "@/lib/client/format";
+import { useDict, useLang } from "@/lib/i18n";
 import { ScoreCard } from "./ScoreCard";
 import { PoliticalAxes } from "./PoliticalAxes";
 import { GroupOverview } from "./GroupOverview";
 import { HighlightedText } from "./HighlightedText";
+import { ClaimCheck } from "./ClaimCheck";
 import { CategoryDetails, FactOpinion, Omissions, Rewrite } from "./Sections";
 
 function Chip({ children, tone = "plain" }: { children: React.ReactNode; tone?: "plain" | "teal" }) {
   return (
-    <span
-      className={`inline-block rounded-full px-3 py-1 text-sm ${
-        tone === "teal" ? "bg-teal-soft text-teal-deep" : "bg-paper text-muted"
-      }`}
-    >
+    <span className={`inline-block rounded-full px-3 py-1 text-sm ${tone === "teal" ? "bg-teal-soft text-teal-deep" : "bg-paper text-muted"}`}>
       {children}
     </span>
   );
 }
 
 function Stats({ result }: { result: AnalysisResult }) {
+  const t = useDict();
+  const lang = useLang();
   const s = result.stats;
   const seconds = Math.round(s.durationMs / 1000);
+  const cost = s.estimatedCostUsd.toLocaleString(lang === "pt" ? "pt-BR" : "en-US", { minimumFractionDigits: 3, maximumFractionDigits: 3 });
   return (
-    <section aria-label="Informações técnicas da análise" className="border-t border-line pt-6 text-sm text-muted">
+    <section aria-label={t.result.stats.aria} className="border-t border-line pt-6 text-sm text-muted">
       <dl className="grid gap-x-8 gap-y-2 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <dt className="inline">Modelo: </dt>
-          <dd className="inline text-ink">{s.model}</dd>
+          <dt className="inline">{t.result.stats.model}</dt>
+          <dd className="inline text-ink">{result.demo ? t.result.stats.demoModel : s.model}</dd>
         </div>
         {!result.demo && (
           <>
             <div>
-              <dt className="inline">Custo estimado: </dt>
-              <dd className="inline text-ink">
-                {s.fromCache ? "US$ 0 (resultado guardado)" : `US$ ${s.estimatedCostUsd.toFixed(3).replace(".", ",")}`}
-              </dd>
+              <dt className="inline">{t.result.stats.cost}</dt>
+              <dd className="inline text-ink">{s.fromCache ? t.result.stats.costCached : `US$ ${cost}`}</dd>
             </div>
             <div>
-              <dt className="inline">Tempo: </dt>
+              <dt className="inline">{t.result.stats.time}</dt>
               <dd className="inline text-ink">{seconds} s</dd>
             </div>
           </>
         )}
         <div>
-          <dt className="inline">Trechos descartados: </dt>
+          <dt className="inline">{t.result.stats.discarded}</dt>
           <dd className="inline text-ink">{s.discardedEvidence}</dd>
         </div>
       </dl>
-      {s.parts > 1 && <p className="mt-2">O texto foi dividido em {s.parts} partes e os resultados foram consolidados.</p>}
+      {s.parts > 1 && <p className="mt-2">{t.result.stats.parts(s.parts)}</p>}
     </section>
   );
 }
 
 export function ResultView({ result, onReset }: { result: AnalysisResult; onReset: () => void }) {
+  const t = useDict();
+  const lang = useLang();
   const index = useMemo(() => buildEvidenceIndex(result), [result]);
   const [selected, setSelected] = useState<string[]>([]);
 
   /** Rola até um trecho no texto e o seleciona. */
-  const showEvidence = useCallback(
-    (evidenceId: string) => {
-      const el = document.getElementById(`ev-${evidenceId}`);
-      if (!el) return;
-      // seleciona o pedaço destacado onde a evidência começa (e todas as evidências que o cobrem)
-      const ids = el.getAttribute("data-ids")?.split(" ").filter(Boolean) ?? [];
-      setSelected(ids.length ? ids : [evidenceId]);
-      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
-      el.classList.remove("hl-flash");
-      void el.getBoundingClientRect();
-      el.classList.add("hl-flash");
-      el.focus({ preventScroll: true });
-    },
-    [],
-  );
+  const showEvidence = useCallback((evidenceId: string) => {
+    const el = document.getElementById(`ev-${evidenceId}`);
+    if (!el) return;
+    // seleciona o pedaço destacado onde a evidência começa (e todas as evidências que o cobrem)
+    const ids = el.getAttribute("data-ids")?.split(" ").filter(Boolean) ?? [];
+    setSelected(ids.length ? ids : [evidenceId]);
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+    el.classList.remove("hl-flash");
+    void el.getBoundingClientRect();
+    el.classList.add("hl-flash");
+    el.focus({ preventScroll: true });
+  }, []);
 
   const showGroup = useCallback((groupId: string) => {
     const el = document.getElementById(`group-${groupId}`) as HTMLDetailsElement | null;
@@ -90,8 +88,10 @@ export function ResultView({ result, onReset }: { result: AnalysisResult; onRese
   }, []);
 
   const { source, context } = result;
-  const date = formatDate(source.publishedAt);
+  const isClaim = context.contentType === "claim";
+  const date = formatDate(source.publishedAt, lang);
   const byline = [source.outlet, source.author, date].filter(Boolean);
+  const otherLanguage = result.language !== lang;
 
   return (
     <div className="mx-auto grid max-w-6xl gap-14">
@@ -102,30 +102,43 @@ export function ResultView({ result, onReset }: { result: AnalysisResult; onRese
             onClick={onReset}
             className="rounded-full border border-ink px-4 py-1.5 font-display text-[15px] font-medium hover:bg-ink hover:text-paper"
           >
-            Nova análise
+            {t.result.newAnalysis}
           </button>
-          {result.demo && (
-            <p className="text-sm text-muted">Exemplo pronto: resultado preparado à mão, sem usar a IA.</p>
-          )}
-          {result.stats.fromCache && (
-            <p className="text-sm text-muted">Este texto já tinha sido analisado. Mostrando o resultado guardado.</p>
-          )}
+          <div className="grid gap-1 text-right text-sm text-muted">
+            {result.demo && <p>{t.result.demoNote}</p>}
+            {result.stats.fromCache && <p>{t.result.cacheNote}</p>}
+            {otherLanguage && <p>{t.result.languageNote(t.labels.languageName[result.language])}</p>}
+          </div>
         </div>
 
         <header className="grid gap-3">
           <div className="flex flex-wrap gap-2">
-            <Chip tone="teal">{CONTENT_TYPE_LABEL[context.contentType]}</Chip>
+            <Chip tone="teal">{t.labels.contentType[context.contentType]}</Chip>
             {context.country && <Chip>{context.country}</Chip>}
             {context.topic && <Chip>{context.topic}</Chip>}
           </div>
-          <h1 className="max-w-4xl text-[1.75rem] leading-tight font-semibold sm:text-[2.25rem]">
-            {source.title || context.topic || "Texto analisado"}
-          </h1>
-          {byline.length > 0 && <p className="text-muted">{byline.join(", ")}</p>}
-          {source.url && (
-            <a href={source.url} target="_blank" rel="noopener noreferrer" className="justify-self-start text-sm break-all text-teal-deep underline underline-offset-4">
-              Abrir a página original
-            </a>
+          {isClaim ? (
+            <>
+              <p className="text-sm text-muted">{t.result.claimHeading}</p>
+              <h1 className="max-w-4xl text-[1.6rem] leading-snug font-semibold sm:text-[2rem]">“{result.text}”</h1>
+              {source.claimContext && (
+                <p className="text-muted">
+                  {t.result.claimSeenAt} {source.claimContext}
+                </p>
+              )}
+            </>
+          ) : (
+            <>
+              <h1 className="max-w-4xl text-[1.75rem] leading-tight font-semibold sm:text-[2.25rem]">
+                {source.title || context.topic || t.result.untitled}
+              </h1>
+              {byline.length > 0 && <p className="text-muted">{byline.join(", ")}</p>}
+              {source.url && (
+                <a href={source.url} target="_blank" rel="noopener noreferrer" className="justify-self-start text-sm break-all text-teal-deep underline underline-offset-4">
+                  {t.result.openOriginal}
+                </a>
+              )}
+            </>
           )}
         </header>
 
@@ -134,15 +147,17 @@ export function ResultView({ result, onReset }: { result: AnalysisResult; onRese
           <PoliticalAxes result={result} />
         </div>
 
+        {isClaim && result.claimCheck && <ClaimCheck check={result.claimCheck} />}
+
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
           <section aria-labelledby="summary-title" className="grid content-start gap-2">
             <h2 id="summary-title" className="text-xl font-medium">
-              Resumo da análise
+              {t.result.summaryTitle}
             </h2>
             <p className="max-w-[68ch] text-[17px] leading-relaxed">{result.summary}</p>
             {context.politicalContext && (
               <p className="mt-2 max-w-[68ch] text-[15px] leading-relaxed text-muted">
-                <span className="font-medium text-ink">Contexto considerado: </span>
+                <span className="font-medium text-ink">{t.result.contextConsidered}</span>
                 {context.politicalContext}
               </p>
             )}
@@ -157,7 +172,8 @@ export function ResultView({ result, onReset }: { result: AnalysisResult; onRese
 
       <div className="grid gap-10 lg:grid-cols-2">
         <Omissions result={result} />
-        <Rewrite result={result} onShow={showEvidence} />
+        {/* Em afirmações, a "versão mais precisa" já aparece na verificação. */}
+        {!isClaim && <Rewrite result={result} onShow={showEvidence} />}
       </div>
 
       <CategoryDetails groups={result.groups} onShow={showEvidence} />

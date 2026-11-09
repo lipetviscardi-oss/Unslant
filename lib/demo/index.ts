@@ -9,28 +9,28 @@
 
 import "server-only";
 import { AppError } from "@/lib/errors";
-import { getExample } from "@/lib/examples";
 import { countWords, normalizeText } from "@/lib/text";
 import { buildFindings, activeGroups, finalizeResult } from "@/lib/analysis/assemble";
 import { promptVersion } from "@/lib/prompts/version";
 import type { AnalysisResult, StreamEvent } from "@/lib/analysis/types";
 import type { Lang } from "@/lib/taxonomy";
 import * as noticiaPt from "./noticia-pt";
+import * as afirmacaoPt from "./afirmacao-pt";
 
 const DEMOS = {
   "noticia-pt": noticiaPt,
+  "afirmacao-pt": afirmacaoPt,
 } as const;
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export async function runDemo(id: string, _lang: Lang, send: (e: StreamEvent) => void): Promise<AnalysisResult> {
   const demo = DEMOS[id as keyof typeof DEMOS];
-  const example = getExample(id);
-  if (!demo || !example) throw new AppError("INVALID_INPUT", `demo inexistente: ${id}`);
+  if (!demo) throw new AppError("INVALID_INPUT", `demo inexistente: ${id}`);
 
-  // O exemplo pronto está escrito em português.
+  // Os exemplos prontos estão escritos em português.
   const lang: Lang = "pt";
-  const text = normalizeText(example.text);
+  const text = normalizeText(demo.text);
 
   send({ type: "stage", stage: "extracting" });
   await wait(300);
@@ -54,7 +54,7 @@ export async function runDemo(id: string, _lang: Lang, send: (e: StreamEvent) =>
   return finalizeResult({
     id: `demo-${id}`,
     text,
-    source: { type: "text", title: demo.triage.title, outlet: "Jornal Exemplo (fictício)" },
+    source: demo.source,
     wordCount: countWords(text),
     lang,
     promptVersion: promptVersion(),
@@ -62,8 +62,9 @@ export async function runDemo(id: string, _lang: Lang, send: (e: StreamEvent) =>
     triage: demo.triage,
     findings,
     synthesis: demo.synthesis,
+    claimCheck: demo.claimCheck,
     stats: {
-      model: "exemplo pronto (sem IA)",
+      model: "demo",
       parts: 1,
       durationMs: 0,
       inputTokens: 0,

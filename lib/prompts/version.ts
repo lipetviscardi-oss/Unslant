@@ -14,6 +14,7 @@ import { triagePrompt } from "./triage";
 import { specialistPrompt } from "./specialist";
 import { overviewPrompt } from "./overview";
 import { synthesisPrompt } from "./synthesis";
+import { claimCheckPrompt } from "./claimCheck";
 
 const SAMPLE_TRIAGE: TriageOutput = {
   contentType: "news",
@@ -40,6 +41,8 @@ export function promptVersion(): string {
   h.update(JSON.stringify(config.ai));
   for (const lang of ["pt", "en"] as const) {
     h.update(triagePrompt(lang));
+    h.update(triagePrompt(lang, true));
+    h.update(claimCheckPrompt(SAMPLE_TRIAGE, lang));
     for (const g of TAXONOMY) h.update(specialistPrompt(g, SAMPLE_TRIAGE, lang));
     h.update(overviewPrompt(SAMPLE_TRIAGE, lang));
     h.update(synthesisPrompt("{}", lang));

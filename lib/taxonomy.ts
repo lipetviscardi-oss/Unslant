@@ -27,6 +27,9 @@
 export type Lang = "pt" | "en";
 export type Localized = Record<Lang, string>;
 
+/** Tipos de conteúdo analisados. */
+export type ContentKind = "article" | "paper" | "claim";
+
 export interface BiasCategory {
   /** Identificador único (só letras minúsculas, números e "_"). */
   id: string;
@@ -48,10 +51,12 @@ export interface BiasGroup {
   /** Peso do grupo na nota geral. */
   weight: number;
   /**
-   * "all" = vale para qualquer texto.
-   * "paper" = só é ativado quando o texto é um artigo acadêmico (paper).
+   * Para quais tipos de conteúdo o grupo é analisado:
+   *   "article" = notícias, artigos de opinião, posts etc.
+   *   "paper"   = artigos acadêmicos (papers)
+   *   "claim"   = afirmações curtas (aba "Afirmação")
    */
-  appliesTo: "all" | "paper";
+  appliesTo: readonly ContentKind[];
   categories: BiasCategory[];
 }
 
@@ -66,7 +71,7 @@ export const TAXONOMY: BiasGroup[] = [
       en: "Word choices that push the reader toward a conclusion.",
     },
     weight: 1,
-    appliesTo: "all",
+    appliesTo: ["article", "paper", "claim"],
     categories: [
       {
         id: "loaded_language",
@@ -131,7 +136,7 @@ export const TAXONOMY: BiasGroup[] = [
       en: "How the story is built: who is the victim, who is to blame, what comes first.",
     },
     weight: 1,
-    appliesTo: "all",
+    appliesTo: ["article", "paper", "claim"],
     categories: [
       {
         id: "framing",
@@ -186,7 +191,7 @@ export const TAXONOMY: BiasGroup[] = [
       en: "Who gets heard, who doesn't, and how quotes are used.",
     },
     weight: 1,
-    appliesTo: "all",
+    appliesTo: ["article", "paper", "claim"],
     categories: [
       {
         id: "source_balance",
@@ -241,7 +246,7 @@ export const TAXONOMY: BiasGroup[] = [
       en: "What was left out that would change how the story is understood.",
     },
     weight: 1,
-    appliesTo: "all",
+    appliesTo: ["article", "paper", "claim"],
     categories: [
       {
         id: "missing_context",
@@ -286,7 +291,7 @@ export const TAXONOMY: BiasGroup[] = [
       en: "Numbers used in misleading ways or that don't support the conclusion.",
     },
     weight: 0.9,
-    appliesTo: "all",
+    appliesTo: ["article", "paper", "claim"],
     categories: [
       {
         id: "misleading_numbers",
@@ -340,7 +345,7 @@ export const TAXONOMY: BiasGroup[] = [
       en: "When opinion is dressed up as fact, or a news story editorializes.",
     },
     weight: 1,
-    appliesTo: "all",
+    appliesTo: ["article", "paper", "claim"],
     categories: [
       {
         id: "opinion_as_fact",
@@ -375,7 +380,7 @@ export const TAXONOMY: BiasGroup[] = [
       en: "Devices meant to provoke fear, anger or urgency rather than inform.",
     },
     weight: 0.8,
-    appliesTo: "all",
+    appliesTo: ["article", "paper", "claim"],
     categories: [
       {
         id: "clickbait",
@@ -417,7 +422,7 @@ export const TAXONOMY: BiasGroup[] = [
       en: "Arguments with flawed reasoning.",
     },
     weight: 0.8,
-    appliesTo: "all",
+    appliesTo: ["article", "paper", "claim"],
     categories: [
       {
         id: "straw_man",
@@ -487,7 +492,7 @@ export const TAXONOMY: BiasGroup[] = [
       en: "Disguised advertising and conflicts of interest visible in the text.",
     },
     weight: 0.7,
-    appliesTo: "all",
+    appliesTo: ["article", "paper"],
     categories: [
       {
         id: "sponsored_content",
@@ -521,7 +526,7 @@ export const TAXONOMY: BiasGroup[] = [
       en: "Stereotypes about groups of people.",
     },
     weight: 0.9,
-    appliesTo: "all",
+    appliesTo: ["article", "paper", "claim"],
     categories: [
       {
         id: "stereotype_gender",
@@ -562,6 +567,79 @@ export const TAXONOMY: BiasGroup[] = [
     ],
   },
 
+  // ------------------------------------- VIESES DE RACIOCÍNIO (AFIRMAÇÕES)
+  {
+    id: "cognitive",
+    name: { pt: "Vieses de raciocínio", en: "Reasoning biases" },
+    shortName: { pt: "Raciocínio", en: "Reasoning" },
+    description: {
+      pt: "Atalhos de pensamento que levam a conclusões sem base, muitas vezes moldados pelo que a pessoa lê e assiste.",
+      en: "Mental shortcuts that lead to unsupported conclusions, often shaped by what a person reads and watches.",
+    },
+    weight: 1.1,
+    appliesTo: ["claim"],
+    categories: [
+      {
+        id: "hasty_generalization",
+        name: { pt: "Generalização apressada", en: "Hasty generalization" },
+        description: {
+          pt: "Tirar uma regra geral a partir de poucos casos.",
+          en: "Drawing a general rule from a few cases.",
+        },
+        aiHint:
+          "A afirmação atribui uma característica a um grupo inteiro, a um país ou a 'todo mundo' com base em poucos exemplos ou impressões.",
+      },
+      {
+        id: "anecdotal_evidence",
+        name: { pt: "Experiência pessoal como prova", en: "Anecdote as proof" },
+        description: {
+          pt: "Usar um caso vivido ou ouvido como se provasse uma tendência.",
+          en: "Using a personal or second-hand story as if it proved a trend.",
+        },
+        aiHint: "'Conheço um que…', 'na minha rua…', 'vi um vídeo que…' usados como prova de um fenômeno amplo.",
+      },
+      {
+        id: "availability_bias",
+        name: { pt: "Viés de disponibilidade", en: "Availability bias" },
+        description: {
+          pt: "Achar que algo é comum porque aparece muito no noticiário ou nas redes.",
+          en: "Believing something is common because it shows up a lot in the news or on social media.",
+        },
+        aiHint:
+          "Afirmações sobre frequência ou tendência ('cada vez mais', 'toda hora', 'explodiu') que parecem refletir casos marcantes e muito divulgados, e não dados.",
+      },
+      {
+        id: "confirmation_bias",
+        name: { pt: "Viés de confirmação", en: "Confirmation bias" },
+        description: {
+          pt: "Considerar só o que confirma o que já se acredita.",
+          en: "Considering only what confirms what one already believes.",
+        },
+        aiHint:
+          "A afirmação ignora evidências contrárias notórias, ou interpreta um fato ambíguo de forma a confirmar uma crença prévia.",
+      },
+      {
+        id: "unfalsifiable",
+        name: { pt: "Afirmação impossível de verificar", en: "Unfalsifiable claim" },
+        description: {
+          pt: "Formulada de um jeito que nenhuma evidência poderia confirmar ou desmentir.",
+          en: "Phrased so that no evidence could confirm or refute it.",
+        },
+        aiHint: "Afirmações vagas, sobre intenções ocultas ou conspirações, ou formuladas de modo que qualquer fato as 'confirma'.",
+      },
+      {
+        id: "echoed_slogan",
+        name: { pt: "Bordão ou narrativa pronta", en: "Slogan or ready-made narrative" },
+        description: {
+          pt: "Repete uma frase feita que circula em um grupo, veículo ou rede, sem examiná-la.",
+          en: "Repeats a stock phrase that circulates in a group, outlet or network, without examining it.",
+        },
+        aiHint:
+          "Bordões, frases de efeito e enquadramentos típicos de um campo político ou de uma bolha de mídia. Não julgue a pessoa: explique de que tipo de discurso a frase costuma vir, com a mesma régua para todos os lados.",
+      },
+    ],
+  },
+
   // -------------------------------------------- ESPECÍFICOS PARA PAPERS
   {
     id: "academic",
@@ -572,7 +650,7 @@ export const TAXONOMY: BiasGroup[] = [
       en: "Typical problems in scientific research. Only shown when the text is a paper.",
     },
     weight: 1.2,
-    appliesTo: "paper",
+    appliesTo: ["paper"],
     categories: [
       {
         id: "funding_conflicts",

@@ -23,6 +23,7 @@ export const ContentTypeSchema = z.enum([
   "press_release",
   "blog",
   "other",
+  "claim",
 ]);
 export type ContentType = z.infer<typeof ContentTypeSchema>;
 
@@ -114,3 +115,16 @@ export const SynthesisSchema = z.object({
   }),
 });
 export type SynthesisOutput = z.infer<typeof SynthesisSchema>;
+
+/* Verificação de afirmação (só na aba "Afirmação") */
+export const ClaimCheckSchema = z.object({
+  claimType: z.enum(["factual", "opinion", "prediction", "value_judgment", "mixed"]),
+  verifiability: z.enum(["verifiable", "partially_verifiable", "not_verifiable"]),
+  assessment: z.enum(["consistent", "partially_consistent", "inconsistent", "insufficient_evidence", "not_applicable"]),
+  confidence: ConfidenceSchema,
+  whatIsKnown: z.string(),
+  possibleOrigins: z.string(),
+  howToVerify: z.array(z.string()),
+  moreAccurateVersion: z.string(),
+});
+export type ClaimCheckOutput = z.infer<typeof ClaimCheckSchema>;

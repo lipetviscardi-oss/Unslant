@@ -22,7 +22,7 @@ import type { SourceInfo, StreamEvent } from "@/lib/analysis/types";
 export const maxDuration = 300;
 
 const RequestSchema = z.object({
-  mode: z.enum(["url", "text", "pdf", "demo"]),
+  mode: z.enum(["url", "text", "pdf", "claim", "demo"]),
   lang: z.enum(["pt", "en"]).default("pt"),
   url: z.string().max(2048).optional(),
   text: z.string().max(1_000_000).optional(),
@@ -30,6 +30,8 @@ const RequestSchema = z.object({
     .object({
       title: z.string().max(500).optional(),
       author: z.string().max(500).optional(),
+      /** Afirmações: onde a pessoa viu ou ouviu. */
+      context: z.string().max(300).optional(),
     })
     .optional(),
   demoId: z.string().max(50).optional(),
@@ -76,15 +78,20 @@ export async function POST(request: Request) {
           source =
             body.mode === "pdf"
               ? { type: "pdf", title: body.meta?.title || undefined, author: body.meta?.author || undefined }
-              : { type: "text" };
+              : body.mode === "claim"
+                ? { type: "claim", claimContext: body.meta?.context?.trim() || undefined }
+                : { type: "text" };
         }
 
         const words = countWords(text);
-        if (words < config.text.minWords) throw new AppError("TEXT_TOO_SHORT", `${words} palavras`);
-        if (words > config.text.maxWords) throw new AppError("TEXT_TOO_LONG", `${words} palavras`);
+        const isClaim = body.mode === "claim";
+        const min = isClaim ? config.text.claimMinWords : config.text.minWords;
+        const max = isClaim ? config.text.claimMaxWords : config.text.maxWords;
+        if (words < min) throw new AppError(isClaim ? "CLAIM_TOO_SHORT" : "TEXT_TOO_SHORT", `${words} palavras`);
+        if (words > max) throw new AppError(isClaim ? "CLAIM_TOO_LONG" : "TEXT_TOO_LONG", `${words} palavras`);
 
         // 2. Já analisamos este texto antes? (cache)
-        const key = cacheKey(text, lang, promptVersion());
+        const key = cacheKey(`${body.mode === "claim" ? `claim|${source.claimContext ?? ""}|` : ""}${text}`, lang, promptVersion());
         const cached = await readCache(key);
         if (cached) {
           cached.stats.fromCache = true;

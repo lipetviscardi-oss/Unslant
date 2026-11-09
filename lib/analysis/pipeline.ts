@@ -22,14 +22,18 @@ import { triagePrompt } from "@/lib/prompts/triage";
 import { specialistPrompt } from "@/lib/prompts/specialist";
 import { overviewPrompt } from "@/lib/prompts/overview";
 import { synthesisPrompt } from "@/lib/prompts/synthesis";
+import { claimCheckPrompt } from "@/lib/prompts/claimCheck";
 import { promptVersion } from "@/lib/prompts/version";
 import {
+  ClaimCheckSchema,
   OverviewSchema,
   SynthesisSchema,
   TriageSchema,
   specialistSchema,
+  type ClaimCheckOutput,
   type SpecialistOutput,
   type SynthesisOutput,
+  type TriageOutput,
 } from "./schemas";
 import { activeGroups, buildFindings, finalizeResult, findingsForSynthesis, type RawPart } from "./assemble";
 import type { AnalysisResult, SourceInfo, StreamEvent } from "./types";
@@ -49,24 +53,28 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
   const wordCount = countWords(text);
   const parts = splitIntoParts(text, config.text.maxWordsPerPart);
   const boundary = newBoundary(); // código aleatório das marcações do documento
+  const isClaim = source.type === "claim";
 
   // 1. Identificação (usa a primeira parte, onde ficam título e resumo)
   onProgress({ type: "stage", stage: "context" });
-  const triage = await callStructured({
+  const identified = await callStructured({
     label: "identificação",
     schema: TriageSchema,
     documentBlock: buildDocumentBlock(parts[0].text, source, boundary, { index: 0, total: parts.length }),
-    task: triagePrompt(lang),
+    task: triagePrompt(lang, isClaim),
     effort: config.ai.effort.triage,
     maxTokens: config.ai.maxTokens.triage,
     usage,
     signal,
   });
 
-  // 2. Especialistas + visão geral, em paralelo
+  // Na aba "Afirmação", o tipo é sempre "afirmação" (define os grupos analisados).
+  const triage: TriageOutput = isClaim ? { ...identified, contentType: "claim" } : identified;
+
+  // 2. Especialistas + visão geral (+ verificação, para afirmações), em paralelo
   const groups = activeGroups(triage);
   const perPart = groups.length + 1;
-  const total = parts.length * perPart;
+  const total = parts.length * perPart + (isClaim ? 1 : 0);
   let done = 0;
   onProgress({ type: "stage", stage: "analyzing", done, total });
   const tick = () => {
@@ -109,6 +117,25 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
       return { part: partIndex, groupId: null, output };
     });
   });
+
+  let claimCheck: ClaimCheckOutput | null = null;
+  if (isClaim) {
+    const documentBlock = buildDocumentBlock(parts[0].text, source, boundary, { index: 0, total: parts.length });
+    tasks.push(async () => {
+      claimCheck = await callStructured({
+        label: "verificação da afirmação",
+        schema: ClaimCheckSchema,
+        documentBlock,
+        task: claimCheckPrompt(triage, lang),
+        effort: config.ai.effort.claimCheck,
+        maxTokens: config.ai.maxTokens.claimCheck,
+        usage,
+        signal,
+      });
+      tick();
+      return { part: -1, groupId: "__claim__", output: null };
+    });
+  }
 
   const outputs = await runLimited(tasks, config.ai.maxParallelRequests);
 
@@ -156,6 +183,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
     triage,
     findings,
     synthesis,
+    claimCheck,
     stats: {
       model: config.ai.model,
       parts: parts.length,

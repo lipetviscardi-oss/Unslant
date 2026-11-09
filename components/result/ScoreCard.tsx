@@ -8,6 +8,8 @@
 import { useEffect, useState } from "react";
 import type { AnalysisResult } from "@/lib/analysis/types";
 import { formatScore, severity, SEVERITY_TEXT } from "@/lib/client/format";
+import { useDict, useLang } from "@/lib/i18n";
+import { scoreLabel } from "@/lib/taxonomy";
 
 const BEAM_COLOR = { low: "var(--color-teal)", mid: "var(--color-amber)", high: "var(--color-ember)" } as const;
 
@@ -36,27 +38,26 @@ export function TiltMeter({ score }: { score: number }) {
 }
 
 export function ScoreCard({ result }: { result: AnalysisResult }) {
+  const t = useDict();
+  const lang = useLang();
   const sev = severity(result.overall.score);
   return (
     <section aria-labelledby="score-title" className="rounded-[20px] bg-paper p-6 sm:p-7">
       <h2 id="score-title" className="sr-only">
-        Nota geral de viés
+        {t.result.score.srTitle}
       </h2>
       <div className="flex items-center gap-5 sm:gap-7">
         <TiltMeter score={result.overall.score} />
         <div className="min-w-0">
           <p className="font-display leading-none">
-            <span className="text-[3.25rem] font-semibold tracking-tight">{formatScore(result.overall.score)}</span>
-            <span className="ml-1.5 text-lg text-muted">de 10</span>
+            <span className="text-[3.25rem] font-semibold tracking-tight">{formatScore(result.overall.score, lang)}</span>
+            <span className="ml-1.5 text-lg text-muted">{t.result.score.outOf}</span>
           </p>
-          <p className={`mt-2 font-display text-lg font-medium ${SEVERITY_TEXT[sev]}`}>{result.overall.label}</p>
+          <p className={`mt-2 font-display text-lg font-medium ${SEVERITY_TEXT[sev]}`}>{scoreLabel(result.overall.score)[lang]}</p>
         </div>
       </div>
       <p className="mt-5 text-[17px] leading-relaxed">{result.summarySimple}</p>
-      <p className="mt-4 text-sm text-muted">
-        A nota mede o quanto o texto é enviesado de forma geral (linguagem, fontes, dados, lógica…), não só
-        politicamente. 0 é um texto equilibrado; 10, uma distorção grave.
-      </p>
+      <p className="mt-4 text-sm text-muted">{t.result.score.explanation}</p>
     </section>
   );
 }

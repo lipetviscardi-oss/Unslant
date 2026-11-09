@@ -2,7 +2,7 @@
 
 /**
  * Página inicial do unslant. Ela tem três estados:
- *  - formulário (escolher link, texto ou PDF);
+ *  - formulário (link, texto, PDF ou afirmação);
  *  - progresso (enquanto a análise acontece);
  *  - resultado.
  */
@@ -13,13 +13,15 @@ import { ProgressPanel, type ProgressState } from "@/components/ProgressPanel";
 import { ResultView } from "@/components/result/ResultView";
 import { AnalyzeError, requestAnalysis, type AnalyzeRequest } from "@/lib/client/analyze";
 import type { AnalysisResult } from "@/lib/analysis/types";
+import { useDict } from "@/lib/i18n";
 
 type View =
   | { kind: "form"; error?: string }
   | { kind: "running"; progress: ProgressState }
   | { kind: "result"; result: AnalysisResult };
 
-export default function Home() {
+export function Home() {
+  const t = useDict();
   const [view, setView] = useState<View>({ kind: "form" });
   const abortRef = useRef<AbortController | null>(null);
 
@@ -45,7 +47,12 @@ export default function Home() {
         setView({ kind: "form" });
         return;
       }
-      const message = err instanceof AnalyzeError ? err.message : "Ocorreu um erro inesperado. Tente de novo.";
+      const message =
+        err instanceof AnalyzeError
+          ? err.code === "NETWORK"
+            ? t.home.networkError
+            : err.message
+          : t.home.unexpectedError;
       setView({ kind: "form", error: message });
     } finally {
       abortRef.current = null;
@@ -70,13 +77,8 @@ export default function Home() {
   return (
     <div className="mx-auto grid max-w-3xl gap-10 pt-8 sm:pt-14">
       <div className="grid gap-4">
-        <h1 className="text-[2rem] leading-[1.15] font-semibold sm:text-[2.75rem]">
-          Veja como um texto tenta convencer você.
-        </h1>
-        <p className="max-w-[60ch] text-[18px] leading-relaxed text-muted">
-          Envie uma notícia, um artigo de opinião ou um paper. O unslant aponta vieses de linguagem, fontes, dados e
-          lógica, sempre com o trecho exato do texto como prova, e mostra a inclinação política quando ela existe.
-        </p>
+        <h1 className="text-[2rem] leading-[1.15] font-semibold sm:text-[2.75rem]">{t.home.title}</h1>
+        <p className="max-w-[60ch] text-[18px] leading-relaxed text-muted">{t.home.intro}</p>
       </div>
 
       {view.error && (

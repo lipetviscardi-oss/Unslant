@@ -19,6 +19,8 @@ export type ErrorCode =
   | "NO_ARTICLE"
   | "TEXT_TOO_SHORT"
   | "TEXT_TOO_LONG"
+  | "CLAIM_TOO_SHORT"
+  | "CLAIM_TOO_LONG"
   | "PDF_INVALID"
   | "PDF_SCANNED"
   | "MISSING_API_KEY"
@@ -84,6 +86,14 @@ export const ERROR_MESSAGES: Record<ErrorCode, Record<Lang, string>> = {
   TEXT_TOO_LONG: {
     pt: "O texto é longo demais para uma análise. Envie uma parte menor (o limite atual está em lib/config.ts).",
     en: "The text is too long to analyze. Please send a shorter part.",
+  },
+  CLAIM_TOO_SHORT: {
+    pt: "A afirmação é curta demais. Escreva a frase completa, com pelo menos 3 palavras.",
+    en: "The claim is too short. Write the full sentence, with at least 3 words.",
+  },
+  CLAIM_TOO_LONG: {
+    pt: "Isso é longo demais para uma afirmação (limite de 300 palavras). Para textos maiores, use a aba \"Texto\".",
+    en: "That's too long for a claim (300-word limit). For longer texts, use the \"Text\" tab.",
   },
   PDF_INVALID: {
     pt: "Não conseguimos abrir esse PDF. Ele pode estar corrompido ou protegido por senha.",
