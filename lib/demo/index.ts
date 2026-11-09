@@ -41,7 +41,7 @@ export async function runDemo(id: string, _lang: Lang, send: (e: StreamEvent) =>
     send({ type: "stage", stage: "analyzing", done, total });
     await wait(90);
   }
-  send({ type: "stage", stage: "synthesizing" });
+  send({ type: "stage", stage: "balancing" });
   await wait(400);
 
   const findings = buildFindings(
@@ -63,6 +63,7 @@ export async function runDemo(id: string, _lang: Lang, send: (e: StreamEvent) =>
     findings,
     synthesis: demo.synthesis,
     claimCheck: demo.claimCheck,
+    balance: { status: "demo", data: null },
     stats: {
       model: "demo",
       parts: 1,

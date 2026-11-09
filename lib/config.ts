@@ -69,6 +69,18 @@ export const config = {
     claimMaxWords: 300,
   },
 
+  /** Busca na web: seção "Para equilibrar sua leitura". */
+  balance: {
+    /** Liga ou desliga a busca (false = a seção não aparece e não há custo de busca). */
+    enabled: true,
+    /** Máximo de buscas na web por análise (cada busca custa cerca de US$ 0,01). */
+    maxSearches: 5,
+    /** Máximo de textos recomendados. */
+    maxArticles: 5,
+    effort: "medium" as const,
+    maxTokens: 12_000,
+  },
+
   /** Download de páginas (aba "Link"). */
   fetch: {
     timeoutMs: 15_000,
@@ -102,6 +114,8 @@ export const config = {
   pricing: {
     "claude-sonnet-5-5": { input: 2, output: 10, cacheWrite: 2.5, cacheRead: 0.2 },
   } as Record<string, { input: number; output: number; cacheWrite: number; cacheRead: number }>,
+  /** Preço de cada busca na web, em dólares (US$ 10 a cada 1.000 buscas). */
+  webSearchPrice: 0.01,
 } as const;
 
 export type Effort = "low" | "medium" | "high";

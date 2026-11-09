@@ -92,6 +92,10 @@ export const en: Dict = {
       context: { label: "Identifying the context", detail: "Type of text, country and political setting." },
       analyzing: { label: "Analyzing biases", detail: "Language, sources, data, fallacies and more, all at once." },
       synthesizing: { label: "Writing the summary", detail: "Combining the findings and checking every quoted passage." },
+      balancing: {
+        label: "Finding texts to balance your reading",
+        detail: "Searching the web for other coverage of the topic and writing the summary.",
+      },
     },
     doneCount: (done: number, total: number) => `${done} of ${total} aspects done`,
     state: { done: "done", active: "in progress", pending: "waiting" },
@@ -180,6 +184,19 @@ export const en: Dict = {
         "This check relies on the AI's general knowledge, which has a cutoff date and can be wrong. It does not consult sources in real time. Check the suggested sources before sharing.",
     },
 
+    balance: {
+      title: "To balance your reading",
+      titleClaim: "Where to check this claim",
+      intro: "Real texts found on the web, from other outlets and perspectives. We check that every link actually came from the search.",
+      introClaim: "Real sources found on the web to help you check the claim. We check that every link actually came from the search.",
+      perspective: "Perspective",
+      opensNewTab: "(opens in a new tab)",
+      suggestionsTitle: "Other suggestions",
+      none: "The search found no reliable texts on this topic. See the suggestions below.",
+      unavailable: "The web search could not be completed this time. The rest of the analysis is not affected.",
+      demo: "Ready-made examples don't run the web search. In a real analysis, this section shows texts from other outlets and perspectives on the same topic, with links.",
+    },
+
     details: {
       title: "All categories",
       description: "Each category with its score, confidence level and the passages supporting it.",
@@ -202,6 +219,7 @@ export const en: Dict = {
       costCached: "US$ 0 (saved result)",
       time: "Time: ",
       discarded: "Discarded passages: ",
+      searches: "Web searches: ",
       parts: (n: number) => `The text was split into ${n} parts and the results were combined.`,
       demoModel: "ready-made example (no AI)",
     },

@@ -3,7 +3,7 @@
  * Este formato também é o que será salvo no banco de dados na Fase 4.
  */
 
-import type { AxisPosition, CategoryStatus, ClaimCheckOutput, Confidence, ContentType } from "./schemas";
+import type { AxisPosition, BalanceOutput, CategoryStatus, ClaimCheckOutput, Confidence, ContentType } from "./schemas";
 import type { Lang } from "@/lib/taxonomy";
 
 export type SourceType = "url" | "text" | "pdf" | "claim";
@@ -100,6 +100,12 @@ export interface AnalysisResult {
   groups: GroupResult[];
   /** Só para afirmações: o que se sabe, de onde a ideia vem, como verificar. */
   claimCheck?: ClaimCheckOutput | null;
+  /**
+   * "Para equilibrar sua leitura": textos reais encontrados na web + outras
+   * sugestões. status: "ok", "unavailable" (a busca falhou), "disabled"
+   * (desligada em config) ou "demo" (exemplo pronto, sem busca).
+   */
+  balance?: { status: "ok" | "unavailable" | "disabled" | "demo"; data: BalanceOutput | null };
 
   stats: {
     model: string;
@@ -110,13 +116,14 @@ export interface AnalysisResult {
     cacheReadTokens: number;
     cacheWriteTokens: number;
     estimatedCostUsd: number;
+    webSearches?: number;
     discardedEvidence: number;
     fromCache: boolean;
   };
 }
 
 /** Eventos enviados ao navegador durante a análise (barra de progresso). */
-export type ProgressStage = "extracting" | "context" | "analyzing" | "synthesizing";
+export type ProgressStage = "extracting" | "context" | "analyzing" | "synthesizing" | "balancing";
 
 export type StreamEvent =
   | { type: "stage"; stage: ProgressStage; done?: number; total?: number }

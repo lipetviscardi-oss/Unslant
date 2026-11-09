@@ -14,6 +14,7 @@ import { PoliticalAxes } from "./PoliticalAxes";
 import { GroupOverview } from "./GroupOverview";
 import { HighlightedText } from "./HighlightedText";
 import { ClaimCheck } from "./ClaimCheck";
+import { Balance } from "./Balance";
 import { CategoryDetails, FactOpinion, Omissions, Rewrite } from "./Sections";
 
 function Chip({ children, tone = "plain" }: { children: React.ReactNode; tone?: "plain" | "teal" }) {
@@ -43,6 +44,12 @@ function Stats({ result }: { result: AnalysisResult }) {
               <dt className="inline">{t.result.stats.cost}</dt>
               <dd className="inline text-ink">{s.fromCache ? t.result.stats.costCached : `US$ ${cost}`}</dd>
             </div>
+            {s.webSearches ? (
+              <div>
+                <dt className="inline">{t.result.stats.searches}</dt>
+                <dd className="inline text-ink">{s.webSearches}</dd>
+              </div>
+            ) : null}
             <div>
               <dt className="inline">{t.result.stats.time}</dt>
               <dd className="inline text-ink">{seconds} s</dd>
@@ -175,6 +182,8 @@ export function ResultView({ result, onReset }: { result: AnalysisResult; onRese
         {/* Em afirmações, a "versão mais precisa" já aparece na verificação. */}
         {!isClaim && <Rewrite result={result} onShow={showEvidence} />}
       </div>
+
+      <Balance result={result} />
 
       <CategoryDetails groups={result.groups} onShow={showEvidence} />
 

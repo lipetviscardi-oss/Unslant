@@ -282,6 +282,7 @@ export function finalizeResult(params: {
   findings: Findings;
   synthesis: SynthesisOutput | null;
   claimCheck?: ClaimCheckOutput | null;
+  balance?: AnalysisResult["balance"];
   stats: Omit<AnalysisResult["stats"], "discardedEvidence">;
 }): AnalysisResult {
   const { triage, findings, synthesis, text } = params;
@@ -341,6 +342,7 @@ export function finalizeResult(params: {
     rewrite,
     groups: findings.groups,
     claimCheck: params.claimCheck ?? null,
+    balance: params.balance ?? { status: "disabled", data: null },
     stats: { ...params.stats, discardedEvidence: findings.discardedEvidence },
   };
 }

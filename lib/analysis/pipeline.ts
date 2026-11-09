@@ -5,6 +5,7 @@
  *  2. Especialistas  — um por grupo da taxonomia + visão geral, em paralelo
  *  3. Conferência    — citações procuradas no texto, notas calculadas
  *  4. Síntese        — resumo final e sugestão de reescrita neutra
+ *     + Busca na web  — textos para equilibrar a leitura (ao mesmo tempo)
  *
  * Textos muito longos são divididos em partes (ver config.text.maxWordsPerPart);
  * cada parte passa pelos especialistas e os resultados são consolidados.
@@ -23,6 +24,8 @@ import { specialistPrompt } from "@/lib/prompts/specialist";
 import { overviewPrompt } from "@/lib/prompts/overview";
 import { synthesisPrompt } from "@/lib/prompts/synthesis";
 import { claimCheckPrompt } from "@/lib/prompts/claimCheck";
+import { balancePrompt } from "@/lib/prompts/balance";
+import { searchBalance } from "@/lib/ai/balance";
 import { promptVersion } from "@/lib/prompts/version";
 import {
   ClaimCheckSchema,
@@ -153,24 +156,55 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
   // 3. Conferência das citações e cálculo das notas
   const findings = buildFindings(text, triage, rawParts, lang);
 
-  // 4. Síntese
-  onProgress({ type: "stage", stage: "synthesizing" });
-  let synthesis: SynthesisOutput | null = null;
-  try {
-    synthesis = await callStructured({
-      label: "síntese",
-      schema: SynthesisSchema,
-      task: synthesisPrompt(findingsForSynthesis(triage, findings), lang),
-      effort: config.ai.effort.synthesis,
-      maxTokens: config.ai.maxTokens.synthesis,
-      usage,
-      signal,
-    });
-  } catch (err) {
-    // Sem a síntese, a análise ainda é útil: mostramos o resto.
-    if (!(err instanceof AppError && err.code === "AI_BAD_RESPONSE")) throw err;
-    console.warn("[unslant] síntese falhou; seguindo sem resumo final", err.detail);
-  }
+  // 4. Síntese + busca de textos para equilibrar, ao mesmo tempo
+  onProgress({ type: "stage", stage: "balancing" });
+
+  const synthesisTask = (async (): Promise<SynthesisOutput | null> => {
+    try {
+      return await callStructured({
+        label: "síntese",
+        schema: SynthesisSchema,
+        task: synthesisPrompt(findingsForSynthesis(triage, findings), lang),
+        effort: config.ai.effort.synthesis,
+        maxTokens: config.ai.maxTokens.synthesis,
+        usage,
+        signal,
+      });
+    } catch (err) {
+      // Sem a síntese, a análise ainda é útil: mostramos o resto.
+      if (!(err instanceof AppError && err.code === "AI_BAD_RESPONSE")) throw err;
+      console.warn("[unslant] síntese falhou; seguindo sem resumo final", err.detail);
+      return null;
+    }
+  })();
+
+  const balanceTask = (async (): Promise<NonNullable<AnalysisResult["balance"]>> => {
+    if (!config.balance.enabled) return { status: "disabled", data: null };
+    try {
+      const data = await searchBalance({
+        task: balancePrompt({
+          triage,
+          economic: findings.political.economic,
+          social: findings.political.social,
+          omissions: findings.omissions.map((o) => o.title),
+          originalOutlet: source.outlet,
+          lang,
+        }),
+        countryCode: triage.countryCode,
+        originalUrl: source.url,
+        usage,
+        signal,
+      });
+      return { status: "ok", data };
+    } catch (err) {
+      // A busca é um complemento: se falhar, o resto da análise continua valendo.
+      if (signal?.aborted) throw err;
+      console.warn("[unslant] busca para equilibrar falhou:", err instanceof AppError ? `${err.code} ${err.detail ?? ""}` : err);
+      return { status: "unavailable", data: null };
+    }
+  })();
+
+  const [synthesis, balance] = await Promise.all([synthesisTask, balanceTask]);
 
   return finalizeResult({
     id: randomUUID(),
@@ -184,6 +218,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
     findings,
     synthesis,
     claimCheck,
+    balance,
     stats: {
       model: config.ai.model,
       parts: parts.length,
@@ -193,6 +228,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
       cacheReadTokens: usage.cacheReadTokens,
       cacheWriteTokens: usage.cacheWriteTokens,
       estimatedCostUsd: usage.costUsd(config.ai.model),
+      webSearches: usage.webSearches,
       fromCache: false,
     },
   });

@@ -92,6 +92,10 @@ export const pt = {
       context: { label: "Identificando o contexto", detail: "Tipo de texto, país e cenário político." },
       analyzing: { label: "Analisando os vieses", detail: "Linguagem, fontes, dados, falácias e mais, ao mesmo tempo." },
       synthesizing: { label: "Escrevendo o resumo", detail: "Juntando os achados e conferindo cada trecho citado." },
+      balancing: {
+        label: "Buscando textos para equilibrar",
+        detail: "Procurando outras coberturas do assunto na web e escrevendo o resumo.",
+      },
     },
     doneCount: (done: number, total: number) => `${done} de ${total} aspectos concluídos`,
     state: { done: "concluído", active: "em andamento", pending: "aguardando" },
@@ -181,6 +185,19 @@ export const pt = {
         "Esta verificação usa o conhecimento geral da IA, que tem data de corte e pode errar. Ela não consulta fontes em tempo real. Confira nas fontes sugeridas antes de compartilhar.",
     },
 
+    balance: {
+      title: "Para equilibrar sua leitura",
+      titleClaim: "Onde conferir essa afirmação",
+      intro: "Textos reais encontrados na web, de outros veículos e perspectivas. Conferimos que cada link veio de fato da busca.",
+      introClaim: "Fontes reais encontradas na web para você conferir a afirmação. Conferimos que cada link veio de fato da busca.",
+      perspective: "Perspectiva",
+      opensNewTab: "(abre em nova aba)",
+      suggestionsTitle: "Outras sugestões",
+      none: "A busca não encontrou textos confiáveis sobre o assunto. Veja as sugestões abaixo.",
+      unavailable: "Não foi possível fazer a busca na web desta vez. O restante da análise não foi afetado.",
+      demo: "Nos exemplos prontos a busca na web não é feita. Numa análise real, aqui aparecem textos de outros veículos e perspectivas sobre o mesmo assunto, com links.",
+    },
+
     details: {
       title: "Todas as categorias",
       description: "Cada categoria com nota, nível de confiança e os trechos que sustentam o apontamento.",
@@ -203,6 +220,7 @@ export const pt = {
       costCached: "US$ 0 (resultado guardado)",
       time: "Tempo: ",
       discarded: "Trechos descartados: ",
+      searches: "Buscas na web: ",
       parts: (n: number) => `O texto foi dividido em ${n} partes e os resultados foram consolidados.`,
       demoModel: "exemplo pronto (sem IA)",
     },

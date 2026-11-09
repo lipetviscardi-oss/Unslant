@@ -128,3 +128,25 @@ export const ClaimCheckSchema = z.object({
   moreAccurateVersion: z.string(),
 });
 export type ClaimCheckOutput = z.infer<typeof ClaimCheckSchema>;
+
+/* Busca de textos para equilibrar a leitura (Fase 2) */
+export const BalanceSchema = z.object({
+  articles: z.array(
+    z.object({
+      url: z.string(),
+      title: z.string(),
+      outlet: z.string(),
+      /** Perspectiva ou tipo de fonte (ex.: "visão de centro-direita", "dados oficiais", "checagem"). */
+      perspective: z.string(),
+      /** Por que este texto equilibra ou complementa o original. */
+      why: z.string(),
+    }),
+  ),
+  suggestions: z.array(
+    z.object({
+      title: z.string(),
+      explanation: z.string(),
+    }),
+  ),
+});
+export type BalanceOutput = z.infer<typeof BalanceSchema>;

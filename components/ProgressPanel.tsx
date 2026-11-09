@@ -3,7 +3,7 @@
 import type { ProgressStage } from "@/lib/analysis/types";
 import { useDict } from "@/lib/i18n";
 
-const STEP_IDS: ProgressStage[] = ["extracting", "context", "analyzing", "synthesizing"];
+const STEP_IDS: ProgressStage[] = ["extracting", "context", "analyzing", "balancing"];
 
 export interface ProgressState {
   stage: ProgressStage;

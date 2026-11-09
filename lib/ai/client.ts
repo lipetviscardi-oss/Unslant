@@ -18,7 +18,7 @@ import { SYSTEM_PROMPT } from "@/lib/prompts/system";
 
 let client: Anthropic | null = null;
 
-function getClient() {
+export function getClient() {
   if (!process.env.ANTHROPIC_API_KEY) throw new AppError("MISSING_API_KEY");
   // maxRetries: a própria biblioteca repete automaticamente erros temporários
   // (sobrecarga, limite de velocidade, falha de conexão).
@@ -32,13 +32,16 @@ export class UsageTracker {
   outputTokens = 0;
   cacheReadTokens = 0;
   cacheWriteTokens = 0;
+  webSearches = 0;
 
   add(usage: {
     input_tokens: number;
     output_tokens: number;
     cache_read_input_tokens?: number | null;
     cache_creation_input_tokens?: number | null;
+    server_tool_use?: { web_search_requests?: number | null } | null;
   }) {
+    this.webSearches += usage.server_tool_use?.web_search_requests ?? 0;
     this.inputTokens += usage.input_tokens ?? 0;
     this.outputTokens += usage.output_tokens ?? 0;
     this.cacheReadTokens += usage.cache_read_input_tokens ?? 0;
@@ -53,7 +56,8 @@ export class UsageTracker {
         this.outputTokens * p.output +
         this.cacheReadTokens * p.cacheRead +
         this.cacheWriteTokens * p.cacheWrite) /
-      1_000_000;
+        1_000_000 +
+      this.webSearches * config.webSearchPrice;
     return Math.round(cost * 10000) / 10000;
   }
 }
@@ -139,7 +143,7 @@ export async function callStructured<T extends z.ZodType>(opts: StructuredCallOp
 }
 
 /** Traduz erros da biblioteca da Anthropic para mensagens do unslant. */
-function mapApiError(err: unknown): AppError {
+export function mapApiError(err: unknown): AppError {
   if (err instanceof AppError) return err;
   if (err instanceof Anthropic.APIUserAbortError) return new AppError("AI_ERROR", "cancelado pelo usuário");
   if (err instanceof Anthropic.AuthenticationError || err instanceof Anthropic.PermissionDeniedError) {

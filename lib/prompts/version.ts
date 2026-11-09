@@ -15,6 +15,7 @@ import { specialistPrompt } from "./specialist";
 import { overviewPrompt } from "./overview";
 import { synthesisPrompt } from "./synthesis";
 import { claimCheckPrompt } from "./claimCheck";
+import { balancePrompt } from "./balance";
 
 const SAMPLE_TRIAGE: TriageOutput = {
   contentType: "news",
@@ -39,6 +40,7 @@ export function promptVersion(): string {
   h.update(JSON.stringify(TAXONOMY));
   h.update(JSON.stringify(SCORING));
   h.update(JSON.stringify(config.ai));
+  h.update(JSON.stringify(config.balance));
   for (const lang of ["pt", "en"] as const) {
     h.update(triagePrompt(lang));
     h.update(triagePrompt(lang, true));
@@ -46,6 +48,8 @@ export function promptVersion(): string {
     for (const g of TAXONOMY) h.update(specialistPrompt(g, SAMPLE_TRIAGE, lang));
     h.update(overviewPrompt(SAMPLE_TRIAGE, lang));
     h.update(synthesisPrompt("{}", lang));
+    const axis = { position: "unidentified", confidence: "low", justification: "", quote: "", start: null, end: null } as const;
+    h.update(balancePrompt({ triage: SAMPLE_TRIAGE, economic: axis, social: axis, omissions: [], lang }));
   }
   cached = h.digest("hex").slice(0, 12);
   return cached;
