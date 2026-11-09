@@ -71,12 +71,13 @@ export function ResultView({ result, onReset }: { result: AnalysisResult; onRese
   const lang = useLang();
   const index = useMemo(() => buildEvidenceIndex(result), [result]);
   const [selected, setSelected] = useState<string[]>([]);
+  const [showAll, setShowAll] = useState(false);
 
-  /** Rola até um trecho no texto e o seleciona. */
-  const showEvidence = useCallback((evidenceId: string) => {
-    const el = document.getElementById(`ev-${evidenceId}`);
-    if (!el) return;
-    // seleciona o pedaço destacado onde a evidência começa (e todas as evidências que o cobrem)
+  /** Rola até um trecho no texto e o seleciona. Devolve false se ele não estiver visível. */
+  const scrollToEvidence = useCallback((evidenceId: string) => {
+    const el = document.querySelector<HTMLElement>(`[data-ids~="${CSS.escape(evidenceId)}"]`);
+    if (!el) return false;
+    // seleciona o destaque inteiro (todas as evidências que ele reúne)
     const ids = el.getAttribute("data-ids")?.split(" ").filter(Boolean) ?? [];
     setSelected(ids.length ? ids : [evidenceId]);
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -85,7 +86,18 @@ export function ResultView({ result, onReset }: { result: AnalysisResult; onRese
     void el.getBoundingClientRect();
     el.classList.add("hl-flash");
     el.focus({ preventScroll: true });
+    return true;
   }, []);
+
+  const showEvidence = useCallback(
+    (evidenceId: string) => {
+      if (scrollToEvidence(evidenceId)) return;
+      // O trecho é leve e está escondido: mostra todos e tenta de novo.
+      setShowAll(true);
+      setTimeout(() => scrollToEvidence(evidenceId), 60);
+    },
+    [scrollToEvidence],
+  );
 
   const showGroup = useCallback((groupId: string) => {
     const el = document.getElementById(`group-${groupId}`) as HTMLDetailsElement | null;
@@ -175,7 +187,14 @@ export function ResultView({ result, onReset }: { result: AnalysisResult; onRese
 
       <GroupOverview groups={result.groups} onSelectGroup={showGroup} />
 
-      <HighlightedText result={result} index={index} selected={selected} onSelect={setSelected} />
+      <HighlightedText
+        result={result}
+        index={index}
+        selected={selected}
+        onSelect={setSelected}
+        showAll={showAll}
+        onToggleAll={() => setShowAll((v) => !v)}
+      />
 
       <div className="grid gap-10 lg:grid-cols-2">
         <Omissions result={result} />

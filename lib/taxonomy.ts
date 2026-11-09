@@ -111,7 +111,7 @@ export const TAXONOMY: BiasGroup[] = [
           en: "'Stated' for one side and 'claimed' or 'admitted' for the other.",
         },
         aiHint:
-          "Compare os verbos usados para introduzir falas de cada lado: neutros ('disse', 'afirmou') vs. que insinuam dúvida ('alegou', 'insistiu', 'tentou justificar') ou culpa ('admitiu', 'confessou', 'reconheceu'). Só aponte se houver assimetria entre lados ou uso tendencioso claro.",
+          "Compare os verbos usados para introduzir falas de cada lado. Verbos como 'disse', 'afirmou', 'declarou' e 'alegou' não são viés por si sós e nunca devem ser marcados isoladamente. Aponte só quando houver assimetria clara entre os lados (ex.: um lado 'afirmou', o outro 'admitiu', 'confessou' ou 'tentou justificar'), citando no máximo um exemplo de cada lado. Se o texto não cita falas, use not_applicable.",
       },
       {
         id: "generalizations",
@@ -301,7 +301,7 @@ export const TAXONOMY: BiasGroup[] = [
           en: "Numbers without a baseline, or absolute figures where relative ones matter (and vice versa).",
         },
         aiHint:
-          "Percentuais sem base, valores absolutos sem população/inflação, 'aumento de 200%' sobre base minúscula, médias que escondem distribuição.",
+          "Percentuais sem base, valores absolutos sem população/inflação, 'aumento de 200%' sobre base minúscula, médias que escondem distribuição. Se o texto não traz números, use not_applicable.",
       },
       {
         id: "correlation_causation",

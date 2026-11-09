@@ -78,7 +78,7 @@ export interface SpecialistOutput {
 }
 
 /* Etapa 2 (em paralelo) — visão geral */
-export const AxisPositionSchema = z.enum(["left", "right", "unidentified"]);
+export const AxisPositionSchema = z.enum(["left", "right", "unidentified", "not_applicable"]);
 export type AxisPosition = z.infer<typeof AxisPositionSchema>;
 
 const AxisSchema = z.object({
@@ -88,9 +88,24 @@ const AxisSchema = z.object({
   quote: z.string(),
 });
 
+export const DisputeStatusSchema = z.enum(["favors_a", "favors_b", "balanced", "unidentified", "not_applicable"]);
+export type DisputeStatus = z.infer<typeof DisputeStatusSchema>;
+
+const DisputeSchema = z.object({
+  status: DisputeStatusSchema,
+  /** Lado que está no poder / ocupa o cargo. */
+  sideA: z.string(),
+  /** Lado de fora (oposição, desafiante). */
+  sideB: z.string(),
+  confidence: ConfidenceSchema,
+  justification: z.string(),
+  quote: z.string(),
+});
+
 export const OverviewSchema = z.object({
   economic: AxisSchema,
   social: AxisSchema,
+  dispute: DisputeSchema,
   factOpinion: z.object({
     factPercent: z.number(),
     explanation: z.string(),

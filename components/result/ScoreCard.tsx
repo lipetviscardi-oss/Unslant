@@ -41,6 +41,7 @@ export function ScoreCard({ result }: { result: AnalysisResult }) {
   const t = useDict();
   const lang = useLang();
   const sev = severity(result.overall.score);
+  const naCount = result.groups.flatMap((g) => g.categories).filter((c) => c.status === "not_applicable").length;
   return (
     <section aria-labelledby="score-title" className="rounded-[20px] bg-paper p-6 sm:p-7">
       <h2 id="score-title" className="sr-only">
@@ -57,7 +58,10 @@ export function ScoreCard({ result }: { result: AnalysisResult }) {
         </div>
       </div>
       <p className="mt-5 text-[17px] leading-relaxed">{result.summarySimple}</p>
-      <p className="mt-4 text-sm text-muted">{t.result.score.explanation}</p>
+      <p className="mt-4 text-sm text-muted">
+        {t.result.score.explanation}
+        {naCount > 0 && <> {t.result.score.naNote(naCount)}</>}
+      </p>
     </section>
   );
 }

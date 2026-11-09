@@ -17,6 +17,7 @@ import { config, type Effort } from "@/lib/config";
 import { AppError } from "@/lib/errors";
 import { SYSTEM_PROMPT } from "@/lib/prompts/system";
 import { callStructuredGemini } from "./gemini";
+import type { StageCost } from "@/lib/analysis/types";
 
 let client: Anthropic | null = null;
 
@@ -28,45 +29,90 @@ export function getClient() {
   return client;
 }
 
-/** Soma os tokens de todas as chamadas de uma análise. */
+/** Soma os tokens e o custo de cada etapa de uma análise. */
 export class UsageTracker {
-  inputTokens = 0;
-  outputTokens = 0;
-  cacheReadTokens = 0;
-  cacheWriteTokens = 0;
-  webSearches = 0;
+  stages: Record<string, StageCost> = {};
 
-  add(usage: {
-    input_tokens: number;
-    output_tokens: number;
-    cache_read_input_tokens?: number | null;
-    cache_creation_input_tokens?: number | null;
-    server_tool_use?: { web_search_requests?: number | null } | null;
-  }) {
-    this.webSearches += usage.server_tool_use?.web_search_requests ?? 0;
-    this.inputTokens += usage.input_tokens ?? 0;
-    this.outputTokens += usage.output_tokens ?? 0;
-    this.cacheReadTokens += usage.cache_read_input_tokens ?? 0;
-    this.cacheWriteTokens += usage.cache_creation_input_tokens ?? 0;
+  /** Registra uso já convertido (usado pelo Gemini e pela busca). */
+  addRaw(
+    stage: string,
+    model: string,
+    u: { input?: number; output?: number; cacheRead?: number; cacheWrite?: number; webSearches?: number },
+  ) {
+    const s = (this.stages[stage] ??= {
+      calls: 0,
+      model,
+      inputTokens: 0,
+      outputTokens: 0,
+      cacheReadTokens: 0,
+      cacheWriteTokens: 0,
+      webSearches: 0,
+      costUsd: 0,
+    });
+    s.calls++;
+    s.inputTokens += u.input ?? 0;
+    s.outputTokens += u.output ?? 0;
+    s.cacheReadTokens += u.cacheRead ?? 0;
+    s.cacheWriteTokens += u.cacheWrite ?? 0;
+    s.webSearches += u.webSearches ?? 0;
+    const p = config.pricing[model];
+    s.costUsd = p
+      ? (s.inputTokens * p.input + s.outputTokens * p.output + s.cacheReadTokens * p.cacheRead + s.cacheWriteTokens * p.cacheWrite) /
+          1_000_000 +
+        s.webSearches * config.webSearchPrice
+      : 0;
   }
 
-  costUsd(model: string) {
-    const p = config.pricing[model];
-    if (!p) return 0;
-    const cost =
-      (this.inputTokens * p.input +
-        this.outputTokens * p.output +
-        this.cacheReadTokens * p.cacheRead +
-        this.cacheWriteTokens * p.cacheWrite) /
-        1_000_000 +
-      this.webSearches * config.webSearchPrice;
-    return Math.round(cost * 10000) / 10000;
+  /** Registra o uso devolvido pela API da Anthropic. */
+  add(
+    usage: {
+      input_tokens: number;
+      output_tokens: number;
+      cache_read_input_tokens?: number | null;
+      cache_creation_input_tokens?: number | null;
+      server_tool_use?: { web_search_requests?: number | null } | null;
+    },
+    stage: string,
+    model: string,
+  ) {
+    this.addRaw(stage, model, {
+      input: usage.input_tokens ?? 0,
+      output: usage.output_tokens ?? 0,
+      cacheRead: usage.cache_read_input_tokens ?? 0,
+      cacheWrite: usage.cache_creation_input_tokens ?? 0,
+      webSearches: usage.server_tool_use?.web_search_requests ?? 0,
+    });
+  }
+
+  private sum(key: keyof Omit<StageCost, "model">) {
+    return Object.values(this.stages).reduce((t, s) => t + (s[key] as number), 0);
+  }
+  get inputTokens() { return this.sum("inputTokens"); }
+  get outputTokens() { return this.sum("outputTokens"); }
+  get cacheReadTokens() { return this.sum("cacheReadTokens"); }
+  get cacheWriteTokens() { return this.sum("cacheWriteTokens"); }
+  get webSearches() { return this.sum("webSearches"); }
+
+  /** Custo total estimado, em dólares. */
+  costUsd() {
+    return Math.round(this.sum("costUsd") * 10000) / 10000;
+  }
+
+  /** Resumo por etapa, para guardar no resultado e mostrar no terminal. */
+  report(): Record<string, StageCost> {
+    const out: Record<string, StageCost> = {};
+    for (const [k, v] of Object.entries(this.stages)) out[k] = { ...v, costUsd: Math.round(v.costUsd * 10000) / 10000 };
+    return out;
   }
 }
 
 export interface StructuredCallOptions<T extends z.ZodType> {
-  /** Nome da etapa, só para mensagens no terminal. */
+  /** Nome da chamada, só para mensagens no terminal. */
   label: string;
+  /** Etapa à qual o custo é somado (ex.: "especialistas"). */
+  stage: string;
+  /** true = usa o modelo mais barato (config.ai.lightModel). Só Anthropic. */
+  light?: boolean;
   schema: T;
   /** Bloco do documento (fica em cache entre as etapas). Omitir na síntese. */
   documentBlock?: string;
@@ -86,6 +132,9 @@ export async function callStructured<T extends z.ZodType>(opts: StructuredCallOp
 
 async function callStructuredAnthropic<T extends z.ZodType>(opts: StructuredCallOptions<T>): Promise<z.infer<T>> {
   const anthropic = getClient();
+  const model = opts.light ? config.ai.lightModel : config.ai.models.anthropic;
+  // O modelo leve (Haiku) não tem troca automática em caso de recusa.
+  const useFallback = config.ai.useRefusalFallback && !opts.light;
 
   const content: Anthropic.Beta.BetaTextBlockParam[] = [];
   if (opts.documentBlock) {
@@ -103,7 +152,7 @@ async function callStructuredAnthropic<T extends z.ZodType>(opts: StructuredCall
     try {
       response = await anthropic.beta.messages.parse(
         {
-          model: config.ai.models.anthropic,
+          model,
           max_tokens: opts.maxTokens,
           system: SYSTEM_PROMPT,
           messages: [{ role: "user", content }],
@@ -113,9 +162,7 @@ async function callStructuredAnthropic<T extends z.ZodType>(opts: StructuredCall
           },
           // Se o modelo recusar por regra de segurança, a Anthropic tenta
           // automaticamente com o modelo alternativo recomendado.
-          ...(config.ai.useRefusalFallback
-            ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" as const }
-            : {}),
+          ...(useFallback ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" as const } : {}),
         },
         { signal: opts.signal },
       );
@@ -129,7 +176,7 @@ async function callStructuredAnthropic<T extends z.ZodType>(opts: StructuredCall
       throw mapApiError(err);
     }
 
-    opts.usage.add(response.usage);
+    opts.usage.add(response.usage, opts.stage, model);
 
     if (response.stop_reason === "refusal") {
       throw new AppError("AI_REFUSAL", `${opts.label}: ${response.stop_details?.category ?? "sem categoria"}`);

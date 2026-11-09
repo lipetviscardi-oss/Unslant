@@ -45,7 +45,7 @@ export function promptVersion(): string {
     h.update(triagePrompt(lang));
     h.update(triagePrompt(lang, true));
     h.update(claimCheckPrompt(SAMPLE_TRIAGE, lang));
-    for (const g of TAXONOMY) h.update(specialistPrompt(g, SAMPLE_TRIAGE, lang));
+    for (const g of TAXONOMY) h.update(specialistPrompt([g], SAMPLE_TRIAGE, lang));
     h.update(overviewPrompt(SAMPLE_TRIAGE, lang));
     h.update(synthesisPrompt("{}", lang));
     const axis = { position: "unidentified", confidence: "low", justification: "", quote: "", start: null, end: null } as const;

@@ -98,7 +98,7 @@ async function searchWithAnthropic(opts: SearchOptions, blockedHost: string | nu
     } catch (err) {
       throw mapApiError(err);
     }
-    opts.usage.add(response.usage);
+    opts.usage.add(response.usage, "busca", config.ai.models.anthropic);
 
     for (const block of response.content) {
       if (block.type === "web_search_tool_result" && Array.isArray(block.content)) {
@@ -168,11 +168,9 @@ async function searchWithGemini(opts: SearchOptions, found: Found): Promise<stri
       }),
     opts.signal,
   );
-  addGeminiUsage(opts.usage, res);
-  if (isBlocked(res)) throw new AppError("AI_REFUSAL", "busca (Gemini)");
-
   const meta = res.candidates?.[0]?.groundingMetadata;
-  opts.usage.webSearches += meta?.webSearchQueries?.length ?? 0;
+  addGeminiUsage(opts.usage, res, "busca", meta?.webSearchQueries?.length ?? 0);
+  if (isBlocked(res)) throw new AppError("AI_REFUSAL", "busca (Gemini)");
 
   const chunks = (meta?.groundingChunks ?? [])
     .map((c) => c.web)
@@ -209,6 +207,8 @@ export async function searchBalance(opts: SearchOptions): Promise<BalanceOutput>
     const list = [...found.values()].map((r) => `- ${r.title} | ${r.url}`).join("\n");
     data = await callStructured({
       label: "formatar busca",
+      stage: "formatar busca",
+      light: true,
       schema: BalanceSchema,
       task: `Organize a resposta abaixo no formato pedido. Use SOMENTE links desta lista de resultados reais:\n<resultados>\n${list.replace(/</g, "‹")}\n</resultados>\n\nResposta a organizar:\n<resultados>\n${finalText.slice(0, 8000).replace(/</g, "‹")}\n</resultados>`,
       effort: "low",

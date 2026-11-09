@@ -19,7 +19,7 @@ import type {
   SynthesisOutput,
   TriageOutput,
 } from "./schemas";
-import type { AnalysisResult, AxisResult, CategoryResult, Evidence, GroupResult, SourceInfo } from "./types";
+import type { AnalysisResult, AxisResult, CategoryResult, DisputeResult, Evidence, GroupResult, SourceInfo } from "./types";
 
 /** Respostas da IA para UMA parte do texto. */
 export interface RawPart {
@@ -30,7 +30,7 @@ export interface RawPart {
 
 export interface Findings {
   groups: GroupResult[];
-  political: { economic: AxisResult; social: AxisResult };
+  political: { economic: AxisResult; social: AxisResult; dispute: DisputeResult };
   factOpinion: { factPercent: number; explanation: string };
   omissions: { title: string; explanation: string }[];
   overall: { score: number; label: string; simpleLabel: string };
@@ -137,7 +137,7 @@ function verifyAxis(
   matcher: QuoteMatcher,
   lang: Lang,
 ): AxisResult {
-  if (axis.position === "unidentified") {
+  if (axis.position === "unidentified" || axis.position === "not_applicable") {
     return { ...axis, quote: "", start: null, end: null };
   }
   const pos = matcher.find(axis.quote);
@@ -155,9 +155,58 @@ function verifyAxis(
 }
 
 function mergeAxes(axes: AxisResult[]): AxisResult {
-  const identified = axes.filter((a) => a.position !== "unidentified");
-  if (identified.length === 0) return axes[0];
+  const identified = axes.filter((a) => a.position === "left" || a.position === "right");
+  if (identified.length === 0) return axes.find((a) => a.position === "unidentified") ?? axes[0];
   return identified.reduce((a, b) => (CONF_RANK[b.confidence] > CONF_RANK[a.confidence] ? b : a));
+}
+
+function verifyDispute(d: OverviewOutput["dispute"], matcher: QuoteMatcher, lang: Lang): DisputeResult {
+  if (d.status !== "favors_a" && d.status !== "favors_b") {
+    return { ...d, quote: "", start: null, end: null };
+  }
+  const pos = matcher.find(d.quote);
+  if (!pos) {
+    return {
+      ...d,
+      status: "unidentified",
+      confidence: "low",
+      justification: `${d.justification} ${NOTES.axisDiscarded[lang]}`,
+      quote: "",
+      start: null,
+      end: null,
+    };
+  }
+  return { ...d, start: pos.start, end: pos.end };
+}
+
+function mergeDisputes(ds: DisputeResult[]): DisputeResult {
+  const decided = ds.filter((d) => d.status === "favors_a" || d.status === "favors_b");
+  if (decided.length) return decided.reduce((a, b) => (CONF_RANK[b.confidence] > CONF_RANK[a.confidence] ? b : a));
+  return ds.find((d) => d.status === "balanced") ?? ds.find((d) => d.status === "unidentified") ?? ds[0];
+}
+
+const SOURCE_TERMS =
+  /\b(segundo|conforme|de acordo com|levantamento|estudo|estudos|pesquisa|pesquisas|relat[óo]rio|especialistas|according to|survey|study|studies|research|report|poll|experts)\b/gi;
+
+/**
+ * Confere se a versão neutra inventou algo: números ou referências a fontes
+ * ("segundo", "levantamento", "estudo"...) que não estão no trecho original.
+ * Devolve a descrição do problema, ou null se estiver tudo certo.
+ */
+export function rewriteProblem(findings: Findings, synthesis: SynthesisOutput): string | null {
+  const rw = synthesis.rewrite;
+  if (!rw.evidenceId || !rw.rewritten.trim()) return null;
+  const ev = findings.groups.flatMap((g) => g.categories).flatMap((c) => c.evidence).find((e) => e.id === rw.evidenceId);
+  if (!ev) return null;
+  const original = ev.quote.toLowerCase();
+  const rewritten = rw.rewritten.toLowerCase();
+  const newNumbers = (rewritten.match(/\d+([.,]\d+)?/g) ?? []).filter((n) => !original.includes(n));
+  if (newNumbers.length) return `acrescentou números que não estão no original (${newNumbers.join(", ")})`;
+  const newTerms = [...new Set((rewritten.match(SOURCE_TERMS) ?? []).map((t) => t.toLowerCase()))].filter(
+    (t) => !original.includes(t),
+  );
+  if (newTerms.length) return `citou fontes que não estão no original (${newTerms.join(", ")})`;
+  return null;
 }
 
 /**
@@ -219,7 +268,11 @@ export function buildFindings(
 
   return {
     groups,
-    political: { economic, social },
+    political: {
+      economic,
+      social,
+      dispute: mergeDisputes(rawParts.map((p) => verifyDispute(p.overview.dispute, matcher, lang))),
+    },
     factOpinion: { factPercent, explanation: factExplanation },
     omissions: omissions.slice(0, 6),
     overall: scoreOverall(groups, lang),
@@ -259,6 +312,12 @@ export function findingsForSynthesis(triage: TriageOutput, findings: Findings): 
       inclinacao: {
         economica: { posicao: findings.political.economic.position, justificativa: findings.political.economic.justification },
         social: { posicao: findings.political.social.position, justificativa: findings.political.social.justification },
+        disputa: {
+          situacao: findings.political.dispute.status,
+          ladoA: findings.political.dispute.sideA,
+          ladoB: findings.political.dispute.sideB,
+          justificativa: findings.political.dispute.justification,
+        },
       },
       percentualFatos: findings.factOpinion.factPercent,
       omissoes: findings.omissions,
@@ -288,7 +347,7 @@ export function finalizeResult(params: {
   const { triage, findings, synthesis, text } = params;
 
   let rewrite: AnalysisResult["rewrite"] = null;
-  if (synthesis?.rewrite.evidenceId) {
+  if (synthesis?.rewrite.evidenceId && !rewriteProblem(findings, synthesis)) {
     const ev = findings.groups
       .flatMap((g) => g.categories)
       .flatMap((c) => c.evidence)

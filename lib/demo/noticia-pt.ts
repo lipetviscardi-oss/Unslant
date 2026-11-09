@@ -220,10 +220,19 @@ export const overview: OverviewOutput = {
     quote: "Prefeitura impõe corte brutal na saúde e abandona os mais pobres",
   },
   social: {
-    position: "unidentified",
-    confidence: "medium",
-    justification: "O texto não trata de temas de costumes, valores ou segurança que permitam identificar uma inclinação social.",
+    position: "not_applicable",
+    confidence: "high",
+    justification: "O tema é orçamento e saúde pública; o texto não trata de costumes, valores ou segurança.",
     quote: "",
+  },
+  dispute: {
+    status: "favors_b",
+    sideA: "Prefeitura de Vale Verde",
+    sideB: "Oposição na Câmara",
+    confidence: "high",
+    justification:
+      "As críticas da oposição e do sindicato abrem e dominam o texto; a explicação da prefeitura aparece só no fim, com verbos que sugerem desconfiança.",
+    quote: "Prefeitura impõe corte brutal na saúde e abandona os mais pobres",
   },
   factOpinion: {
     factPercent: 45,

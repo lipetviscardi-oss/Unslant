@@ -67,13 +67,15 @@ export async function withRetry<T>(fn: () => Promise<T>, signal?: AbortSignal): 
 }
 
 /** Registra os tokens usados (no plano grátis o custo é zero, mas é útil saber). */
-export function addGeminiUsage(usage: UsageTracker, res: GenerateContentResponse) {
+export function addGeminiUsage(usage: UsageTracker, res: GenerateContentResponse, stage: string, webSearches = 0) {
   const m = res.usageMetadata;
-  if (!m) return;
-  const cached = m.cachedContentTokenCount ?? 0;
-  usage.inputTokens += Math.max(0, (m.promptTokenCount ?? 0) - cached) + (m.toolUsePromptTokenCount ?? 0);
-  usage.cacheReadTokens += cached;
-  usage.outputTokens += (m.candidatesTokenCount ?? 0) + (m.thoughtsTokenCount ?? 0);
+  const cached = m?.cachedContentTokenCount ?? 0;
+  usage.addRaw(stage, geminiModel(), {
+    input: Math.max(0, (m?.promptTokenCount ?? 0) - cached) + (m?.toolUsePromptTokenCount ?? 0),
+    cacheRead: cached,
+    output: (m?.candidatesTokenCount ?? 0) + (m?.thoughtsTokenCount ?? 0),
+    webSearches,
+  });
 }
 
 /** Recusa por segurança? */
@@ -117,7 +119,7 @@ export async function callStructuredGemini<T extends z.ZodType>(opts: Structured
         }),
       opts.signal,
     );
-    addGeminiUsage(opts.usage, res);
+    addGeminiUsage(opts.usage, res, opts.stage);
 
     if (isBlocked(res)) throw new AppError("AI_REFUSAL", `${opts.label}: bloqueado pelo Gemini`);
     if (res.candidates?.[0]?.finishReason === FinishReason.MAX_TOKENS) {

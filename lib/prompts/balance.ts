@@ -7,21 +7,24 @@
  */
 
 import type { TriageOutput } from "@/lib/analysis/schemas";
-import type { AxisResult } from "@/lib/analysis/types";
+import type { AxisResult, DisputeResult } from "@/lib/analysis/types";
 import { config } from "@/lib/config";
 import { contextBlock, languageInstruction } from "./document";
 
-const POS = { left: "esquerda", right: "direita", unidentified: "não identificada" } as const;
+const POS = { left: "esquerda", right: "direita", unidentified: "não identificada", not_applicable: "não se aplica" } as const;
 
 export function balancePrompt(params: {
   triage: TriageOutput;
   economic: AxisResult;
   social: AxisResult;
+  dispute?: DisputeResult;
   omissions: string[];
   originalOutlet?: string;
   lang: "pt" | "en";
 }) {
-  const { triage, economic, social, omissions, originalOutlet, lang } = params;
+  const { triage, economic, social, dispute, omissions, originalOutlet, lang } = params;
+  const favored =
+    dispute?.status === "favors_a" ? dispute.sideA : dispute?.status === "favors_b" ? dispute.sideB : "nenhum identificado";
   const isClaim = triage.contentType === "claim";
 
   const goal = isClaim
@@ -38,6 +41,7 @@ ${contextBlock({
     "Veículo original": originalOutlet || "desconhecido",
     "Inclinação econômica identificada": POS[economic.position],
     "Inclinação social identificada": POS[social.position],
+    "Lado favorecido na disputa": favored,
     "O que pode estar faltando": omissions.join("; ") || "nada identificado",
   })}
 
@@ -45,7 +49,7 @@ COMO FAZER
 1. Use a ferramenta de busca na web (até ${config.balance.maxSearches} buscas). Busque no idioma do país do texto e, se útil, em inglês.
 2. Escolha de 2 a ${config.balance.maxArticles} resultados REAIS, que apareceram nas suas buscas.
    - Priorize veículos e instituições confiáveis e conhecidos.
-   - Busque perspectivas DIFERENTES da do texto original. Se o texto pende para um lado, inclua fontes respeitadas de outros pontos do espectro. Se não há inclinação clara, traga fontes variadas.
+   - Busque perspectivas DIFERENTES da do texto original. Se o texto pende para um lado (ou favorece um lado da disputa), inclua fontes respeitadas que tragam a versão do outro lado. Se não há inclinação clara, traga fontes variadas.
    - Nunca recomende só veículos do mesmo lado.
    - Não inclua o próprio texto original nem o mesmo veículo.
    - Fontes primárias (institutos de estatística, órgãos oficiais, estudos) e checagens são bem-vindas.

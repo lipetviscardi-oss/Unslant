@@ -7,15 +7,20 @@
 
 import { useMemo } from "react";
 import type { AnalysisResult } from "@/lib/analysis/types";
-import { buildSegments, type EvidenceRef } from "@/lib/client/evidence";
+import { buildSegments, countHighlights, type EvidenceRef } from "@/lib/client/evidence";
 import { formatScore, severity, SEVERITY_SOFT, SEVERITY_TEXT } from "@/lib/client/format";
 import { useDict, useLang } from "@/lib/i18n";
+
+/** Nota mínima para um destaque aparecer por padrão (moderado e forte). */
+export const DEFAULT_MIN_SCORE = 3.5;
 
 interface Props {
   result: AnalysisResult;
   index: Map<string, EvidenceRef>;
   selected: string[];
   onSelect: (ids: string[]) => void;
+  showAll: boolean;
+  onToggleAll: () => void;
 }
 
 function EvidenceDetails({ refs, onClose }: { refs: EvidenceRef[]; onClose: () => void }) {
@@ -52,10 +57,12 @@ function EvidenceDetails({ refs, onClose }: { refs: EvidenceRef[]; onClose: () =
   );
 }
 
-export function HighlightedText({ result, index, selected, onSelect }: Props) {
+export function HighlightedText({ result, index, selected, onSelect, showAll, onToggleAll }: Props) {
   const t = useDict();
   const lang = useLang();
-  const segments = useMemo(() => buildSegments(result.text.length, index), [result.text.length, index]);
+  const minScore = showAll ? 0 : DEFAULT_MIN_SCORE;
+  const segments = useMemo(() => buildSegments(result.text.length, index, minScore), [result.text.length, index, minScore]);
+  const counts = useMemo(() => countHighlights(index, DEFAULT_MIN_SCORE), [index]);
   const selectedRefs = selected.map((id) => index.get(id)).filter((r): r is EvidenceRef => Boolean(r));
   const selectedKey = selected.join("|");
   const isClaim = result.context.contentType === "claim";
@@ -66,8 +73,24 @@ export function HighlightedText({ result, index, selected, onSelect }: Props) {
         <h2 id="text-title" className="text-2xl font-medium">
           {isClaim ? t.result.text.titleClaim : t.result.text.title}
         </h2>
-        <p className="mt-1 text-muted">{index.size > 0 ? t.result.text.count(index.size) : t.result.text.none}</p>
-        {index.size > 0 && (
+        <p className="mt-1 text-muted">
+          {counts.total === 0
+            ? t.result.text.none
+            : showAll
+              ? t.result.text.count(counts.total)
+              : t.result.text.countFiltered(counts.visible, counts.total)}
+        </p>
+        {counts.total > counts.visible && (
+          <button
+            type="button"
+            onClick={onToggleAll}
+            aria-pressed={showAll}
+            className="mt-2 rounded-full border border-line bg-paper px-4 py-1.5 text-sm hover:border-ink"
+          >
+            {showAll ? t.result.text.showStrong : t.result.text.showAll(counts.total)}
+          </button>
+        )}
+        {counts.total > 0 && (
           <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-muted" aria-label={t.result.text.legendAria}>
             <li className="flex items-center gap-2"><span className="hl hl-low">abc</span> {t.result.text.legend.low}</li>
             <li className="flex items-center gap-2"><span className="hl hl-mid">abc</span> {t.result.text.legend.mid}</li>
@@ -82,14 +105,12 @@ export function HighlightedText({ result, index, selected, onSelect }: Props) {
             {segments.map((seg) => {
               const slice = result.text.slice(seg.start, seg.end);
               if (seg.ids.length === 0) return <span key={seg.start}>{slice}</span>;
-              const maxScore = Math.max(...seg.ids.map((id) => index.get(id)?.category.score ?? 0));
-              const sev = severity(maxScore);
+              const sev = severity(seg.maxScore);
               const isSelected = seg.ids.join("|") === selectedKey;
-              const names = seg.ids.map((id) => index.get(id)?.categoryDef?.name[lang]).filter(Boolean).join(", ");
+              const names = [...new Set(seg.ids.map((id) => index.get(id)?.categoryDef?.name[lang]).filter(Boolean))].join(", ");
               return (
                 <mark
                   key={seg.start}
-                  id={seg.starts.length ? `ev-${seg.starts[0]}` : undefined}
                   data-ids={seg.ids.join(" ")}
                   role="button"
                   tabIndex={0}

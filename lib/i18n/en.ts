@@ -117,6 +117,8 @@ export const en: Dict = {
     score: {
       srTitle: "Overall bias score",
       outOf: "out of 10",
+      naNote: (n: number) =>
+        `${n} ${plural(n, "category does", "categories do")} not apply to this text and ${plural(n, "was", "were")} left out of the score.`,
       explanation:
         "The score measures how biased the text is overall (language, sources, data, reasoning…), not just politically. 0 is a balanced text; 10 is severe distortion.",
     },
@@ -127,6 +129,14 @@ export const en: Dict = {
       unidentifiedNote: "“Unidentified” means the text does not provide enough evidence.",
       economic: { name: "Economic", help: "State and market" },
       social: { name: "Social", help: "Values and customs" },
+      dispute: {
+        name: "Which side of the dispute it favors",
+        help: "Government × opposition, candidates",
+        favors: (side: string) => `Favors ${side}`,
+        balanced: "Balanced",
+        unidentified: "Unidentified",
+        notApplicable: "Not applicable: the text is not about a dispute between political sides.",
+      },
     },
 
     factOpinion: {
@@ -148,6 +158,10 @@ export const en: Dict = {
       titleClaim: "The claim, with flagged passages",
       count: (n: number) => `${n} ${plural(n, "passage was", "passages were")} flagged. Click a highlight to see why.`,
       none: "No passage was flagged as problematic.",
+      countFiltered: (shown: number, total: number) =>
+        `Showing ${shown} moderate or strong ${plural(shown, "passage", "passages")} of ${total}. Click a highlight to see why.`,
+      showAll: (n: number) => `Show all passages (${n})`,
+      showStrong: "Show only moderate and strong",
       legendAria: "Color legend",
       legend: { low: "mild issue", mid: "moderate", high: "strong" },
       asideHint: "Click a highlighted passage to see what kind of bias it signals and why.",
@@ -237,7 +251,7 @@ export const en: Dict = {
       claim: "Claim",
     },
     confidence: { low: "low confidence", medium: "medium confidence", high: "high confidence" },
-    position: { left: "Left", right: "Right", unidentified: "Unidentified" },
+    position: { left: "Left", right: "Right", unidentified: "Unidentified", not_applicable: "Not applicable" },
     claimType: {
       factual: "Factual claim",
       opinion: "Opinion",

@@ -23,11 +23,31 @@ export const config = {
      */
     provider: "anthropic" as AiProvider,
 
-    /** Modelo usado por cada IA. */
+    /** Modelo usado por cada IA (o principal faz a análise em si). */
     models: {
       anthropic: "claude-sonnet-5-5",
       gemini: "gemini-3.8-flash",
     },
+
+    /**
+     * Só Anthropic: modelo mais barato para tarefas simples (resumo final e
+     * organização da busca). ~20x mais barato que o principal.
+     * A identificação fica no modelo principal de propósito: ela é a primeira
+     * chamada e "aquece" o cache do texto para os especialistas.
+     */
+    lightModel: "claude-haiku-5-5",
+
+    /**
+     * Especialistas agrupados: cada linha vira UMA chamada à IA que analisa
+     * vários grupos da taxonomia de uma vez (mais barato e mais rápido do que
+     * uma chamada por grupo). Grupos que não se aplicam ao texto são pulados.
+     */
+    specialistBundles: [
+      ["language", "framing", "emotional"],
+      ["sources", "omission", "fact_opinion"],
+      ["data", "fallacies", "interests"],
+      ["representation", "cognitive", "academic"],
+    ],
 
     /**
      * "Esforço" de raciocínio de cada etapa: "low" | "medium" | "high".
@@ -44,7 +64,7 @@ export const config = {
     /** Limite de tamanho da resposta de cada etapa (em "tokens"; 1 token ≈ 3/4 de palavra). */
     maxTokens: {
       triage: 4_000,
-      specialist: 16_000,
+      specialist: 20_000,
       overview: 12_000,
       synthesis: 8_000,
       claimCheck: 8_000,
@@ -52,10 +72,11 @@ export const config = {
 
     /**
      * Quantas chamadas à IA podem acontecer ao mesmo tempo.
-     * Anthropic: contas novas têm limites baixos; 4 é um valor seguro.
+     * Anthropic: 8 permite rodar todas as etapas de uma vez (se a sua conta
+     * receber erros de limite, diminua para 4).
      * Gemini grátis: aceita poucas chamadas por minuto; 1 evita bloqueios.
      */
-    maxParallelRequests: { anthropic: 4, gemini: 1 },
+    maxParallelRequests: { anthropic: 8, gemini: 1 },
 
     /**
      * Só Anthropic: se a IA recusar um texto por motivo de segurança, tenta
@@ -64,7 +85,7 @@ export const config = {
     useRefusalFallback: true,
 
     /** Máximo de trechos de evidência por categoria (os mais representativos). */
-    maxEvidencePerCategory: 4,
+    maxEvidencePerCategory: 2,
   },
 
   /** Limites de tamanho dos textos analisados (em palavras). */
@@ -88,7 +109,7 @@ export const config = {
     /** Liga ou desliga a busca (false = a seção não aparece e não há custo de busca). */
     enabled: true,
     /** Máximo de buscas na web por análise (cada busca custa cerca de US$ 0,01). */
-    maxSearches: 5,
+    maxSearches: 3,
     /** Máximo de textos recomendados. */
     maxArticles: 5,
     effort: "medium" as const,
@@ -127,6 +148,7 @@ export const config = {
    */
   pricing: {
     "claude-sonnet-5-5": { input: 2, output: 10, cacheWrite: 2.5, cacheRead: 0.2 },
+    "claude-haiku-5-5": { input: 0.1, output: 0.5, cacheWrite: 0.125, cacheRead: 0.01 },
   } as Record<string, { input: number; output: number; cacheWrite: number; cacheRead: number }>,
   /** Preço de cada busca na web, em dólares (US$ 10 a cada 1.000 buscas). */
   webSearchPrice: 0.01,

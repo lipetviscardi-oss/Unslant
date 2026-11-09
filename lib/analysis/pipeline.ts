@@ -38,7 +38,15 @@ import {
   type SynthesisOutput,
   type TriageOutput,
 } from "./schemas";
-import { activeGroups, buildFindings, finalizeResult, findingsForSynthesis, type RawPart } from "./assemble";
+import {
+  activeGroups,
+  buildFindings,
+  finalizeResult,
+  findingsForSynthesis,
+  rewriteProblem,
+  type RawPart,
+} from "./assemble";
+import type { BiasGroup } from "@/lib/taxonomy";
 import type { AnalysisResult, SourceInfo, StreamEvent } from "./types";
 
 export interface PipelineInput {
@@ -47,6 +55,22 @@ export interface PipelineInput {
   lang: Lang;
   signal?: AbortSignal;
   onProgress: (event: StreamEvent) => void;
+}
+
+/**
+ * Junta os grupos ativos nas chamadas definidas em config.ai.specialistBundles.
+ * Grupos que não estiverem em nenhum pacote viram uma chamada própria.
+ */
+function buildBundles(groups: BiasGroup[]): BiasGroup[][] {
+  const used = new Set<string>();
+  const bundles: BiasGroup[][] = [];
+  for (const ids of config.ai.specialistBundles) {
+    const bundle = groups.filter((g) => (ids as readonly string[]).includes(g.id) && !used.has(g.id));
+    bundle.forEach((g) => used.add(g.id));
+    if (bundle.length) bundles.push(bundle);
+  }
+  for (const g of groups) if (!used.has(g.id)) bundles.push([g]);
+  return bundles;
 }
 
 export async function runPipeline(input: PipelineInput): Promise<AnalysisResult> {
@@ -65,6 +89,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
     schema: TriageSchema,
     documentBlock: buildDocumentBlock(parts[0].text, source, boundary, { index: 0, total: parts.length }),
     task: triagePrompt(lang, isClaim),
+    stage: "identificação",
     effort: config.ai.effort.triage,
     maxTokens: config.ai.maxTokens.triage,
     usage,
@@ -74,9 +99,10 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
   // Na aba "Afirmação", o tipo é sempre "afirmação" (define os grupos analisados).
   const triage: TriageOutput = isClaim ? { ...identified, contentType: "claim" } : identified;
 
-  // 2. Especialistas + visão geral (+ verificação, para afirmações), em paralelo
+  // 2. Especialistas (agrupados) + visão geral (+ verificação, para afirmações), em paralelo
   const groups = activeGroups(triage);
-  const perPart = groups.length + 1;
+  const bundles = buildBundles(groups);
+  const perPart = bundles.length + 1;
   const total = parts.length * perPart + (isClaim ? 1 : 0);
   let done = 0;
   onProgress({ type: "stage", stage: "analyzing", done, total });
@@ -88,26 +114,28 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
   const tasks: (() => Promise<{ part: number; groupId: string | null; output: unknown }>)[] = [];
   parts.forEach((part, partIndex) => {
     const documentBlock = buildDocumentBlock(part.text, source, boundary, { index: partIndex, total: parts.length });
-    for (const group of groups) {
-      const ids = group.categories.map((c) => c.id) as [string, ...string[]];
+    for (const bundle of bundles) {
+      const ids = bundle.flatMap((g) => g.categories.map((c) => c.id)) as [string, ...string[]];
       tasks.push(async () => {
         const output = await callStructured({
-          label: `especialista ${group.id} (parte ${partIndex + 1})`,
+          label: `especialistas ${bundle.map((g) => g.id).join("+")} (parte ${partIndex + 1})`,
+          stage: "especialistas",
           schema: specialistSchema(ids),
           documentBlock,
-          task: specialistPrompt(group, triage, lang),
+          task: specialistPrompt(bundle, triage, lang),
           effort: config.ai.effort.specialist,
           maxTokens: config.ai.maxTokens.specialist,
           usage,
           signal,
         });
         tick();
-        return { part: partIndex, groupId: group.id, output };
+        return { part: partIndex, groupId: "__bundle__", output };
       });
     }
     tasks.push(async () => {
       const output = await callStructured({
         label: `visão geral (parte ${partIndex + 1})`,
+        stage: "visão geral",
         schema: OverviewSchema,
         documentBlock,
         task: overviewPrompt(triage, lang),
@@ -127,6 +155,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
     tasks.push(async () => {
       claimCheck = await callStructured({
         label: "verificação da afirmação",
+        stage: "verificação",
         schema: ClaimCheckSchema,
         documentBlock,
         task: claimCheckPrompt(triage, lang),
@@ -146,8 +175,16 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
     const specialists: Record<string, SpecialistOutput> = {};
     let overview: RawPart["overview"] | undefined;
     for (const o of outputs.filter((x) => x.part === i)) {
-      if (o.groupId) specialists[o.groupId] = o.output as SpecialistOutput;
-      else overview = o.output as RawPart["overview"];
+      if (o.groupId === "__bundle__") {
+        // Separa as categorias de cada chamada agrupada por grupo da taxonomia.
+        for (const cat of (o.output as SpecialistOutput).categories) {
+          const groupId = groups.find((g) => g.categories.some((c) => c.id === cat.categoryId))?.id;
+          if (!groupId) continue;
+          (specialists[groupId] ??= { categories: [] }).categories.push(cat);
+        }
+      } else if (o.groupId === null) {
+        overview = o.output as RawPart["overview"];
+      }
     }
     if (!overview) throw new AppError("AI_BAD_RESPONSE", "visão geral ausente");
     return { words: countWords(p.text), specialists, overview };
@@ -159,17 +196,34 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
   // 4. Síntese + busca de textos para equilibrar, ao mesmo tempo
   onProgress({ type: "stage", stage: "balancing" });
 
+  const runSynthesis = (retryNote = "") =>
+    callStructured({
+      label: "síntese",
+      stage: "síntese",
+      light: true, // modelo mais barato: só resume o que os especialistas encontraram
+      schema: SynthesisSchema,
+      task: synthesisPrompt(findingsForSynthesis(triage, findings), lang, retryNote),
+      effort: config.ai.effort.synthesis,
+      maxTokens: config.ai.maxTokens.synthesis,
+      usage,
+      signal,
+    });
+
   const synthesisTask = (async (): Promise<SynthesisOutput | null> => {
     try {
-      return await callStructured({
-        label: "síntese",
-        schema: SynthesisSchema,
-        task: synthesisPrompt(findingsForSynthesis(triage, findings), lang),
-        effort: config.ai.effort.synthesis,
-        maxTokens: config.ai.maxTokens.synthesis,
-        usage,
-        signal,
-      });
+      let out = await runSynthesis();
+      // A versão neutra não pode inventar fontes ou números: confere e, se precisar, refaz uma vez.
+      let problem = rewriteProblem(findings, out);
+      if (problem) {
+        console.warn(`[unslant] versão neutra refeita: ${problem}`);
+        out = await runSynthesis(`na tentativa anterior a versão neutra ${problem}. Isso é proibido: reescreva usando só o que está no trecho original.`);
+        problem = rewriteProblem(findings, out);
+        if (problem) {
+          console.warn(`[unslant] versão neutra descartada: ${problem}`);
+          out = { ...out, rewrite: { evidenceId: "", rewritten: "", explanation: "" } };
+        }
+      }
+      return out;
     } catch (err) {
       // Sem a síntese, a análise ainda é útil: mostramos o resto.
       if (!(err instanceof AppError && err.code === "AI_BAD_RESPONSE")) throw err;
@@ -186,6 +240,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
           triage,
           economic: findings.political.economic,
           social: findings.political.social,
+          dispute: findings.political.dispute,
           omissions: findings.omissions.map((o) => o.title),
           originalOutlet: source.outlet,
           lang,
@@ -205,6 +260,14 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
   })();
 
   const [synthesis, balance] = await Promise.all([synthesisTask, balanceTask]);
+
+  // Mostra no terminal quanto cada etapa custou (para acompanhar e otimizar).
+  console.info(
+    `[unslant] custo por etapa (US$ ${usage.costUsd().toFixed(4)} no total, ${Math.round((Date.now() - startedAt) / 1000)} s):\n` +
+      Object.entries(usage.report())
+        .map(([k, v]) => `  - ${k}: US$ ${v.costUsd.toFixed(4)} (${v.calls} chamada(s), ${v.model}, entrada ${v.inputTokens} + cache ${v.cacheReadTokens}/${v.cacheWriteTokens}, saída ${v.outputTokens}${v.webSearches ? `, ${v.webSearches} busca(s)` : ""})`)
+        .join("\n"),
+  );
 
   return finalizeResult({
     id: randomUUID(),
@@ -227,8 +290,9 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
       outputTokens: usage.outputTokens,
       cacheReadTokens: usage.cacheReadTokens,
       cacheWriteTokens: usage.cacheWriteTokens,
-      estimatedCostUsd: usage.costUsd(activeModel()),
+      estimatedCostUsd: usage.costUsd(),
       webSearches: usage.webSearches,
+      stages: usage.report(),
       fromCache: false,
     },
   });

@@ -1,7 +1,8 @@
 /**
  * ETAPA 2 (em paralelo) — VISÃO GERAL
- * Inclinação política nos dois eixos (econômico e social), proporção de fato
- * vs. opinião e "o que o texto pode estar omitindo".
+ * Inclinação política (eixos econômico e social + lado favorecido numa
+ * disputa), proporção de fato vs. opinião e "o que o texto pode estar
+ * omitindo".
  */
 
 import type { TriageOutput } from "@/lib/analysis/schemas";
@@ -17,21 +18,29 @@ ${contextBlock({
     Tema: triage.topic,
   })}
 
-1) INCLINAÇÃO POLÍTICA em dois eixos independentes ("economic" e "social").
-   Para cada eixo: position ("left", "right" ou "unidentified"), confidence, justification (1 a 3 frases) e quote (um trecho EXATO do documento que sustenta a classificação; "" se position for "unidentified").
+1) EIXOS IDEOLÓGICOS ("economic" e "social")
+   Para cada eixo: position, confidence, justification (1 a 3 frases) e quote (trecho EXATO do documento que sustenta a classificação; "" se position não for "left" ou "right").
+   position:
+   - "not_applicable" quando o TEMA do texto não envolve aquele eixo. O eixo econômico só se aplica se o texto trata de economia, impostos, gasto público, trabalho, mercado, regulação, privatização, renda etc. O eixo social só se aplica se o texto trata de costumes, valores, religião, direitos de minorias, segurança pública/punição, drogas, família etc. Uma disputa eleitoral, um escândalo ou uma briga entre políticos NÃO é, por si só, tema econômico ou social.
+   - "unidentified" quando o tema envolve o eixo, mas o texto não toma partido de forma identificável.
+   - "left" ou "right" só com evidência clara.
 
-   Eixo econômico — esquerda: mais papel do Estado na economia, redistribuição, proteção trabalhista e social, regulação de mercados. Direita: livre mercado, menos impostos e gasto público, privatização, desregulamentação, responsabilidade fiscal como prioridade.
+   Eixo econômico — esquerda: mais papel do Estado na economia, redistribuição, proteção trabalhista e social, regulação. Direita: livre mercado, menos impostos e gasto público, privatização, desregulamentação, responsabilidade fiscal como prioridade.
    Eixo social — esquerda: progressismo em costumes, ampliação de direitos de minorias, secularismo, foco em causas estruturais da criminalidade. Direita: conservadorismo em costumes, valores tradicionais e religiosos, ênfase em ordem, punição e segurança.
-   Adapte essas definições ao contexto político do país identificado.
+   Adapte essas definições ao contexto político do país identificado. A inclinação é medida pela forma como o texto trata o tema (o que valoriza, critica, quem trata como herói ou vilão), NÃO pelo tema em si.
 
-   Regras importantes:
-   - A inclinação é medida pela forma como o texto trata o tema (o que valoriza, critica, quem trata como herói ou vilão), NÃO pelo tema em si. Uma notícia equilibrada sobre uma política de esquerda não é de esquerda.
-   - Use "unidentified" sempre que não houver evidência suficiente. Muitos textos não têm inclinação clara em um ou nos dois eixos — isso é normal e esperado. Não force uma classificação.
-   - Aplique o teste de inversão: você classificaria um texto espelhado, com os lados trocados, com a mesma confiança?
+2) DISPUTA ("dispute") — viés partidário ou eleitoral
+   Use quando o texto envolve uma disputa concreta entre dois lados identificáveis: governo × oposição, candidato A × candidato B, partido X × partido Y, prefeito × câmara etc.
+   - sideA: SEMPRE o lado que está no poder ou ocupa o cargo em questão (governo, prefeitura, atual mandatário, quem foi eleito). sideB: SEMPRE o lado de fora (oposição, desafiante, críticos). Em eleições sem mandatário, sideA é o candidato citado primeiro no texto. Escreva nomes curtos e neutros (ex.: "Prefeitura de Vale Verde", "Oposição na Câmara").
+   - status: "favors_a" ou "favors_b" (o texto trata um lado de forma mais favorável: mais espaço, linguagem mais positiva, versão do outro lado minimizada); "balanced" (os dois lados recebem tratamento equivalente); "unidentified" (há disputa, mas não dá para afirmar); "not_applicable" (não há disputa entre lados identificáveis; deixe sideA e sideB vazios).
+   - confidence, justification (1 a 3 frases) e quote (trecho EXATO que sustenta a classificação; "" se status não for "favors_a" ou "favors_b").
+   - Mesma régua para os dois lados: os critérios para "favors_a" e "favors_b" são idênticos. Faça o teste de inversão: com os lados trocados no texto, você daria a classificação oposta com a mesma confiança? Se não, use "unidentified".
 
-2) FATO VS. OPINIÃO: factPercent = estimativa de 0 a 100 da parcela do texto composta por afirmações factuais verificáveis (o restante é opinião, interpretação ou previsão). explanation: 1 a 2 frases.
+3) FATO VS. OPINIÃO: factPercent = estimativa de 0 a 100 da parcela do texto composta por afirmações factuais verificáveis (o restante é opinião, interpretação ou previsão). explanation: 1 a 2 frases.
 
-3) O QUE O TEXTO PODE ESTAR OMITINDO: até 5 itens (omissions), cada um com "title" (curto) e "explanation" (1 a 2 frases). Pense em: dados de comparação, versão de partes envolvidas, contexto histórico, consequências para outros grupos, incertezas. Baseie-se em conhecimento geral amplamente aceito; não invente fatos específicos. Lista vazia se nada relevante faltar.
+4) O QUE O TEXTO PODE ESTAR OMITINDO: até 5 itens (omissions), cada um com "title" (curto) e "explanation" (1 a 2 frases). Pense em: dados de comparação, versão de partes envolvidas, contexto histórico, consequências para outros grupos, incertezas. Baseie-se em conhecimento geral amplamente aceito; não invente fatos específicos. Lista vazia se nada relevante faltar.
+
+Muitos textos não têm inclinação em nenhum eixo nem favorecem lado algum. Isso é normal: não force classificações.
 
 ${languageInstruction(lang)}`;
 }

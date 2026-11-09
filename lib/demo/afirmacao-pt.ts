@@ -184,6 +184,14 @@ export const overview: OverviewOutput = {
       "A crítica de costumes a uma geração aparece em todos os campos políticos; não há elementos suficientes para identificar um lado.",
     quote: "",
   },
+  dispute: {
+    status: "not_applicable",
+    sideA: "",
+    sideB: "",
+    confidence: "high",
+    justification: "A afirmação não envolve uma disputa entre governo e oposição ou entre candidatos.",
+    quote: "",
+  },
   factOpinion: {
     factPercent: 5,
     explanation: "É quase toda opinião: uma impressão sobre a vontade de uma geração, sem nenhum dado.",

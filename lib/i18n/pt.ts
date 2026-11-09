@@ -117,6 +117,8 @@ export const pt = {
     score: {
       srTitle: "Nota geral de viés",
       outOf: "de 10",
+      naNote: (n: number) =>
+        `${n} ${plural(n, "categoria não se aplica", "categorias não se aplicam")} a este texto e ${plural(n, "ficou", "ficaram")} fora da nota.`,
       explanation:
         "A nota mede o quanto o texto é enviesado de forma geral (linguagem, fontes, dados, lógica…), não só politicamente. 0 é um texto equilibrado; 10, uma distorção grave.",
     },
@@ -127,6 +129,14 @@ export const pt = {
       unidentifiedNote: "“Não identificado” significa que o texto não dá evidência suficiente.",
       economic: { name: "Econômico", help: "Estado e mercado" },
       social: { name: "Social", help: "Costumes e valores" },
+      dispute: {
+        name: "Favorece qual lado da disputa",
+        help: "Governo × oposição, candidatos",
+        favors: (side: string) => `Favorece ${side}`,
+        balanced: "Equilibrado",
+        unidentified: "Não identificado",
+        notApplicable: "Não se aplica: o texto não trata de uma disputa entre lados políticos.",
+      },
     },
 
     factOpinion: {
@@ -149,6 +159,10 @@ export const pt = {
       count: (n: number) =>
         `${n} ${plural(n, "trecho foi apontado", "trechos foram apontados")}. Clique num destaque para ver o motivo.`,
       none: "Nenhum trecho foi apontado como problemático.",
+      countFiltered: (shown: number, total: number) =>
+        `Mostrando ${shown} ${plural(shown, "trecho moderado ou forte", "trechos moderados ou fortes")} de ${total}. Clique num destaque para ver o motivo.`,
+      showAll: (n: number) => `Mostrar todos os trechos (${n})`,
+      showStrong: "Mostrar só moderados e fortes",
       legendAria: "Legenda das cores",
       legend: { low: "problema leve", mid: "moderado", high: "forte" },
       asideHint: "Clique num trecho destacado para ver que tipo de viés ele indica e por quê.",
@@ -238,7 +252,7 @@ export const pt = {
       claim: "Afirmação",
     },
     confidence: { low: "confiança baixa", medium: "confiança média", high: "confiança alta" },
-    position: { left: "Esquerda", right: "Direita", unidentified: "Não identificado" },
+    position: { left: "Esquerda", right: "Direita", unidentified: "Não identificado", not_applicable: "Não se aplica" },
     claimType: {
       factual: "Afirmação de fato",
       opinion: "Opinião",

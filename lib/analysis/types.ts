@@ -3,7 +3,7 @@
  * Este formato também é o que será salvo no banco de dados na Fase 4.
  */
 
-import type { AxisPosition, BalanceOutput, CategoryStatus, ClaimCheckOutput, Confidence, ContentType } from "./schemas";
+import type { AxisPosition, BalanceOutput, CategoryStatus, ClaimCheckOutput, Confidence, ContentType, DisputeStatus } from "./schemas";
 import type { Lang } from "@/lib/taxonomy";
 
 export type SourceType = "url" | "text" | "pdf" | "claim";
@@ -57,6 +57,29 @@ export interface AxisResult {
   end: number | null;
 }
 
+export interface DisputeResult {
+  status: DisputeStatus;
+  sideA: string;
+  sideB: string;
+  confidence: Confidence;
+  justification: string;
+  quote: string;
+  start: number | null;
+  end: number | null;
+}
+
+/** Custo e tokens de cada etapa (para medir onde o dinheiro vai). */
+export interface StageCost {
+  calls: number;
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
+  webSearches: number;
+  costUsd: number;
+}
+
 export interface AnalysisResult {
   /** Versão do formato, para compatibilidade futura. */
   schemaVersion: 1;
@@ -84,7 +107,8 @@ export interface AnalysisResult {
   text: string;
 
   overall: { score: number; label: string; simpleLabel: string };
-  political: { economic: AxisResult; social: AxisResult };
+  /** dispute pode faltar em resultados antigos (antes da versão com disputa). */
+  political: { economic: AxisResult; social: AxisResult; dispute?: DisputeResult };
   factOpinion: { factPercent: number; explanation: string };
   summary: string;
   summarySimple: string;
@@ -117,6 +141,8 @@ export interface AnalysisResult {
     cacheWriteTokens: number;
     estimatedCostUsd: number;
     webSearches?: number;
+    /** Custo por etapa (identificação, especialistas, busca...). */
+    stages?: Record<string, StageCost>;
     discardedEvidence: number;
     fromCache: boolean;
   };
