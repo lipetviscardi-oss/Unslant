@@ -258,7 +258,7 @@ export function findingsForSynthesis(triage: TriageOutput, findings: Findings): 
     },
     null,
     1,
-  );
+  ).replace(/</g, "\\u003c"); // impede que trechos do documento imitem marcações
 }
 
 /** Junta tudo no resultado final. */

@@ -17,7 +17,7 @@ import { AppError } from "@/lib/errors";
 import type { Lang } from "@/lib/taxonomy";
 import { countWords, splitIntoParts } from "@/lib/text";
 import { callStructured, runLimited, UsageTracker } from "@/lib/ai/client";
-import { buildDocumentBlock } from "@/lib/prompts/document";
+import { buildDocumentBlock, newBoundary } from "@/lib/prompts/document";
 import { triagePrompt } from "@/lib/prompts/triage";
 import { specialistPrompt } from "@/lib/prompts/specialist";
 import { overviewPrompt } from "@/lib/prompts/overview";
@@ -48,13 +48,14 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
   const usage = new UsageTracker();
   const wordCount = countWords(text);
   const parts = splitIntoParts(text, config.text.maxWordsPerPart);
+  const boundary = newBoundary(); // código aleatório das marcações do documento
 
   // 1. Identificação (usa a primeira parte, onde ficam título e resumo)
   onProgress({ type: "stage", stage: "context" });
   const triage = await callStructured({
     label: "identificação",
     schema: TriageSchema,
-    documentBlock: buildDocumentBlock(parts[0].text, source, { index: 0, total: parts.length }),
+    documentBlock: buildDocumentBlock(parts[0].text, source, boundary, { index: 0, total: parts.length }),
     task: triagePrompt(lang),
     effort: config.ai.effort.triage,
     maxTokens: config.ai.maxTokens.triage,
@@ -75,7 +76,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
 
   const tasks: (() => Promise<{ part: number; groupId: string | null; output: unknown }>)[] = [];
   parts.forEach((part, partIndex) => {
-    const documentBlock = buildDocumentBlock(part.text, source, { index: partIndex, total: parts.length });
+    const documentBlock = buildDocumentBlock(part.text, source, boundary, { index: partIndex, total: parts.length });
     for (const group of groups) {
       const ids = group.categories.map((c) => c.id) as [string, ...string[]];
       tasks.push(async () => {

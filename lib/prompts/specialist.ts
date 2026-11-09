@@ -8,7 +8,7 @@
 import type { BiasGroup } from "@/lib/taxonomy";
 import type { TriageOutput } from "@/lib/analysis/schemas";
 import { config } from "@/lib/config";
-import { languageInstruction } from "./document";
+import { contextBlock, languageInstruction } from "./document";
 
 export function specialistPrompt(group: BiasGroup, triage: TriageOutput, lang: "pt" | "en") {
   const categories = group.categories
@@ -17,11 +17,12 @@ export function specialistPrompt(group: BiasGroup, triage: TriageOutput, lang: "
 
   return `TAREFA: analise o documento acima SOMENTE quanto ao grupo "${group.name.pt}" (${group.description.pt}).
 
-Contexto identificado na etapa anterior:
-- Tipo de texto: ${triage.contentType}
-- País: ${triage.country}
-- Contexto político: ${triage.politicalContext}
-- Tema: ${triage.topic}
+${contextBlock({
+    "Tipo de texto": triage.contentType,
+    País: triage.country,
+    "Contexto político": triage.politicalContext,
+    Tema: triage.topic,
+  })}
 
 Categorias deste grupo:
 ${categories}

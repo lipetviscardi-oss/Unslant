@@ -5,23 +5,24 @@
  */
 
 import type { TriageOutput } from "@/lib/analysis/schemas";
-import { languageInstruction } from "./document";
+import { contextBlock, languageInstruction } from "./document";
 
 export function overviewPrompt(triage: TriageOutput, lang: "pt" | "en") {
   return `TAREFA: avaliar a inclinação política do documento acima, a proporção de fato vs. opinião e o que ele pode estar omitindo.
 
-Contexto identificado na etapa anterior:
-- Tipo de texto: ${triage.contentType}
-- País: ${triage.country}
-- Contexto político: ${triage.politicalContext}
-- Tema: ${triage.topic}
+${contextBlock({
+    "Tipo de texto": triage.contentType,
+    País: triage.country,
+    "Contexto político": triage.politicalContext,
+    Tema: triage.topic,
+  })}
 
 1) INCLINAÇÃO POLÍTICA em dois eixos independentes ("economic" e "social").
    Para cada eixo: position ("left", "right" ou "unidentified"), confidence, justification (1 a 3 frases) e quote (um trecho EXATO do documento que sustenta a classificação; "" se position for "unidentified").
 
    Eixo econômico — esquerda: mais papel do Estado na economia, redistribuição, proteção trabalhista e social, regulação de mercados. Direita: livre mercado, menos impostos e gasto público, privatização, desregulamentação, responsabilidade fiscal como prioridade.
    Eixo social — esquerda: progressismo em costumes, ampliação de direitos de minorias, secularismo, foco em causas estruturais da criminalidade. Direita: conservadorismo em costumes, valores tradicionais e religiosos, ênfase em ordem, punição e segurança.
-   Adapte essas definições ao contexto político do país indicado acima.
+   Adapte essas definições ao contexto político do país identificado.
 
    Regras importantes:
    - A inclinação é medida pela forma como o texto trata o tema (o que valoriza, critica, quem trata como herói ou vilão), NÃO pelo tema em si. Uma notícia equilibrada sobre uma política de esquerda não é de esquerda.

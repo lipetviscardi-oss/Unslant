@@ -10,8 +10,10 @@
  */
 
 import "server-only";
-import { lookup } from "node:dns/promises";
+import { lookup as dnsLookup } from "node:dns/promises";
+import type { LookupAddress, LookupOptions } from "node:dns";
 import net from "node:net";
+import { Agent, fetch as undiciFetch, type Response as UndiciResponse } from "undici";
 import { JSDOM, VirtualConsole } from "jsdom";
 import { Readability } from "@mozilla/readability";
 import { config } from "@/lib/config";
@@ -24,31 +26,95 @@ const USER_AGENT =
 
 /* ------------------------------------------------ segurança dos endereços */
 
-function isPrivateIp(ip: string): boolean {
-  if (net.isIPv4(ip)) {
-    const [a, b] = ip.split(".").map(Number);
-    return (
-      a === 0 ||
-      a === 10 ||
-      a === 127 ||
-      (a === 100 && b >= 64 && b <= 127) ||
-      (a === 169 && b === 254) ||
-      (a === 172 && b >= 16 && b <= 31) ||
-      (a === 192 && b === 168) ||
-      (a === 198 && (b === 18 || b === 19)) ||
-      a >= 224
-    );
+/**
+ * Endereços IPv4 que NÃO são públicos (rede local, do próprio servidor,
+ * reservados, de documentação etc.).
+ */
+const BLOCKED_V4 = new net.BlockList();
+for (const [net4, prefix] of [
+  ["0.0.0.0", 8],
+  ["10.0.0.0", 8],
+  ["100.64.0.0", 10],
+  ["127.0.0.0", 8],
+  ["169.254.0.0", 16],
+  ["172.16.0.0", 12],
+  ["192.0.0.0", 24],
+  ["192.0.2.0", 24],
+  ["192.88.99.0", 24],
+  ["192.168.0.0", 16],
+  ["198.18.0.0", 15],
+  ["198.51.100.0", 24],
+  ["203.0.113.0", 24],
+  ["224.0.0.0", 3], // multicast e reservados (224.0.0.0 a 255.255.255.255)
+] as const) {
+  BLOCKED_V4.addSubnet(net4, prefix, "ipv4");
+}
+
+/**
+ * IPv6: só aceitamos endereços públicos ("global unicast", 2000::/3).
+ * Isso já recusa formas disfarçadas de IPv4 (::ffff:…, 64:ff9b::…), o
+ * próprio servidor (::1), rede local (fc00::, fe80::, fec0::) etc.
+ * Dentro de 2000::/3, recusamos ainda os túneis que embutem IPv4
+ * (6to4 e Teredo) e faixas de documentação.
+ */
+const ALLOWED_V6 = new net.BlockList();
+ALLOWED_V6.addSubnet("2000::", 3, "ipv6");
+const BLOCKED_V6 = new net.BlockList();
+for (const [net6, prefix] of [
+  ["2002::", 16], // 6to4
+  ["2001::", 32], // Teredo
+  ["2001:db8::", 32], // documentação
+  ["2001:10::", 28], // ORCHID
+  ["3fff::", 20], // documentação
+] as const) {
+  BLOCKED_V6.addSubnet(net6, prefix, "ipv6");
+}
+
+export function isPublicIp(ip: string): boolean {
+  if (net.isIPv4(ip)) return !BLOCKED_V4.check(ip, "ipv4");
+  if (net.isIPv6(ip)) return ALLOWED_V6.check(ip, "ipv6") && !BLOCKED_V6.check(ip, "ipv6");
+  return false;
+}
+
+class ForbiddenAddressError extends Error {
+  constructor(host: string) {
+    super(`endereço não público: ${host}`);
+    this.name = "ForbiddenAddressError";
   }
-  const v6 = ip.toLowerCase();
-  if (v6.startsWith("::ffff:")) return isPrivateIp(v6.slice(7));
-  return (
-    v6 === "::" ||
-    v6 === "::1" ||
-    v6.startsWith("fc") ||
-    v6.startsWith("fd") ||
-    v6.startsWith("fe80") ||
-    v6.startsWith("ff")
-  );
+}
+
+/**
+ * Resolve o nome do site E confere os endereços no momento exato da
+ * conexão. Assim, um site não consegue mostrar um endereço público na
+ * conferência e trocar por um interno na hora de conectar ("DNS rebinding").
+ */
+function safeLookup(
+  hostname: string,
+  options: LookupOptions,
+  callback: (err: NodeJS.ErrnoException | null, address: string | LookupAddress[], family?: number) => void,
+) {
+  dnsLookup(hostname, { all: true, family: options.family as number | undefined })
+    .then((addresses) => {
+      if (addresses.length === 0 || addresses.some((a) => !isPublicIp(a.address))) {
+        callback(new ForbiddenAddressError(hostname), []);
+        return;
+      }
+      if (options.all) callback(null, addresses);
+      else callback(null, addresses[0].address, addresses[0].family);
+    })
+    .catch((err) => callback(err, []));
+}
+
+/** Conexões de saída sempre passam pela conferência acima. */
+const safeAgent = new Agent({ connect: { lookup: safeLookup as never } });
+
+function isForbiddenAddress(err: unknown): boolean {
+  let e: unknown = err;
+  for (let i = 0; i < 5 && e; i++) {
+    if (e instanceof ForbiddenAddressError) return true;
+    e = (e as { cause?: unknown }).cause;
+  }
+  return false;
 }
 
 /** Só para testes locais: UNSLANT_ALLOW_LOCAL_URLS=true no .env.local. */
@@ -69,13 +135,15 @@ async function assertPublicUrl(raw: string): Promise<URL> {
   if (host === "localhost" || host.endsWith(".localhost") || host.endsWith(".internal") || host.endsWith(".local")) {
     throw new AppError("URL_FORBIDDEN");
   }
+  // Conferência antecipada, só para dar uma mensagem clara ao usuário.
+  // A conferência que garante a segurança acontece na conexão (safeLookup).
   let addresses: { address: string }[];
   try {
-    addresses = net.isIP(host) ? [{ address: host }] : await lookup(host, { all: true });
+    addresses = net.isIP(host) ? [{ address: host }] : await dnsLookup(host, { all: true });
   } catch {
     throw new AppError("FETCH_FAILED", `DNS: ${host}`);
   }
-  if (addresses.length === 0 || addresses.some((a) => isPrivateIp(a.address))) {
+  if (addresses.length === 0 || addresses.some((a) => !isPublicIp(a.address))) {
     throw new AppError("URL_FORBIDDEN", host);
   }
   return url;
@@ -83,7 +151,7 @@ async function assertPublicUrl(raw: string): Promise<URL> {
 
 /* ---------------------------------------------------------- download */
 
-async function readLimited(res: Response, maxBytes: number): Promise<string> {
+async function readLimited(res: UndiciResponse, maxBytes: number): Promise<string> {
   const declared = Number(res.headers.get("content-length") ?? 0);
   if (declared > maxBytes) throw new AppError("FETCH_TOO_LARGE");
   if (!res.body) return "";
@@ -118,11 +186,13 @@ async function readLimited(res: Response, maxBytes: number): Promise<string> {
 async function fetchPage(rawUrl: string): Promise<{ html: string; finalUrl: string }> {
   let url = await assertPublicUrl(rawUrl);
   for (let hop = 0; hop <= config.fetch.maxRedirects; hop++) {
-    let res: Response;
+    let res: UndiciResponse;
     try {
-      res = await fetch(url, {
+      res = await undiciFetch(url, {
         redirect: "manual", // seguimos os redirecionamentos à mão, conferindo cada destino
         signal: AbortSignal.timeout(config.fetch.timeoutMs),
+        // Em testes locais (UNSLANT_ALLOW_LOCAL_URLS) a conferência na conexão é desligada.
+        dispatcher: allowLocal() ? undefined : safeAgent,
         headers: {
           "User-Agent": USER_AGENT,
           Accept: "text/html,application/xhtml+xml;q=0.9,*/*;q=0.5",
@@ -130,6 +200,7 @@ async function fetchPage(rawUrl: string): Promise<{ html: string; finalUrl: stri
         },
       });
     } catch (err) {
+      if (isForbiddenAddress(err)) throw new AppError("URL_FORBIDDEN", url.hostname);
       if (err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError")) {
         throw new AppError("FETCH_TIMEOUT");
       }
