@@ -193,7 +193,7 @@ Decisões: chave da IA neste ambiente via formulário seguro (sim); gasto máxim
 
 | # | Item | Status |
 |---|---|---|
-| B1 | Veículos: reconferir todas as fontes; tabela veículo/classificação/fonte/conferido | a fazer |
+| B1 | Veículos: 92 domínios — 73 conferidos ✅ (todas as fontes batem; CBS = RIGHT-CENTER no MBFC desde 28/04/2026), 19 sem classificação política. Corrigidas 3 notas (texto exato da Wikipédia: Gazeta do Povo, Brasil de Fato) e Aos Fatos (mostra o viés LEFT-CENTER do MBFC). Comando `npm run conferir-veiculos` → docs/veiculos-conferidos.md | feito |
 | B2 | Contradições internas (a gênero, b versão neutra, c disputa, d notas) com correção automática; rodar nas 8 análises | a fazer |
 | B3 | Lixo: comando `npm run checar-lixo` (antes/depois por link) | a fazer |
 | B4 | PDFs: título, autores, data e revista (3+ PDFs) | a fazer |

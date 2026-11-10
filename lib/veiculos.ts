@@ -66,7 +66,7 @@ export const OUTLETS: Record<string, OutletInfo> = {
   "gazetadopovo.com.br": {
     name: "Gazeta do Povo",
     line: "right",
-    source: WIKI("Gazeta_do_Povo", "Ideologia na ficha: \"Direita\"; \"um dos principais veículos de propaganda ideológica do conservadorismo brasileiro\""),
+    source: WIKI("Gazeta_do_Povo", "Ideologia na ficha: \"Direita\"; \"um dos princípais veículo de propaganda ideológica do conservadorismo brasileiro\" (texto exato do artigo)"),
   },
   "veja.abril.com.br": {
     name: "Veja",
@@ -95,7 +95,7 @@ export const OUTLETS: Record<string, OutletInfo> = {
   "brasildefato.com.br": {
     name: "Brasil de Fato",
     line: "left",
-    source: WIKI("Brasil_de_Fato", "\"rede de jornalistas [...] de esquerda, sendo uma das publicações oficiais do MST\""),
+    source: WIKI("Brasil_de_Fato", "\"intelectuais de esquerda, sendo uma das publicações oficiais do Movimento dos Trabalhadores Rurais sem Terra (MST)\""),
   },
   "brasil247.com": {
     name: "Brasil 247",
@@ -189,7 +189,7 @@ export const OUTLETS: Record<string, OutletInfo> = {
   "agenciabrasil.ebc.com.br": { name: "Agência Brasil", line: "wire", source: { label: "Tipo de veículo", note: "agência pública de notícias (EBC)" } },
 
   /* ------------------------- Checagem de fatos ------------------------ */
-  "aosfatos.org": { name: "Aos Fatos", line: "fact_check", source: MBFC("aos-fatos-bias-and-credibility/", "agência de checagem", "2025-08") },
+  "aosfatos.org": { name: "Aos Fatos", line: "fact_check", source: { ...MBFC("aos-fatos-bias-and-credibility/", "LEFT-CENTER", "2025-08"), note: "Agência de checagem; o MBFC avalia o viés como LEFT-CENTER" } },
   "lupa.uol.com.br": { name: "Agência Lupa", line: "fact_check", source: { label: "Tipo de veículo", note: "agência de checagem" } },
   "lupa.news": { name: "Agência Lupa", line: "fact_check", source: { label: "Tipo de veículo", note: "agência de checagem" } },
   "apublica.org": { name: "Agência Pública", line: "fact_check", source: { label: "Tipo de veículo", note: "jornalismo investigativo e checagem" } },

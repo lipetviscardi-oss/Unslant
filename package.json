@@ -10,7 +10,8 @@
     "comparar": "node scripts/comparar.mjs",
     "teste:salvar": "node scripts/teste-salvar.mjs",
     "teste": "node scripts/teste.mjs",
-    "verificar": "node scripts/verificar-chaves.mjs"
+    "verificar": "node scripts/verificar-chaves.mjs",
+    "conferir-veiculos": "node --no-warnings scripts/conferir-veiculos.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.6.0",
