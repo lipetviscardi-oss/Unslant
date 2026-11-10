@@ -72,3 +72,13 @@ Itens: 1) conta Supabase (grátis) + chaves no .env.local; 2) instalar @supabase
 6) "Minhas análises" (histórico, abrir de novo sem custo, apagar); 7) cache no banco (compartilhado);
 8) análise em etapas salvas no banco (resolve o tempo limite da Vercel; dá para fechar a aba); 9) Privacidade atualizada.
 Decisões pendentes: visitante sem login pode analisar?; login só por e-mail ou também Google?; resultado reaproveitado conta no limite?; horário da virada do dia.
+Decisões do usuário (Fase 4): 1b (visitante sem conta: 1 análise simples); 2a agora (link no e-mail) — depois e-mail+senha e Google;
+3a (resultado reaproveitado não conta); virada do dia = meia-noite do horário de CADA pessoa; região Supabase = Leste dos EUA;
+pode instalar @supabase/supabase-js e @supabase/ssr.
+
+## Rodada 7 — internacional (antes da Fase 4)
+| Item | O quê | Status |
+|---|---|---|
+| I1 | Mais veículos britânicos (e americanos) na lista, com fonte MBFC conferida | em andamento |
+| I2 | Exemplo pronto em inglês | a fazer |
+| I3 | Teste automático com pares EUA e Reino Unido (simetria em vários pares) | a fazer |
