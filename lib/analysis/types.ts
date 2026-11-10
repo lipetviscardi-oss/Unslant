@@ -47,6 +47,8 @@ export interface Evidence {
   quoted?: boolean;
   /** Evidência numa imagem (não no texto): id da figura; start/end ficam -1. */
   figureId?: string;
+  /** Peso do trecho (sinal leve, médio ou forte); a cor do destaque nunca passa da nota da categoria. */
+  strength?: "weak" | "medium" | "strong";
 }
 
 /** Uma imagem, gráfico ou tabela analisada pela etapa "Imagens e gráficos". */

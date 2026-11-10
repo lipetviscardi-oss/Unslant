@@ -39,7 +39,7 @@ Para CADA categoria acima (de todos os grupos), devolva exatamente uma entrada e
 - score: nota de 0 a 10 conforme a escala e as referências das regras (use 0 se status não for "found").
 - confidence: "low", "medium" ou "high".
 - summary: se "found", 1 a 2 frases dizendo o que foi encontrado; se "none_found" ou "not_applicable", no máximo 12 palavras.
-- evidence: até ${config.ai.maxEvidencePerCategory} trechos, só os mais representativos. Cada um com "quote" (cópia EXATA do documento, 2 a 40 palavras) e "explanation" (por que o trecho mostra o problema e, quando útil, como seria uma versão neutra). Lista vazia se status não for "found".
+- evidence: até ${config.ai.maxEvidencePerCategory} trechos, só os mais representativos. Cada um com "quote" (cópia EXATA do documento, 2 a 40 palavras), "explanation" (por que o trecho mostra o problema e, quando útil, como seria uma versão neutra) e "strength" (o peso DESTE trecho: "weak" = sinal leve, "medium" = sinal claro, "strong" = exemplo intenso e inequívoco). Seja proporcional à nota da categoria: numa categoria com nota moderada, a maioria dos trechos deve ser "weak" ou "medium"; "strong" é para os poucos trechos mais graves. Lista vazia se status não for "found".
 
 Lembre-se: notas altas exigem evidências fortes e recorrentes. Um único caso leve merece nota baixa.
 ${withOverview ? `

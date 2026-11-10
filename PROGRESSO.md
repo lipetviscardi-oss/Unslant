@@ -179,7 +179,7 @@ Decisões: A) item 9 = intensidade por trecho; B) limite de imagens e PDF contar
 | R9-6 | "Respostas do autor às críticas" (overview.rebuttals; seção nova no detalhado; a síntese avalia até onde procedem) | feito (falta conferir na tela e com IA de verdade) |
 | R9-7 | Disputa com ressalva (dispute.caveat) no resumo simples, no detalhado e na síntese | feito (falta conferir com IA de verdade) |
 | R9-8 | Veículos brasileiros + linha "especializado"; sem fonte = estimativa com aviso | a fazer |
-| R9-9 | Intensidade por trecho nos destaques | a fazer |
+| R9-9 | Intensidade por trecho (evidence.strength weak/medium/strong); cor = peso do trecho limitado pela faixa da categoria; filtro padrão esconde sinais leves; legenda nova | feito (conferido na tela com dados simulados) |
 | R9-11 | Casos Séralini (PDF) e Outras Palavras no teste automático | a fazer |
 | R9-V | Validação com IA de verdade (≤ US$ 2) | a fazer |
 

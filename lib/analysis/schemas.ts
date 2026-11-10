@@ -73,6 +73,8 @@ function specialistBase(categoryIds: readonly [string, ...string[]]) {
           z.object({
             quote: z.string(),
             explanation: z.string(),
+            /** Peso deste trecho: sinal leve, médio ou forte do problema. */
+            strength: z.enum(["weak", "medium", "strong"]),
           }),
         ),
       }),
@@ -86,7 +88,7 @@ export interface SpecialistOutput {
     score: number;
     confidence: Confidence;
     summary: string;
-    evidence: { quote: string; explanation: string }[];
+    evidence: { quote: string; explanation: string; strength?: "weak" | "medium" | "strong" }[];
   }[];
 }
 

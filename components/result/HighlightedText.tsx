@@ -9,11 +9,7 @@ import { useMemo } from "react";
 import type { AnalysisResult } from "@/lib/analysis/types";
 import { buildSegments, countHighlights, type EvidenceRef } from "@/lib/client/evidence";
 import { formatScore, severity, SEVERITY_SOFT, SEVERITY_TEXT } from "@/lib/client/format";
-import { NOT_MILD_MIN } from "@/lib/taxonomy";
 import { useDict, useLang } from "@/lib/i18n";
-
-/** Nota mínima para um destaque aparecer por padrão (moderado e forte). */
-export const DEFAULT_MIN_SCORE = NOT_MILD_MIN;
 
 interface Props {
   result: AnalysisResult;
@@ -48,7 +44,10 @@ function EvidenceDetails({ refs, onClose }: { refs: EvidenceRef[]; onClose: () =
                   {formatScore(r.category.score, lang)}/10
                 </span>
               </div>
-              <p className="text-sm text-muted">{r.groupDef?.name[lang]}</p>
+              <p className="text-sm text-muted">
+                {r.groupDef?.name[lang]}
+                {r.evidence.strength ? ` · ${t.result.text.weight(t.result.text.strength[r.evidence.strength])}` : ""}
+              </p>
               <p className="text-[15px] leading-relaxed">{r.evidence.explanation}</p>
             </li>
           );
@@ -61,9 +60,8 @@ function EvidenceDetails({ refs, onClose }: { refs: EvidenceRef[]; onClose: () =
 export function HighlightedText({ result, index, selected, onSelect, showAll, onToggleAll }: Props) {
   const t = useDict();
   const lang = useLang();
-  const minScore = showAll ? 0 : DEFAULT_MIN_SCORE;
-  const segments = useMemo(() => buildSegments(result.text.length, index, minScore), [result.text.length, index, minScore]);
-  const counts = useMemo(() => countHighlights(index, DEFAULT_MIN_SCORE), [index]);
+  const segments = useMemo(() => buildSegments(result.text.length, index, !showAll), [result.text.length, index, showAll]);
+  const counts = useMemo(() => countHighlights(index), [index]);
   const selectedRefs = selected.map((id) => index.get(id)).filter((r): r is EvidenceRef => Boolean(r));
   const selectedKey = selected.join("|");
   const isClaim = result.context.contentType === "claim";
@@ -96,6 +94,7 @@ export function HighlightedText({ result, index, selected, onSelect, showAll, on
             <li className="flex items-center gap-2"><span className="hl hl-low">abc</span> {t.result.text.legend.low}</li>
             <li className="flex items-center gap-2"><span className="hl hl-mid">abc</span> {t.result.text.legend.mid}</li>
             <li className="flex items-center gap-2"><span className="hl hl-high">abc</span> {t.result.text.legend.high}</li>
+            <li className="basis-full text-[13px]">{t.result.text.legendNote}</li>
           </ul>
         )}
       </div>
@@ -106,7 +105,7 @@ export function HighlightedText({ result, index, selected, onSelect, showAll, on
             {segments.map((seg) => {
               const slice = result.text.slice(seg.start, seg.end);
               if (seg.ids.length === 0) return <span key={seg.start}>{slice}</span>;
-              const sev = severity(seg.maxScore);
+              const sev = seg.tone;
               const isSelected = seg.ids.join("|") === selectedKey;
               const names = [...new Set(seg.ids.map((id) => index.get(id)?.categoryDef?.name[lang]).filter(Boolean))].join(", ");
               return (

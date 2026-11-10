@@ -159,7 +159,7 @@ function verifyCategory(
         continue;
       }
       seen.add(pos.start);
-      evidence.push({ id: "", quote: ev.quote, explanation: ev.explanation, start: pos.start, end: pos.end, quoted });
+      evidence.push({ id: "", quote: ev.quote, explanation: ev.explanation, start: pos.start, end: pos.end, quoted, ...(ev.strength ? { strength: ev.strength } : {}) });
     }
     if (evidence.length === 0) {
       // Sem evidência verificável, não há afirmação de viés.
