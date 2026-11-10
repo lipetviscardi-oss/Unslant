@@ -142,7 +142,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
           documentBlock,
           task: specialistPrompt(bundle, triage, lang, withOverview),
           effort: specialistEffort,
-          maxTokens: config.ai.maxTokens.specialist + (withOverview ? config.ai.maxTokens.overview : 0),
+          maxTokens: config.ai.maxTokens.specialist + (withOverview ? config.ai.maxTokens.overview : 0), // limitado a 21.000 em client.ts
           usage,
           signal,
         });

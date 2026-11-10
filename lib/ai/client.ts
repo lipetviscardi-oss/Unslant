@@ -21,6 +21,9 @@ import type { StageCost } from "@/lib/analysis/types";
 
 let client: Anthropic | null = null;
 
+
+/** Maior limite de resposta aceito pela biblioteca sem streaming (128.000 ÷ 6, arredondado para baixo). */
+const MAX_NONSTREAMING_TOKENS = 21_000;
 export function getClient() {
   if (!process.env.ANTHROPIC_API_KEY) throw new AppError("MISSING_API_KEY");
   // maxRetries: a própria biblioteca repete automaticamente erros temporários
@@ -148,6 +151,11 @@ async function callStructuredAnthropic<T extends z.ZodType>(opts: StructuredCall
   }
   content.push({ type: "text", text: opts.task });
 
+  // A biblioteca da Anthropic recusa pedidos sem "streaming" acima de ~21.333
+  // tokens de resposta (antes mesmo de enviar). Nossas respostas são bem
+  // menores do que isso, então o limite fica logo abaixo.
+  const maxTokens = Math.min(opts.maxTokens, MAX_NONSTREAMING_TOKENS);
+
   const maxAttempts = 2; // a tentativa original + 1 nova tentativa
   let lastProblem = "";
 
@@ -157,7 +165,7 @@ async function callStructuredAnthropic<T extends z.ZodType>(opts: StructuredCall
       response = await anthropic.beta.messages.parse(
         {
           model,
-          max_tokens: opts.maxTokens,
+          max_tokens: maxTokens,
           system: SYSTEM_PROMPT,
           messages: [{ role: "user", content }],
           output_config: {
@@ -171,8 +179,14 @@ async function callStructuredAnthropic<T extends z.ZodType>(opts: StructuredCall
         { signal: opts.signal },
       );
     } catch (err) {
-      // Resposta fora do formato combinado: o zod recusou.
-      if (err instanceof Anthropic.AnthropicError && !(err instanceof Anthropic.APIError)) {
+      // Resposta fora do formato combinado: o zod recusou. A biblioteca não tem
+      // uma classe própria para esse erro, então ele é reconhecido pelo texto.
+      // Qualquer outro erro vira AI_ERROR com o motivo real (no terminal).
+      if (
+        err instanceof Anthropic.AnthropicError &&
+        !(err instanceof Anthropic.APIError) &&
+        err.message.startsWith("Failed to parse structured output")
+      ) {
         lastProblem = `formato inválido: ${err.message.slice(0, 300)}`;
         console.warn(`[unslant] ${opts.label}: tentativa ${attempt} — ${lastProblem}`);
         continue;

@@ -16,6 +16,7 @@ Cada item concluído é salvo no GitHub logo em seguida.
 | F | Custo: visão geral junto de um pacote de especialistas (4 chamadas em vez de 5) | feito |
 | G | Teste automático: npm run teste:salvar e npm run teste (faixas, simetria ≤ 1,5, lados opostos) | feito |
 | H | Verificação final (tipos, lint, build) + README/Metodologia + instruções ao usuário | feito |
+| H2 | Correção: análises falhavam (limite de 21 mil tokens da biblioteca sem streaming no pacote com visão geral) | feito |
 
 ### Decisões
 - Item 5: "esforço baixo" nos especialistas fica pronto para teste, mas só será ativado se `npm run teste` passar.
