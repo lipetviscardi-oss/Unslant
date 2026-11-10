@@ -349,7 +349,9 @@ export function AnalyzeForm({ onSubmit }: { onSubmit: (req: AnalyzeRequest) => v
         </h2>
         <div className="grid gap-3 sm:grid-cols-2">
           {[
-            { id: "noticia-pt", title: t.home.examples.demoTitle, desc: t.home.examples.demoDesc },
+            lang === "en"
+              ? { id: "news-en", title: t.home.examples.demoTitle, desc: t.home.examples.demoDesc }
+              : { id: "noticia-pt", title: t.home.examples.demoTitle, desc: t.home.examples.demoDesc },
             { id: "afirmacao-pt", title: t.home.examples.demoClaimTitle, desc: t.home.examples.demoClaimDesc },
           ].map((d) => (
             <button

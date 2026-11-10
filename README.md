@@ -190,6 +190,7 @@ Com o site ligado em `http://localhost:3000`:
 | **Modo simples e detalhado** (grátis) | Em **Tipo de análise**, escolha Simples ou Detalhada e clique em **Ver uma análise pronta** | Abre no tipo escolhido. No **Simples** (nota, inclinação em uma linha, 3 principais problemas com exemplo). O botão **Detalhado** (ou "Ver análise completa") mostra tudo; "Ver no texto" abre o detalhado no trecho. O site lembra a última escolha |
 | **Afirmação pronta** (grátis) | Clique em **Ver uma afirmação analisada** | Nota 3,7 ("Viés moderado") e o quadro "Verificação da afirmação" |
 | **Idioma** (grátis) | Clique em **English** no topo | O site inteiro muda para inglês (endereço `/en`); o botão vira **Português** |
+| **Exemplo em inglês** (grátis) | Na versão em inglês, clique em **See a ready-made analysis** | Notícia americana fictícia, com viés no sentido oposto ao do exemplo brasileiro: nota 5,8 e inclinação econômica "Direita" |
 | **Páginas** (grátis) | Clique em **Metodologia**, **Tipos de viés** e **Privacidade** no topo (no celular, ficam no rodapé) | Textos completos nos dois idiomas |
 | **Afirmação** (usa a IA) | Aba **Afirmação** → clique num dos exemplos → **Analisar** | Resultado com a verificação e o grupo "Vieses de raciocínio" |
 | **Destaques** | Clique num trecho colorido do texto | Aparecem a categoria e a explicação (ao lado no computador, embaixo no celular) |

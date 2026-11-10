@@ -86,7 +86,7 @@ export const en: Dict = {
     examples: {
       title: "No text at hand?",
       demoTitle: "See a ready-made analysis",
-      demoDesc: "A fictional Brazilian news story about health cuts (report in Portuguese). Free, no AI used.",
+      demoDesc: "A fictional US news story about a heat pump mandate. Free, no AI used.",
       demoClaimTitle: "See an analyzed claim",
       demoClaimDesc: "\"Young people today don't want to work…\" (report in Portuguese). Free, no AI used.",
       hint: "Or load a sample text (fictional) into the Text tab. Analyzing these texts uses the AI as usual.",

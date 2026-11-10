@@ -80,5 +80,5 @@ pode instalar @supabase/supabase-js e @supabase/ssr.
 | Item | O quê | Status |
 |---|---|---|
 | I1 | Mais veículos britânicos (e americanos) na lista, com fonte MBFC conferida | feito |
-| I2 | Exemplo pronto em inglês | em andamento |
-| I3 | Teste automático com pares EUA e Reino Unido (simetria em vários pares) | a fazer |
+| I2 | Exemplo pronto em inglês | feito |
+| I3 | Teste automático com pares EUA e Reino Unido (simetria em vários pares) | em andamento |

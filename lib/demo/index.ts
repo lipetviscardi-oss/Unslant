@@ -16,10 +16,12 @@ import type { AnalysisResult, StreamEvent } from "@/lib/analysis/types";
 import type { Lang } from "@/lib/taxonomy";
 import * as noticiaPt from "./noticia-pt";
 import * as afirmacaoPt from "./afirmacao-pt";
+import * as newsEn from "./news-en";
 
 const DEMOS = {
   "noticia-pt": noticiaPt,
   "afirmacao-pt": afirmacaoPt,
+  "news-en": newsEn,
 } as const;
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -28,8 +30,8 @@ export async function runDemo(id: string, _lang: Lang, send: (e: StreamEvent) =>
   const demo = DEMOS[id as keyof typeof DEMOS];
   if (!demo) throw new AppError("INVALID_INPUT", `demo inexistente: ${id}`);
 
-  // Os exemplos prontos estão escritos em português.
-  const lang: Lang = "pt";
+  // Cada exemplo pronto tem o seu idioma (os em português não declaram).
+  const lang: Lang = "lang" in demo ? demo.lang : "pt";
   const text = normalizeText(demo.text);
 
   send({ type: "stage", stage: "extracting" });
