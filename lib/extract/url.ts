@@ -232,26 +232,44 @@ async function fetchPage(rawUrl: string): Promise<{ html: string; finalUrl: stri
 
 /* ---------------------------------------------------------- extração */
 
-const BLOCK_TAGS = new Set(["P", "H1", "H2", "H3", "H4", "H5", "H6", "LI", "BLOCKQUOTE", "PRE", "FIGCAPTION", "TD", "DT", "DD"]);
+const BLOCK_TAGS = new Set(["P", "H1", "H2", "H3", "H4", "H5", "H6", "LI", "BLOCKQUOTE", "PRE", "FIGCAPTION", "DT", "DD"]);
+/** Caixas genéricas: viram parágrafo só quando têm texto e nenhum bloco dentro. */
+const CONTAINER_TAGS = new Set(["DIV", "SECTION", "ARTICLE", "MAIN", "ASIDE"]);
 
-/** Converte o HTML do artigo em texto, mantendo a separação de parágrafos. */
-function htmlToParagraphs(html: string): string {
+/** Uma linha de tabela vira "célula | célula | célula". */
+function tableToParagraphs(table: Element): string[] {
+  const out: string[] = [];
+  const caption = table.querySelector("caption")?.textContent?.replace(/\s+/g, " ").trim();
+  if (caption) out.push(`Tabela: ${caption}`);
+  for (const row of Array.from(table.querySelectorAll("tr"))) {
+    const cells = Array.from(row.children)
+      .filter((c) => c.tagName === "TD" || c.tagName === "TH")
+      .map((c) => (c.textContent ?? "").replace(/\s+/g, " ").trim());
+    if (cells.some(Boolean)) out.push(cells.join(" | "));
+  }
+  return out;
+}
+
+/** Converte o HTML do artigo em texto, mantendo a separação de parágrafos e as linhas de tabela. */
+export function htmlToParagraphs(html: string): string {
   const dom = new JSDOM(`<body>${html}</body>`);
   const body = dom.window.document.body;
   const paragraphs: string[] = [];
-  const walker = dom.window.document.createTreeWalker(body, dom.window.NodeFilter.SHOW_ELEMENT);
-  let node = walker.nextNode() as Element | null;
-  while (node) {
-    if (BLOCK_TAGS.has(node.tagName)) {
-      // evita duplicar parágrafos aninhados (ex.: <li><p>…</p></li>)
-      const hasBlockChild = Array.from(node.querySelectorAll("*")).some((c) => BLOCK_TAGS.has(c.tagName));
-      if (!hasBlockChild) {
+  const walk = (el: Element) => {
+    for (const node of Array.from(el.children)) {
+      const isLeaf = !Array.from(node.querySelectorAll("*")).some((c) => BLOCK_TAGS.has(c.tagName) || c.tagName === "TABLE");
+      if (node.tagName === "TABLE") {
+        paragraphs.push(...tableToParagraphs(node));
+      } else if (isLeaf && (BLOCK_TAGS.has(node.tagName) || CONTAINER_TAGS.has(node.tagName))) {
+        // bloco "folha" (sem outros blocos dentro): vira um parágrafo
         const t = (node.textContent ?? "").replace(/\s+/g, " ").trim();
         if (t) paragraphs.push(t);
+      } else {
+        walk(node);
       }
     }
-    node = walker.nextNode() as Element | null;
-  }
+  };
+  walk(body);
   if (paragraphs.length === 0) return (body.textContent ?? "").trim();
   return paragraphs.join("\n\n");
 }
