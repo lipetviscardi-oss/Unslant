@@ -126,4 +126,7 @@ Depois: Fase 4 (P2 em diante). Retomada automática: tarefa "Retomar unslant".
 - Configurar um serviço de e-mail próprio no Supabase (o envio grátis é limitado) — junto com a Fase 6.
 
 ## Fase 5: plano pago (Stripe)
-Esperando o usuário decidir preços e limites do plano pago (explicação enviada em 10/11/2026). Nada foi feito ainda.
+**Em espera** (decisão do usuário em 10/11/2026): primeiro publicar o site e testar com conhecidos no Brasil e no Reino Unido; cobrança depois.
+
+## Fase 6 (adiantada): publicar para testes
+Plano enviado ao usuário em 10/11/2026; esperando as decisões (domínio, botão de sugestões, limites dos testadores, e-mail de contato).
