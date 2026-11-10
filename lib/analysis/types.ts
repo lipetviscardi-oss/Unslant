@@ -171,6 +171,11 @@ export interface AnalysisResult {
   } | null;
   /** true = nenhum trecho do autor precisava de reescrita (mostra "Nenhum trecho precisa de reescrita"). */
   rewriteNone?: boolean;
+  /**
+   * true = versão da análise simples: só o que o modo simples mostra. A
+   * análise completa fica no servidor até a pessoa usar a detalhada do dia.
+   */
+  partial?: boolean;
   /** Imagens, gráficos e tabelas analisados (só quando o conteúdo tinha imagens). */
   figures?: FigureResult[];
   groups: GroupResult[];
@@ -223,5 +228,23 @@ export type StreamEvent =
       /** "long" = texto longo, analisado em etapas; "waiting" = esperando o limite por minuto da IA. */
       note?: "long" | "waiting";
     }
-  | { type: "result"; result: AnalysisResult }
+  | { type: "result"; result: AnalysisResult; access?: ResultAccess }
   | { type: "error"; code: string; message: string };
+
+/**
+ * O que a pessoa pode ver desta análise (Fase 4). Vai junto com o resultado,
+ * mas nunca é guardado no cache.
+ */
+export interface ResultAccess {
+  /** false = limites desligados (Supabase não configurado ou exemplo pronto): pode ver tudo. */
+  limitsOn: boolean;
+  loggedIn: boolean;
+  /** Análise salva em "Minhas análises" (só para quem tem conta). */
+  analysisId?: string;
+  /** Tipo escolhido no formulário. */
+  kind: "simple" | "detailed";
+  /** Numa simples: a pessoa já usou a "detalhada do dia" para ver tudo? */
+  unlocked: boolean;
+  /** Quantas restam hoje (null = sem limites). */
+  remaining: { simple: number; detailed: number } | null;
+}

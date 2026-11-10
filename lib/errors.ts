@@ -32,6 +32,11 @@ export type ErrorCode =
   | "AI_BAD_RESPONSE"
   | "AI_ERROR"
   | "DAILY_LIMIT"
+  | "LIMIT_SIMPLE"
+  | "LIMIT_DETAILED"
+  | "LIMIT_ANON"
+  | "LOGIN_REQUIRED"
+  | "NOT_FOUND"
   | "UNKNOWN";
 
 export const ERROR_MESSAGES: Record<ErrorCode, Record<Lang, string>> = {
@@ -138,6 +143,26 @@ export const ERROR_MESSAGES: Record<ErrorCode, Record<Lang, string>> = {
   DAILY_LIMIT: {
     pt: "O limite diário de análises do site foi atingido (proteção contra gastos). Tente amanhã ou aumente o limite em lib/config.ts.",
     en: "The site's daily analysis limit was reached. Try again tomorrow.",
+  },
+  LIMIT_SIMPLE: {
+    pt: "Você já usou as 3 análises simples de hoje. Amanhã (à meia-noite no seu horário) elas voltam. Textos que alguém já analisou continuam saindo na hora.",
+    en: "You've used today's 3 simple analyses. They come back tomorrow (at midnight your time). Texts someone has already analyzed still come out instantly.",
+  },
+  LIMIT_DETAILED: {
+    pt: "Você já usou a análise detalhada de hoje. Escolha \"Simples\" ou tente amanhã (à meia-noite no seu horário).",
+    en: "You've used today's detailed analysis. Choose \"Simple\" or try again tomorrow (at midnight your time).",
+  },
+  LIMIT_ANON: {
+    pt: "Você já usou a análise grátis de hoje sem conta. Entre com seu e-mail (sem senha) para ter 3 análises simples e 1 detalhada por dia.",
+    en: "You've used today's free analysis without an account. Sign in with your email (no password) to get 3 simple analyses and 1 detailed analysis per day.",
+  },
+  LOGIN_REQUIRED: {
+    pt: "A análise detalhada é para quem tem conta. Entre com seu e-mail (sem senha): é grátis e dá 3 análises simples e 1 detalhada por dia.",
+    en: "Detailed analysis requires an account. Sign in with your email (no password): it's free and gives you 3 simple analyses and 1 detailed analysis per day.",
+  },
+  NOT_FOUND: {
+    pt: "Não encontramos esta análise. Ela pode ter sido apagada.",
+    en: "We couldn't find this analysis. It may have been deleted.",
   },
   UNKNOWN: {
     pt: "Ocorreu um erro inesperado. Tente de novo.",

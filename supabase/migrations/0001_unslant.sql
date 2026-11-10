@@ -63,8 +63,13 @@ create table if not exists public.usage_events (
   analysis_id uuid references public.analyses (id) on delete set null,
   created_at timestamptz not null default now()
 );
+-- Visitante sem conta: segundo código anônimo, derivado do endereço de internet
+-- (também um resumo irreversível, nunca o endereço em si).
+alter table public.usage_events add column if not exists ip_key text;
 create index if not exists usage_user_day on public.usage_events (user_id, local_day);
 create index if not exists usage_anon_day on public.usage_events (anon_key, local_day);
+create index if not exists usage_ip_day on public.usage_events (ip_key, local_day);
+create index if not exists usage_created on public.usage_events (created_at);
 
 alter table public.usage_events enable row level security;
 -- (sem políticas: só o servidor lê e grava)

@@ -19,7 +19,11 @@ import { cacheKey, readCache, writeCache } from "@/lib/analysis/cache";
 import { releaseDailySlot, reserveDailySlot } from "@/lib/analysis/limits";
 import { promptVersion } from "@/lib/prompts/version";
 import { runDemo } from "@/lib/demo";
-import type { SourceInfo, StreamEvent } from "@/lib/analysis/types";
+import type { AnalysisResult, ResultAccess, SourceInfo, StreamEvent } from "@/lib/analysis/types";
+import { supabaseAdmin } from "@/lib/supabase/admin";
+import { identifyViewer, limitsFor, linkUsage, recordUsage, refundUsage, remainingToday, siteUsageLast24h, type Kind } from "@/lib/analysis/usage";
+import { saveAnalysis } from "@/lib/analysis/store";
+import { toSimplePayload } from "@/lib/analysis/access";
 
 // Análises podem levar alguns minutos (limite da Vercel: até 300 s no plano grátis).
 export const maxDuration = 300;
@@ -53,6 +57,10 @@ const RequestSchema = z.object({
     )
     .max(config.visual.maxPdfPages)
     .optional(),
+  /** Tipo escolhido no formulário (decide o limite usado e o que é enviado ao navegador). */
+  view: z.enum(["simple", "detailed"]).optional(),
+  /** Fuso horário do navegador (ex.: "America/New_York"): o limite diário zera à meia-noite dele. */
+  tz: z.string().max(64).optional(),
   /** true = ignora o resultado guardado e analisa de novo (botão "Analisar de novo"). */
   fresh: z.boolean().optional(),
   /** Tipo de texto escolhido pelo usuário (opcional; sem ele, a IA identifica). */
@@ -86,6 +94,32 @@ export async function POST(request: Request) {
   const dev = process.env.NODE_ENV === "development" ? body.devOptions : undefined;
   const encoder = new TextEncoder();
 
+  // Limites por pessoa (Fase 4): só com o banco configurado. Exemplos prontos e o
+  // teste automático (npm run teste, só no computador de desenvolvimento) não contam.
+  const kind: Kind = body.view === "detailed" ? "detailed" : "simple";
+  const limitsOn = body.mode !== "demo" && !dev && supabaseAdmin() !== null;
+  // Precisa ser antes de começar a resposta: pode gravar o cookie anônimo do visitante.
+  const viewer = limitsOn ? await identifyViewer(body.tz) : null;
+  if (viewer && limitsFor(viewer)[kind] === 0) {
+    return Response.json({ code: "LOGIN_REQUIRED", message: errorMessage("LOGIN_REQUIRED", lang) }, { status: 403 });
+  }
+  /** Salva em "Minhas análises" (quem tem conta) e diz o que a pessoa pode ver. */
+  const finish = async (result: AnalysisResult, key: string, counted: boolean, usageId: number | null) => {
+    if (!viewer) return { result, access: undefined };
+    const analysisId = await saveAnalysis({ viewer, kind, result, cacheKey: key, counted });
+    if (analysisId) await linkUsage(usageId, analysisId);
+    const access: ResultAccess = {
+      limitsOn: true,
+      loggedIn: Boolean(viewer.userId),
+      analysisId: analysisId ?? undefined,
+      kind,
+      unlocked: kind === "detailed",
+      remaining: await remainingToday(viewer),
+    };
+    // Na simples, o navegador recebe só o que o modo simples mostra.
+    return { result: kind === "simple" ? toSimplePayload(result) : result, access };
+  };
+
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       let closed = false;
@@ -99,6 +133,7 @@ export async function POST(request: Request) {
       };
 
       let reserved = false;
+      let usageId: number | null = null;
       try {
         if (body.mode === "demo") {
           send({ type: "result", result: await runDemo(body.demoId ?? "", lang, send) });
@@ -151,13 +186,26 @@ export async function POST(request: Request) {
         const cached = dev?.noCache || body.fresh ? null : await readCache(key);
         if (cached) {
           cached.stats.fromCache = true;
-          send({ type: "result", result: cached });
+          // Resultado reaproveitado: sai na hora e não conta no limite do dia.
+          send({ type: "result", ...(await finish(cached, key, false, null)) });
           return;
         }
 
-        // 3. Análise com a IA
-        reserveDailySlot();
-        reserved = true;
+        // 3. Análise com a IA: confere o limite do dia e registra o uso ANTES de gastar.
+        if (viewer) {
+          const remaining = await remainingToday(viewer);
+          if (remaining && remaining[kind] <= 0) {
+            throw new AppError(kind === "detailed" ? "LIMIT_DETAILED" : viewer.userId ? "LIMIT_SIMPLE" : "LIMIT_ANON");
+          }
+          const site = await siteUsageLast24h();
+          if (site !== null && site >= config.limits.globalDailyAnalyses) {
+            throw new AppError("DAILY_LIMIT", `${site}/${config.limits.globalDailyAnalyses} nas últimas 24 h`);
+          }
+          usageId = await recordUsage(viewer, kind);
+        } else {
+          reserveDailySlot();
+          reserved = true;
+        }
         if (body.mode === "pdf" && body.images?.length) {
           visuals = body.images.map((img, i) => ({
             id: `img-${i + 1}`,
@@ -180,13 +228,15 @@ export async function POST(request: Request) {
         });
         // Resultado de experimento não entra no cache (para não se misturar com as análises normais).
         if (!dev?.specialistEffort && !dev?.specialistModel) await writeCache(key, result);
-        send({ type: "result", result });
+        send({ type: "result", ...(await finish(result, key, true, usageId)) });
       } catch (err) {
         const code = err instanceof AppError ? err.code : "UNKNOWN";
         // Erros que acontecem antes de qualquer gasto devolvem a vaga do limite diário.
         if (reserved && (code === "MISSING_API_KEY" || code === "AI_AUTH" || code === "AI_NO_CREDIT")) {
           releaseDailySlot();
         }
+        // A análise não saiu: o uso do dia é devolvido.
+        if (usageId !== null) await refundUsage(usageId).catch(() => undefined);
         console.error(`[unslant] erro ${code}:`, err instanceof AppError ? err.detail ?? "" : err);
         // No computador de desenvolvimento (npm run dev), o detalhe técnico vai junto, para facilitar
         // o diagnóstico. No site publicado, só a mensagem simples (o detalhe fica no registro do servidor).

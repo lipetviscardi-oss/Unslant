@@ -182,6 +182,16 @@ export const config = {
      * Na Fase 4 isso passa a ser controlado pelo banco de dados.
      */
     globalDailyAnalyses: 30,
+    /**
+     * Análises por dia (zera à meia-noite no horário de cada pessoa).
+     * Resultados reaproveitados (texto já analisado) e exemplos prontos não contam.
+     */
+    perDay: {
+      /** Visitante sem conta. */
+      anonymous: { simple: 1, detailed: 0 },
+      /** Conta grátis. */
+      free: { simple: 3, detailed: 1 },
+    },
   },
 
   /**
