@@ -9,7 +9,8 @@
     "lint": "eslint",
     "comparar": "node scripts/comparar.mjs",
     "teste:salvar": "node scripts/teste-salvar.mjs",
-    "teste": "node scripts/teste.mjs"
+    "teste": "node scripts/teste.mjs",
+    "verificar": "node scripts/verificar-chaves.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.6.0",
