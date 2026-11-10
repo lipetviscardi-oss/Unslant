@@ -118,6 +118,30 @@
       ],
       "titulo": "",
       "link": ""
+    },
+    {
+      "id": "seralini",
+      "nome": "Paper Séralini (PDF, 2014)",
+      "arquivo": "fixtures/seralini.json",
+      "faixa": [
+        4.5,
+        7
+      ],
+      "academicoMin": 5,
+      "titulo": "Republished study: long-term toxicity of a Roundup herbicide and a Roundup-tolerant genetically modified maize",
+      "link": "https://enveurope.springeropen.com/articles/10.1186/s12302-014-0014-5"
+    },
+    {
+      "id": "outras-palavras",
+      "nome": "Outras Palavras (opinião econômica)",
+      "arquivo": "fixtures/outras-palavras.json",
+      "faixa": [
+        4,
+        7
+      ],
+      "eixoEconomico": "left",
+      "titulo": "Terceiro turno, a revanche do mercado",
+      "link": "https://outraspalavras.net/?p=3208529"
     }
   ],
   "simetria": [

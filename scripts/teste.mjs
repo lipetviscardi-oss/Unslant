@@ -193,6 +193,29 @@ for (const c of manifest.casos) {
   }
   if (c.faixa) check(score >= min && score <= max, `${c.nome}: nota ${n(score, 1)} dentro da faixa ${min}–${max}`);
 
+  // Papers: o grupo acadêmico precisa ter pelo menos a nota pedida (caso.academicoMin).
+  if (c.academicoMin != null) {
+    const ac = r.groups.find((g) => g.id === "academic");
+    console.log(`  Grupo acadêmico: ${ac?.score != null ? n(ac.score, 1) : "não ativado"}`);
+    check(ac?.score != null && ac.score > c.academicoMin, `${c.nome}: grupo acadêmico acima de ${n(c.academicoMin)} (${ac?.score != null ? n(ac.score, 1) : "não ativado"})`);
+  }
+  // Eixo econômico esperado (caso.eixoEconomico: "left" ou "right").
+  if (c.eixoEconomico) {
+    const pos = r.political.economic.position;
+    const name = { left: "esquerda", right: "direita", center: "centro", not_identified: "não identificado" };
+    console.log(`  Eixo econômico: ${name[pos] ?? pos}`);
+    check(pos === c.eixoEconomico, `${c.nome}: eixo econômico ${name[c.eixoEconomico]} (deu ${name[pos] ?? pos})`);
+  }
+  // Novidades da Rodada 9 (só informativo): respostas do autor, ressalva da disputa, referências, peso dos trechos.
+  if (r.rebuttals?.length) console.log(`  Respostas do autor: ${r.rebuttals.map((x) => `${x.verdict} — ${x.criticism.slice(0, 60)}`).join(" | ")}`);
+  if (r.political.dispute?.caveat) console.log(`  Ressalva da disputa: ${r.political.dispute.caveat}`);
+  if (r.source.references) console.log(`  Referências separadas: ${r.source.references.split(/\s+/).length} palavras`);
+  const strengths = r.groups.flatMap((g) => g.categories).flatMap((x) => x.evidence).map((e) => e.strength).filter(Boolean);
+  if (strengths.length) console.log(`  Peso dos trechos: ${["weak", "medium", "strong"].map((k) => `${k} ${strengths.filter((s) => s === k).length}`).join(", ")}`);
+  const figIssues = r.groups.flatMap((g) => g.categories.flatMap((x) => x.evidence.filter((e) => e.figureId).map((e) => `${x.id} (${n(x.score, 1)}) em ${e.quote}`)));
+  if (figIssues.length) console.log(`  Problemas nas imagens: ${figIssues.join(" | ")}`);
+  if (r.rewrite) console.log(`  Versão neutra: ${r.rewrite.rewritten.slice(0, 160)}`);
+
   // Imagens e gráficos: quantas figuras a IA viu e se apontou o gráfico enganoso.
   if (r.figures?.length) {
     console.log(`  Imagens: ${r.figures.map((f) => `${f.label} (${f.kind}): ${f.description.slice(0, 90)}`).join(" | ")}`);
