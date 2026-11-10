@@ -63,13 +63,16 @@ export function MethodologyPt() {
           próprio navegador.
         </li>
         <li>
-          <strong>Identificação.</strong> A IA identifica o tipo de texto (notícia, opinião, paper, afirmação…), o país e o
-          contexto político relevante.
+          <strong>Identificação.</strong> A IA identifica o tipo de texto (notícia, reportagem, análise, opinião,
+          editorial, paper…), o país e o contexto político relevante. O tipo segue critérios fixos (por exemplo: texto
+          assinado que defende uma posição é opinião; texto que defende a posição do próprio veículo é editorial) e usa
+          como pista a editoria indicada pela página, quando existe. O motivo da escolha aparece no resultado. Se você
+          souber o tipo, pode informá-lo no formulário, e ele prevalece sobre o da IA.
         </li>
         <li>
           <strong>Especialistas.</strong> O texto é examinado ao mesmo tempo por vários &ldquo;especialistas&rdquo;, cada um
-          olhando só para um grupo de vieses (linguagem, fontes, dados, falácias…), mais um que avalia a inclinação política,
-          a proporção de fato e opinião e possíveis omissões.
+          olhando só para alguns grupos de vieses (linguagem, fontes, dados, falácias…). Um deles também avalia a inclinação
+          política, a proporção de fato e opinião e possíveis omissões.
         </li>
         <li>
           <strong>Conferência.</strong> Cada trecho citado como evidência é procurado no texto original. O que não for
@@ -103,6 +106,12 @@ export function MethodologyPt() {
       <p>
         Isso impede que a IA &ldquo;invente&rdquo; problemas e permite que você confira cada apontamento com os próprios
         olhos: basta clicar no trecho destacado.
+      </p>
+      <p>
+        <strong>Falas entre aspas são de quem fala, não do autor.</strong> Quando o texto reproduz entre aspas a fala de
+        um político, especialista ou entrevistado, essa fala não é tratada como opinião do autor apresentada como fato,
+        nem como linguagem do autor. O site confere isso automaticamente e descarta esses apontamentos. Falas citadas
+        ainda podem contar quando o problema está na escolha do autor, por exemplo ao dar voz a um só lado.
       </p>
 
       <h2>Como a nota de 0 a 10 é calculada</h2>
@@ -149,7 +158,8 @@ export function MethodologyPt() {
         texto trata de uma disputa concreta (governo × oposição, candidato A × candidato B), a IA diz se ele favorece um
         lado, se é equilibrado ou se não dá para afirmar. Para que a régua seja a mesma para os dois lados, eles são
         sempre apresentados na mesma ordem: primeiro quem está no poder, depois quem está fora. A classificação precisa
-        de um trecho do texto como prova.
+        de um trecho do texto como prova e indica a intensidade (levemente, claramente ou fortemente). O resumo da
+        análise é instruído a dizer a mesma coisa que esse marcador.
       </p>
       <p>
         As outras duas são eixos ideológicos, preenchidos só quando o tema realmente envolve economia ou costumes. Uma
@@ -185,9 +195,10 @@ export function MethodologyPt() {
           coisa num texto que favorecesse o lado oposto.
         </li>
         <li>
-          <strong>Textos espelhados.</strong> Mantemos pares de textos que contam o mesmo fato com viés para lados
-          opostos. Se a ferramenta for justa, os dois recebem notas parecidas e inclinações opostas. Usamos esses pares para
-          testar cada mudança.
+          <strong>Teste com lados opostos.</strong> Mantemos um conjunto de textos reais sobre o mesmo fato, de veículos
+          de lados opostos e de um veículo mais neutro. Cada mudança no site passa por um teste automático: os dois lados
+          precisam receber notas parecidas (diferença de no máximo 1,5 ponto) e inclinações opostas, e o texto mais neutro
+          precisa receber nota baixa.
         </li>
         <li>
           <strong>Cores neutras.</strong> Esquerda e direita nunca aparecem com cores diferentes. As cores do site indicam
@@ -209,6 +220,12 @@ export function MethodologyPt() {
         <li>
           <strong>Perspectivas diferentes.</strong> A IA é instruída a nunca recomendar só veículos do mesmo lado e a
           priorizar fontes confiáveis. O veículo do texto original fica de fora.
+        </li>
+        <li>
+          <strong>Linha editorial.</strong> Cada sugestão mostra a linha editorial do veículo (esquerda, centro, direita,
+          institucional, jurídico, checagem, acadêmico, agência de notícias…). Órgãos oficiais, tribunais, agências de
+          checagem e agências de notícias vêm de uma lista fixa do site. Os demais são uma estimativa da IA, baseada na
+          percepção pública mais aceita, e aparecem marcados como &ldquo;estimativa&rdquo;.
         </li>
         <li>
           <strong>Não é endosso.</strong> Recomendar um texto não significa que ele seja neutro ou correto: ele ajuda a ver o
@@ -297,12 +314,15 @@ export function MethodologyEn() {
           browser.
         </li>
         <li>
-          <strong>Identification.</strong> The AI identifies the type of text (news, opinion, paper, claim…), the country
-          and the relevant political context.
+          <strong>Identification.</strong> The AI identifies the type of text (news, feature, analysis, opinion,
+          editorial, paper…), the country and the relevant political context. The type follows fixed criteria (for
+          example: a signed piece arguing a position is opinion; a piece stating the outlet&rsquo;s own position is an
+          editorial) and uses the section shown by the page as a hint, when there is one. The reason appears in the
+          result. If you know the type, you can choose it in the form, and your choice overrides the AI.
         </li>
         <li>
           <strong>Specialists.</strong> The text is examined at the same time by several &ldquo;specialists&rdquo;, each
-          looking at one group of biases only (language, sources, data, fallacies…), plus one that assesses political
+          looking at a few groups of biases only (language, sources, data, fallacies…). One of them also assesses political
           leaning, the share of fact and opinion, and possible omissions.
         </li>
         <li>
@@ -337,6 +357,12 @@ export function MethodologyEn() {
       <p>
         This keeps the AI from &ldquo;inventing&rdquo; problems and lets you check every finding yourself: just click the
         highlighted passage.
+      </p>
+      <p>
+        <strong>Quotes belong to the speaker, not the author.</strong> When the text quotes a politician, expert or
+        interviewee, that quote is not treated as the author&rsquo;s opinion presented as fact, nor as the author&rsquo;s
+        language. The site checks this automatically and discards such findings. Quotes can still count when the problem
+        is the author&rsquo;s choice, for example giving voice to only one side.
       </p>
 
       <h2>How the 0–10 score is calculated</h2>
@@ -383,7 +409,8 @@ export function MethodologyEn() {
         the text covers a concrete dispute (government × opposition, candidate A × candidate B), the AI says whether it
         favors one side, is balanced, or cannot be determined. To apply the same yardstick to both sides, they are always
         listed in the same order: first whoever holds power, then whoever is outside it. The classification must be backed
-        by a passage from the text.
+        by a passage from the text and states the intensity (slightly, clearly or strongly). The analysis summary is
+        instructed to say the same thing as this marker.
       </p>
       <p>
         The other two are ideological axes, filled in only when the topic really involves the economy or social values.
@@ -419,8 +446,10 @@ export function MethodologyEn() {
           same thing in a text favoring the opposite side.
         </li>
         <li>
-          <strong>Mirrored texts.</strong> We keep pairs of texts that tell the same story slanted in opposite directions. If
-          the tool is fair, both get similar scores and opposite leanings. We use these pairs to test every change.
+          <strong>Opposite-sides test.</strong> We keep a set of real texts about the same event, from outlets on opposite
+          sides and from a more neutral outlet. Every change to the site goes through an automatic test: both sides must
+          get similar scores (at most 1.5 points apart) and opposite leanings, and the more neutral text must get a low
+          score.
         </li>
         <li>
           <strong>Neutral colors.</strong> Left and right never appear in different colors. The site&rsquo;s colors only
@@ -442,6 +471,12 @@ export function MethodologyEn() {
         <li>
           <strong>Different perspectives.</strong> The AI is instructed never to recommend outlets from a single side and
           to prioritize reliable sources. The original text&rsquo;s outlet is excluded.
+        </li>
+        <li>
+          <strong>Editorial line.</strong> Each suggestion shows the outlet&rsquo;s editorial line (left, center, right,
+          institutional, legal, fact-checking, academic, news agency…). Official bodies, courts, fact-checkers and news
+          agencies come from a fixed list kept by the site. The others are an AI estimate, based on the most widely accepted
+          public perception, and are marked as &ldquo;estimate&rdquo;.
         </li>
         <li>
           <strong>Not an endorsement.</strong> Recommending a text does not mean it is neutral or correct: it helps you see

@@ -197,6 +197,8 @@ Com o site ligado em `http://localhost:3000`:
 | **PDF** (usa a IA) | Clique em **Baixar o paper em PDF**, vá à aba **PDF** e envie o arquivo | Aparece "Fermented Oat Beverage and Anxiety (471 palavras extraídas)"; a análise deve ativar o grupo "Específicos de artigos acadêmicos" |
 | **Simetria** (usa a IA) | Analise o **Par espelhado (A)** e depois o **(B)** | Notas parecidas e inclinação social em lados opostos |
 | **Link** (usa a IA) | Cole o link de uma matéria real | Título, veículo, autor e data aparecem no topo do resultado |
+| **Tipo de texto** (usa a IA) | Antes de analisar, escolha um tipo em **Tipo de texto** (ex.: Opinião). Depois analise de novo deixando **Detectar automaticamente** | Com escolha: aparece "Tipo informado por você."; sem escolha: aparece "Por que …" com o motivo dado pela IA |
+| **Linha editorial** (usa a IA) | Role até **Para equilibrar sua leitura** | Cada sugestão mostra a linha editorial do veículo; as estimativas da IA aparecem com "(estimativa)" |
 | **Erros** | Cole um texto com poucas palavras, ou um link de site com paywall | Mensagem clara explicando o que fazer |
 
 **Comparar antes e depois:** depois de mudar instruções ou configurações, analise de novo os mesmos textos e rode o comando abaixo. Ele mostra, para cada texto, a análise mais antiga ao lado da mais recente (nota, inclinações, destaques, custo, tempo e custo por etapa).
@@ -204,6 +206,28 @@ Com o site ligado em `http://localhost:3000`:
 ```bash
 npm run comparar
 ```
+
+**Teste automático (simetria):** compara artigos reais de lados opostos sobre o mesmo fato (Brasil de Fato e Terra Brasil, que devem ficar entre 4 e 6, com diferença de no máximo 1,5 ponto e favorecendo lados opostos) e um mais neutro (CNN Brasil, entre 1 e 3). A lista e as faixas ficam em `testes/casos.json`.
+
+1. Na primeira vez, analise os 3 artigos no site e depois rode (guarda os textos em `testes/textos/`, só no seu computador, fora do GitHub por causa dos direitos autorais):
+
+```bash
+npm run teste:salvar
+```
+
+2. Sempre que quiser conferir uma mudança, com o site ligado em outra janela do Terminal (custa cerca de US$ 0,40 por rodada):
+
+```bash
+npm run teste
+```
+
+3. Experimento para baratear: o mesmo teste com "esforço baixo" nos especialistas (não muda o site; só mostra se a qualidade se mantém):
+
+```bash
+npm run teste -- --baixo
+```
+
+O teste mostra ✅ ou ❌ para cada regra, o gênero identificado, o custo e a comparação com a rodada anterior.
 
 **Cache:** analisar o mesmo texto de novo é instantâneo e grátis, porque o resultado fica guardado na pasta `.cache/`. Se você editar a taxonomia ou os prompts, o cache antigo é ignorado sozinho.
 
@@ -225,6 +249,8 @@ npm run comparar
 | `content/privacy.tsx` | Texto da página Privacidade (atualize antes de lançar login ou pagamentos) |
 | `lib/prompts/claimCheck.ts` | Instruções da verificação de afirmações |
 | `lib/prompts/balance.ts` | Instruções da busca de textos para equilibrar |
+| `lib/veiculos.ts` | Linha editorial fixa de veículos (órgãos oficiais, tribunais, checagem, agências). Veículos fora da lista recebem uma estimativa da IA, marcada como "estimativa" |
+| `testes/casos.json` | Artigos e faixas de nota do teste automático |
 
 Cada arquivo tem comentários explicando o que pode ser mudado. Depois de salvar, o site recarrega sozinho (se estiver ligado com `npm run dev`).
 
@@ -232,7 +258,7 @@ Cada arquivo tem comentários explicando o que pode ser mudado. Depois de salvar
 
 ## Quanto custa
 
-- **Com o Gemini grátis, o custo é zero.** Com a Anthropic, **cada análise de matéria deve custar cerca de US$ 0,12 a 0,18** (estimativa após a otimização; confira o valor real no fim de cada análise ou com `npm run comparar`), já incluindo até 3 buscas na web (US$ 0,01 cada; ajuste em `lib/config.ts`, seção `balance`). Papers longos ficam entre US$ 0,50 e 1,50. O custo estimado de cada análise aparece no fim da página de resultado.
+- **Com o Gemini grátis, o custo é zero.** Com a Anthropic, **cada análise de matéria deve custar cerca de US$ 0,10 a 0,15** (estimativa após a otimização: 4 chamadas de especialistas, com o Claude Haiku na identificação, na síntese e na busca; confira o valor real no fim de cada análise ou com `npm run comparar`), já incluindo até 3 buscas na web (US$ 0,01 cada; ajuste em `lib/config.ts`, seção `balance`). Papers longos ficam entre US$ 0,50 e 1,50. O custo estimado de cada análise aparece no fim da página de resultado.
 - O exemplo pronto e as análises repetidas (cache) são grátis.
 - **Proteção:** o site recusa novas análises depois de 30 por dia (ajuste em `lib/config.ts`, `globalDailyAnalyses`). Configure também o limite mensal na conta da Anthropic, como explicado acima.
 
@@ -277,13 +303,16 @@ lib/
   ai/client.ts             conversa com a IA (Anthropic) e escolhe qual IA usar
   ai/gemini.ts             conversa com o Google Gemini (testes grátis)
   ai/balance.ts            busca na web e conferência dos links
+  veiculos.ts              linha editorial fixa de alguns veículos  ← editável
   demo/                    resultado do exemplo pronto
+scripts/                   comandos npm run comparar, teste e teste:salvar
+testes/casos.json          artigos e faixas do teste automático  ← editável
 public/exemplos/           PDF de exemplo
 ```
 
 **Como uma análise acontece:**
 1. **Identificação:** a IA descobre o tipo de texto, o país e o contexto político.
-2. **Especialistas:** um por grupo de viés, mais um de visão geral (inclinação, fato e opinião, omissões), todos ao mesmo tempo.
+2. **Especialistas:** 4 chamadas ao mesmo tempo, cada uma com alguns grupos de viés; uma delas também faz a visão geral (inclinação, disputa, fato e opinião, omissões).
 3. **Conferência:** cada citação é procurada no texto, as que não existem são descartadas e as notas são calculadas.
 4. **Síntese:** resumo e sugestão de reescrita.
 
