@@ -64,3 +64,11 @@ Retomada automática: tarefa "Retomar unslant" apagada (rodada concluída). Pró
 - Escolha "Tipo de análise" (Simples/Detalhada) no formulário — Opção A aprovada: as duas fazem a mesma análise completa (mesma nota); muda o que é mostrado.
 - Para a Fase 4 (decidido): usuário grátis = 3 análises simples + 1 detalhada por dia; numa simples, o botão "Ver análise completa" vira "usar minha detalhada do dia" (não chama a IA de novo). Limites do plano pago ficam para a Fase 5.
 - Próximo: Fase 4 (login Supabase, histórico, limites por usuário, análise em segundo plano). Pedir aprovação e avisar custos antes.
+
+## Fase 4 — plano enviado ao usuário (aguardando aprovação e 4 decisões)
+Itens: 1) conta Supabase (grátis) + chaves no .env.local; 2) instalar @supabase/supabase-js e @supabase/ssr (pedir aprovação);
+3) login por link no e-mail; 4) tabelas (perfis, análises, uso diário) com regras de acesso (cada um só vê o seu);
+5) limites: grátis = 3 simples + 1 detalhada/dia (zera à meia-noite de Brasília), "usar minha detalhada do dia";
+6) "Minhas análises" (histórico, abrir de novo sem custo, apagar); 7) cache no banco (compartilhado);
+8) análise em etapas salvas no banco (resolve o tempo limite da Vercel; dá para fechar a aba); 9) Privacidade atualizada.
+Decisões pendentes: visitante sem login pode analisar?; login só por e-mail ou também Google?; resultado reaproveitado conta no limite?; horário da virada do dia.
