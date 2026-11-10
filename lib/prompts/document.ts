@@ -79,6 +79,6 @@ ${lines.join("\n")}
 
 export function languageInstruction(lang: "pt" | "en") {
   return lang === "pt"
-    ? "Escreva todos os textos da resposta (explicações, resumos, justificativas) em português do Brasil. As citações (campo de trecho/quote) devem permanecer no idioma original do documento, copiadas exatamente."
-    : "Write every text field of your answer (explanations, summaries, justifications) in English. Quotes (the quote fields) must stay in the document's original language, copied exactly.";
+    ? "IDIOMA DA RESPOSTA: escreva TODOS os campos de texto em português do Brasil (explicações, resumos, justificativas, nomes de países, temas, motivos, contexto, nomes dos lados de uma disputa). As citações (campos de trecho/quote) devem permanecer no idioma original do documento, copiadas exatamente."
+    : "ANSWER LANGUAGE: write EVERY text field in English (explanations, summaries, justifications, country names, topics, reasons, context, names of the sides of a dispute), even though the instructions and examples above are in Portuguese. Quotes (the quote fields) must stay in the document's original language, copied exactly. Never use Portuguese in the answer unless it is inside a quote.";
 }

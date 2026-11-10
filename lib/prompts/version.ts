@@ -27,7 +27,7 @@ import { visualPrompt } from "./visual";
  * site (conferência das citações, regras das aspas, cálculo das notas, versão
  * neutra etc.). Assim os resultados guardados com a lógica antiga são refeitos.
  */
-export const ANALYSIS_VERSION = 6;
+export const ANALYSIS_VERSION = 7;
 
 const SAMPLE_TRIAGE: TriageOutput = {
   contentType: "news",

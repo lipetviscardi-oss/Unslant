@@ -21,10 +21,10 @@ Preencha:
   - "press_release": comunicado de empresa, governo ou organização; "blog": post pessoal; "other": nada acima.
   Se os metadados trouxerem a seção/editoria da página (ex.: "Opinião", "Colunas", "Análise", "Editorial"), considere-a uma pista forte. Na dúvida entre "news" e "analysis", pergunte-se: o autor faz avaliações com a própria voz, fora das aspas? Se sim, é "analysis".
 - contentTypeReason: UMA frase curta dizendo por que o texto recebeu esse tipo (ex.: "Relata a decisão em voz neutra; as opiniões aparecem só em falas citadas.").
-- country: país cuja política/sociedade o texto trata principalmente, escrito por extenso no idioma pedido (ex.: "Brasil", "Estados Unidos", "Reino Unido"). Use "Internacional" se não for um país específico e "Não identificado" se não der para saber.
+- country: país cuja política/sociedade o texto trata principalmente, escrito por extenso NO IDIOMA DA RESPOSTA (em português: "Brasil", "Estados Unidos", "Reino Unido"; em inglês: "Brazil", "United States", "United Kingdom"). Se não for um país específico, use "Internacional" (em inglês: "International"); se não der para saber, "Não identificado" (em inglês: "Unidentified").
 - countryCode: código ISO de 2 letras do país (ex.: "BR", "US") ou "" se não houver.
 - politicalContext: 1 a 3 frases sobre o contexto político relevante para interpretar este texto naquele país (ex.: quem governa, quais são os polos do debate sobre o tema). Use conhecimento geral; não invente fatos específicos e recentes que você não pode verificar.
-- documentLanguage: idioma do documento (ex.: "português", "inglês").
+- documentLanguage: idioma do documento, escrito no idioma da resposta (ex.: "português"/"Portuguese", "inglês"/"English").
 - topic: tema central em até 8 palavras.
 - contentSummary: o que o texto diz, em 1 a 2 frases neutras.
 - title, author, outlet, publishedAt: copie do documento ou dos metadados se estiverem claros; caso contrário, "" (não adivinhe).

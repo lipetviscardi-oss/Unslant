@@ -7,8 +7,9 @@
  */
 
 import { config } from "@/lib/config";
-import { SCORING, TAXONOMY, scoreLabel, type BiasGroup, type ContentKind, type Lang } from "@/lib/taxonomy";
+import { NOT_MILD_MIN, TAXONOMY, scoreLabel, type BiasGroup, type ContentKind, type Lang } from "@/lib/taxonomy";
 import { createQuoteMatcher, type QuoteMatcher } from "./verify";
+import { getDict } from "@/lib/i18n/server";
 import { clamp, scoreGroup, scoreOverall } from "./scoring";
 import type {
   AxisPosition,
@@ -289,7 +290,7 @@ export function rewriteCandidates(findings: Findings, text: string): Set<string>
   const ids = new Set<string>();
   for (const g of findings.groups) {
     for (const c of g.categories) {
-      if (c.status !== "found" || c.score < SCORING.intensity.moderate) continue;
+      if (c.status !== "found" || c.score < NOT_MILD_MIN) continue;
       for (const e of c.evidence) {
         if (e.quoted || e.start < 0) continue; // fala citada ou evidência numa imagem
         const sentence = sentenceAround(text, e.start, e.end);
@@ -301,23 +302,38 @@ export function rewriteCandidates(findings: Findings, text: string): Set<string>
   return ids;
 }
 
-const LEVEL_WORDS = { leve: /\b(leve|levemente|mild|slightly)\b/i, moderado: /\b(moderad[oa]|moderadamente|moderate|moderately)\b/i, forte: /\b(forte|fortemente|strong|strongly)\b/i };
-/** Gradações fora da escala única do site (leve / moderado / forte). */
-const OFF_SCALE = /\b(acentuad[oa]s?|muito fortes?|extremamente enviesad[oa]|claramente enviesad[oa]|marked bias|very strong|heavily biased)\b/i;
+/** Palavras de cada faixa da escala (SCORING.labels), da mais específica para a mais geral. */
+const LEVEL_PATTERNS: [string, RegExp][] = [
+  ["muito forte", /\b(muito fortes?|muito enviesad[oa]|very strong|very biased|heavily biased)\b/i],
+  ["acentuado", /\b(acentuad[oa]|claramente|marked|clearly)\b/i],
+  ["forte", /\b(fortes?|fortemente|strong|strongly)\b/i],
+  ["moderado", /\b(moderad[oa]|moderadamente|moderate|moderately)\b/i],
+  ["leve", /\b(leve|levemente|mild|mildly|slight|slightly)\b/i],
+];
+/** Gradações fora da escala do site. */
+const OFF_SCALE = /\b(grave|extremamente enviesad[oa]|extreme bias|extremely biased|severe bias|severely biased)\b/i;
+/** Nomes de campos e valores internos que nunca podem aparecer no resumo. */
+const INTERNAL_TERMS =
+  /\b(favors_[ab]|not_applicable|none_found|side[AB]|intensidadeGeral|notaGeral|citacaoDeTerceiro|podeReescrever|percentualFatos|[a-z]+_[a-z]+(?:_[a-z]+)*)\b|classifica[çc][ãa]o do (site|sistema)|(site|system)'s classification|classification (of|by) the (site|system)/i;
 
 /**
- * Confere se o resumo usa a escala única do site e a mesma intensidade da nota
- * geral quando qualifica o texto como um todo ("viés moderado", "levemente enviesado").
+ * Confere o resumo: (1) nada de nomes de campos ou valores internos; (2) usa a
+ * escala do site e a mesma faixa da nota geral quando qualifica o texto inteiro
+ * ("viés acentuado", "clearly biased", "strong bias").
  */
 export function summaryProblem(findings: Findings, synthesis: SynthesisOutput): string | null {
-  const expected = scoreLabel(findings.overall.score).pt.replace("Viés ", ""); // leve | moderado | forte
+  const expected = scoreLabel(findings.overall.score).short.pt;
   for (const summary of [synthesis.summary, synthesis.summarySimple]) {
+    const internal = summary.match(INTERNAL_TERMS);
+    if (internal) return `usou o termo interno "${internal[0]}"; escreva só em linguagem normal, sem nomes de campos, valores internos ou menções à "classificação do site"`;
     const off = summary.match(OFF_SCALE);
-    if (off) return `usou a gradação "${off[0]}", que não existe no site; use só leve, moderado ou forte`;
-    // Só as frases que qualificam o texto inteiro: "viés X", "X enviesado", "bias X".
-    for (const m of summary.matchAll(/\b(?:viés|bias)\s+(\p{L}+)|\b(\p{L}+)\s+(?:enviesad[oa]|biased)\b/giu)) {
-      const word = m[1] ?? m[2];
-      const level = (Object.keys(LEVEL_WORDS) as (keyof typeof LEVEL_WORDS)[]).find((k) => LEVEL_WORDS[k].test(word));
+    if (off) return `usou a gradação "${off[0]}", que não existe no site; use só a escala leve, moderado, acentuado, forte ou muito forte`;
+    // Só as expressões que qualificam o texto inteiro: "viés X", "X bias", "X enviesado/biased".
+    const phrases = summary.matchAll(
+      /\b(?:viés|bias)\s+((?:\p{L}+\s+)?\p{L}+)|\b((?:\p{L}+\s+)?\p{L}+)\s+(?:viés|bias|enviesad[oa]|biased)\b/giu,
+    );
+    for (const m of phrases) {
+      const level = LEVEL_PATTERNS.find(([, re]) => re.test(m[1] ?? m[2]))?.[0];
       if (level && level !== expected) return `chamou o viés do texto de "${level}", mas a nota geral corresponde a "${expected}"`;
     }
   }
@@ -492,20 +508,27 @@ export function buildFindings(
 }
 
 /** Texto compacto com as conclusões, enviado à IA para a síntese. */
-export function findingsForSynthesis(triage: TriageOutput, findings: Findings, text: string): string {
+/**
+ * Dados enviados para a síntese. Tudo em linguagem normal, no idioma do
+ * relatório: nada de valores internos ("favors_b", "slight"), que acabavam
+ * aparecendo no resumo.
+ */
+export function findingsForSynthesis(triage: TriageOutput, findings: Findings, text: string, lang: Lang): string {
+  const t = getDict(lang);
   const candidates = rewriteCandidates(findings, text);
   const groups = findings.groups
     .filter((g) => g.score !== null)
     .map((g) => {
-      const group = TAXONOMY.find((t) => t.id === g.id)!;
+      const group = TAXONOMY.find((x) => x.id === g.id)!;
       return {
-        grupo: group.name.pt,
+        grupo: group.name[lang],
         nota: g.score,
         categorias: g.categories
           .filter((c) => c.status === "found")
           .map((c) => ({
-            categoria: group.categories.find((x) => x.id === c.id)?.name.pt ?? c.id,
+            categoria: group.categories.find((x) => x.id === c.id)?.name[lang] ?? c.id,
             nota: c.score,
+            intensidade: scoreLabel(c.score).short[lang],
             resumo: c.summary,
             evidencias: c.evidence.map((e) => ({
               id: e.id,
@@ -522,26 +545,33 @@ export function findingsForSynthesis(triage: TriageOutput, findings: Findings, t
       };
     });
 
+  const { economic, social, dispute } = findings.political;
+  const axis = (a: AxisResult) => (a.position === "not_applicable" ? undefined : { posicao: t.labels.position[a.position], justificativa: a.justification });
+  const disputeText =
+    dispute.status === "favors_a" || dispute.status === "favors_b"
+      ? t.result.simple.favors(dispute.status === "favors_a" ? dispute.sideA : dispute.sideB, t.result.simple.strength[dispute.strength ?? "slight"])
+      : dispute.status === "balanced"
+        ? t.result.simple.balanced
+        : dispute.status === "unidentified"
+          ? t.result.axes.dispute.unidentified
+          : undefined;
+
   return JSON.stringify(
     {
       texto: {
-        tipo: triage.contentType,
+        tipo: t.labels.contentType[triage.contentType],
+        // Motivo do tipo, dado na identificação: o resumo não pode descrever o gênero de outro jeito.
+        motivoDoTipo: triage.contentTypeReason || undefined,
         pais: triage.country,
         tema: triage.topic,
         resumo: triage.contentSummary,
       },
       notaGeral: findings.overall.score,
-      intensidadeGeral: scoreLabel(findings.overall.score).pt.replace("Viés ", ""),
+      intensidadeGeral: scoreLabel(findings.overall.score).short[lang],
       inclinacao: {
-        economica: { posicao: findings.political.economic.position, justificativa: findings.political.economic.justification },
-        social: { posicao: findings.political.social.position, justificativa: findings.political.social.justification },
-        disputa: {
-          situacao: findings.political.dispute.status,
-          intensidade: findings.political.dispute.strength,
-          ladoA: findings.political.dispute.sideA,
-          ladoB: findings.political.dispute.sideB,
-          justificativa: findings.political.dispute.justification,
-        },
+        economica: axis(economic),
+        social: axis(social),
+        ...(disputeText ? { disputa: { situacao: disputeText, justificativa: dispute.justification } } : {}),
       },
       percentualFatos: findings.factOpinion.factPercent,
       omissoes: findings.omissions,

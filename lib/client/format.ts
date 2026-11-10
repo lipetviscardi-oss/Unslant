@@ -1,15 +1,13 @@
 /** Pequenas funções de apresentação usadas pelos componentes da tela. */
 
 import { NUMBER_LOCALE, type Locale } from "@/lib/i18n/config";
-import { SCORING } from "@/lib/taxonomy";
+import { scoreLabel } from "@/lib/taxonomy";
 
 export type Severity = "low" | "mid" | "high";
 
-/** Intensidade de uma nota (leve / moderado / forte): define a cor. Escala em SCORING.intensity. */
+/** Cor de uma nota: vem da faixa em SCORING.labels (lib/taxonomy.ts). */
 export function severity(score: number): Severity {
-  if (score < SCORING.intensity.moderate) return "low";
-  if (score < SCORING.intensity.strong) return "mid";
-  return "high";
+  return scoreLabel(score).tone;
 }
 
 export const SEVERITY_TEXT: Record<Severity, string> = {

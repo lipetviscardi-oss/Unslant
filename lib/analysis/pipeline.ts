@@ -276,7 +276,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
       stage: "síntese",
       light: true, // modelo mais barato: só resume o que os especialistas encontraram
       schema: SynthesisSchema,
-      task: synthesisPrompt(findingsForSynthesis(triage, findings, text), lang, retryNote),
+      task: synthesisPrompt(findingsForSynthesis(triage, findings, text, lang), lang, retryNote),
       effort: config.ai.effort.synthesis,
       maxTokens: config.ai.maxTokens.synthesis,
       usage,

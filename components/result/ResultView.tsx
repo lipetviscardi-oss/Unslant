@@ -35,11 +35,13 @@ const MODEL_LABEL: Record<string, string> = {
 };
 
 /** "Claude Sonnet 5.5 (especialistas, visão geral) · Claude Haiku 5.5 (identificação, síntese, busca)" */
-function modelsUsed(s: AnalysisResult["stats"]): string {
+function modelsUsed(s: AnalysisResult["stats"], stageNames: Record<string, string>): string {
   if (!s.stages) return MODEL_LABEL[s.model] ?? s.model;
   const byModel = new Map<string, string[]>();
   for (const [stage, v] of Object.entries(s.stages)) {
-    for (const m of v.model.split(" + ")) byModel.set(m, [...(byModel.get(m) ?? []), stage]);
+    // Os nomes das etapas são internos (em português): na tela, aparecem traduzidos.
+    const name = stageNames[stage] ?? stage;
+    for (const m of v.model.split(" + ")) byModel.set(m, [...(byModel.get(m) ?? []), name]);
   }
   return [...byModel.entries()].map(([m, stages]) => `${MODEL_LABEL[m] ?? m} (${stages.join(", ")})`).join(" · ");
 }
@@ -55,7 +57,7 @@ function Stats({ result }: { result: AnalysisResult }) {
       <dl className="grid gap-x-8 gap-y-2 sm:grid-cols-2 lg:grid-cols-4">
         <div className="sm:col-span-2 lg:col-span-4">
           <dt className="inline">{t.result.stats.model}</dt>
-          <dd className="inline text-ink">{result.demo ? t.result.stats.demoModel : modelsUsed(s)}</dd>
+          <dd className="inline text-ink">{result.demo ? t.result.stats.demoModel : modelsUsed(s, t.labels.stage)}</dd>
         </div>
         {!result.demo && (
           <>

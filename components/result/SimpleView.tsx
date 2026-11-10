@@ -8,7 +8,7 @@
 
 import type { AnalysisResult, CategoryResult, Evidence } from "@/lib/analysis/types";
 import { formatScore, severity, SEVERITY_SOFT, SEVERITY_TEXT } from "@/lib/client/format";
-import { getCategory } from "@/lib/taxonomy";
+import { getCategory, scoreLabel } from "@/lib/taxonomy";
 import { useDict, useLang } from "@/lib/i18n";
 
 import type { ResultMode } from "@/lib/client/mode";
@@ -95,7 +95,7 @@ export function TopProblems({ result, onShow }: { result: AnalysisResult; onShow
                     {formatScore(c.score, lang)}
                   </span>
                   <span className="font-display text-lg font-medium">{def?.simpleName[lang] ?? def?.name[lang] ?? c.id}</span>
-                  <span className={`text-sm ${SEVERITY_TEXT[sev]}`}>{ts.level[sev]}</span>
+                  <span className={`text-sm ${SEVERITY_TEXT[sev]}`}>{scoreLabel(c.score).short[lang]}</span>
                 </p>
                 {c.summary && <p className="text-[15px] leading-relaxed text-muted">{c.summary}</p>}
                 {ev && (

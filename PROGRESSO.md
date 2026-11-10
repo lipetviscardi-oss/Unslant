@@ -106,11 +106,11 @@ Decisões: 1b (5 faixas nos dois idiomas: 0–2 leve/Mild, 2–4 moderado/Modera
 4a (manter classificação da fonte, mostrar data da avaliação); 9 sim (simetria Mother Jones × Federalist ≤ 1,5, lados opostos).
 | Item | O quê | Status |
 |---|---|---|
-| R1 | 5 faixas (taxonomy SCORING), resumo, destaques, modo simples, docs | em andamento |
-| R2 | Idioma: identificação com instrução de idioma; rodapé traduzido | a fazer |
-| R3 | Resumo sem códigos internos (dados legíveis + regra + conferência) | a fazer |
-| R5 | Resumo coerente com o gênero | a fazer |
-| R4 | Reconferir a lista de veículos (avaliação, país, data) + National Review, The Dispatch, Washington Examiner | a fazer |
+| R1 | 5 faixas (taxonomy SCORING), resumo, destaques, modo simples, docs | feito |
+| R2 | Idioma: identificação com instrução de idioma; rodapé traduzido | feito |
+| R3 | Resumo sem códigos internos (dados legíveis + regra + conferência) | feito |
+| R5 | Resumo coerente com o gênero | feito |
+| R4 | Reconferir a lista de veículos (avaliação, país, data) + National Review, The Dispatch, Washington Examiner | em andamento |
 | R6 | Limpar newsletter, propaganda, "leia também" e tags do texto | a fazer |
 | R7 | Equilibrar: pelo menos 1 veículo do outro lado (busca dirigida se faltar) | a fazer |
 | R8 | Imagens: só o visível | a fazer |

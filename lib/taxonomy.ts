@@ -826,19 +826,18 @@ export const SCORING = {
   /** Peso de cada nível de confiança no cálculo das médias. */
   confidenceWeight: { low: 0.6, medium: 0.85, high: 1 },
   /**
-   * Escala única de intensidade usada no site inteiro (notas, cores,
-   * destaques, versão neutra): abaixo de "moderate" = leve; de "moderate"
-   * até antes de "strong" = moderado; a partir de "strong" = forte.
-   */
-  intensity: { moderate: 3.5, strong: 6.5 },
-  /**
-   * Faixas da nota geral (limite superior de cada faixa), na mesma escala de
-   * "intensity" acima: leve até 3,4; moderado de 3,5 a 6,4; forte a partir de 6,5.
+   * ESCALA ÚNICA do site, nos dois idiomas: vale para a nota geral, as notas
+   * das categorias, as cores, os destaques, o modo simples e o resumo.
+   * "max" = limite superior da faixa (as notas têm uma casa decimal):
+   * 0–2 leve · 2,1–4 moderado · 4,1–6 acentuado · 6,1–8 forte · 8,1–10 muito forte.
+   * "tone" = cor usada na tela (low = verde, mid = âmbar, high = vermelho).
    */
   labels: [
-    { max: 3.4, pt: "Viés leve", en: "Mild bias", simplePt: "levemente enviesado", simpleEn: "slightly biased" },
-    { max: 6.4, pt: "Viés moderado", en: "Moderate bias", simplePt: "moderadamente enviesado", simpleEn: "moderately biased" },
-    { max: 10, pt: "Viés forte", en: "Strong bias", simplePt: "fortemente enviesado", simpleEn: "strongly biased" },
+    { max: 2, short: { pt: "leve", en: "mild" }, pt: "Viés leve", en: "Mild bias", simplePt: "levemente enviesado", simpleEn: "slightly biased", tone: "low" },
+    { max: 4, short: { pt: "moderado", en: "moderate" }, pt: "Viés moderado", en: "Moderate bias", simplePt: "moderadamente enviesado", simpleEn: "moderately biased", tone: "mid" },
+    { max: 6, short: { pt: "acentuado", en: "marked" }, pt: "Viés acentuado", en: "Marked bias", simplePt: "claramente enviesado", simpleEn: "clearly biased", tone: "mid" },
+    { max: 8, short: { pt: "forte", en: "strong" }, pt: "Viés forte", en: "Strong bias", simplePt: "fortemente enviesado", simpleEn: "strongly biased", tone: "high" },
+    { max: 10, short: { pt: "muito forte", en: "very strong" }, pt: "Viés muito forte", en: "Very strong bias", simplePt: "muito enviesado", simpleEn: "very biased", tone: "high" },
   ],
 } as const;
 
@@ -859,3 +858,6 @@ export function getCategory(id: string): { group: BiasGroup; category: BiasCateg
 export function scoreLabel(score: number) {
   return SCORING.labels.find((l) => score <= l.max) ?? SCORING.labels[SCORING.labels.length - 1];
 }
+
+/** Menor nota que já não é "leve" (a partir dela, o destaque aparece por padrão e o trecho pode ganhar versão neutra). */
+export const NOT_MILD_MIN = SCORING.labels[0].max + 0.1;
