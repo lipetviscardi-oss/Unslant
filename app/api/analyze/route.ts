@@ -180,7 +180,10 @@ export async function POST(request: Request) {
           releaseDailySlot();
         }
         console.error(`[unslant] erro ${code}:`, err instanceof AppError ? err.detail ?? "" : err);
-        send({ type: "error", code, message: errorMessage(code, lang) });
+        // No computador de desenvolvimento (npm run dev), o detalhe técnico vai junto, para facilitar
+        // o diagnóstico. No site publicado, só a mensagem simples (o detalhe fica no registro do servidor).
+        const detail = process.env.NODE_ENV === "development" && err instanceof AppError && err.detail ? ` [detalhe: ${err.detail.slice(0, 400)}]` : "";
+        send({ type: "error", code, message: errorMessage(code, lang) + detail });
       } finally {
         closed = true;
         try {

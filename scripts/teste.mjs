@@ -9,6 +9,7 @@
  *                                a inclinação política (continua no Sonnet)
  *                                (experimento para baratear; não muda o site)
  *   npm run teste -- --porta 3001   → se o site estiver em outra porta
+ *   npm run teste -- --so cnn       → roda só um caso (o id está em testes/casos.json)
  *
  * Confere as regras (faixa de nota de cada artigo, simetria entre os dois
  * lados, lados opostos na disputa) e mostra ✅ ou ❌. Custa cerca de
@@ -22,6 +23,9 @@ import path from "node:path";
 
 const args = process.argv.slice(2);
 const low = args.includes("--baixo");
+// --so <id>: roda só um caso (ex.: npm run teste -- --so paper-grafico)
+const onlyIndex = args.indexOf("--so");
+const only = onlyIndex !== -1 ? args[onlyIndex + 1] : undefined;
 const specialistModel = args.includes("--haiku") ? "haiku" : args.includes("--misto") ? "mixed" : undefined;
 const experiment =
   [low ? 'esforço "baixo"' : "", specialistModel === "haiku" ? "Haiku nos especialistas" : "", specialistModel === "mixed" ? "misto (Haiku + Sonnet na inclinação)" : ""]
@@ -33,6 +37,14 @@ const base = `http://localhost:${port}`;
 
 const root = process.cwd();
 const manifest = JSON.parse(readFileSync(path.join(root, "testes", "casos.json"), "utf8"));
+if (only) {
+  manifest.casos = manifest.casos.filter((c) => c.id === only);
+  if (!manifest.casos.length) {
+    console.log(`Não existe caso com id "${only}" em testes/casos.json.`);
+    process.exit(1);
+  }
+  delete manifest.simetria; // simetria só faz sentido com os dois lados juntos
+}
 const textsDir = path.join(root, "testes", "textos");
 /** Onde fica o texto de cada caso: um arquivo do próprio projeto (caso.arquivo) ou o guardado pelo teste:salvar. */
 const caseFile = (c) => (c.arquivo ? path.join(root, "testes", c.arquivo) : path.join(textsDir, `${c.id}.json`));
