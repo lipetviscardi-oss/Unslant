@@ -9,15 +9,25 @@ import { NextResponse, type NextRequest } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { supabaseServer } from "@/lib/supabase/server";
 
-/** Só aceita voltar para páginas do próprio site (evita redirecionar para sites de fora). */
-function safeNext(next: string | null): string {
-  if (!next || !next.startsWith("/") || next.startsWith("//") || next.startsWith("/\\")) return "/";
-  return next;
+/**
+ * Só aceita voltar para páginas do próprio site (evita mandar a pessoa para um
+ * site de fora depois do login). Monta o endereço completo e confere a origem:
+ * isso pega também truques como barras invertidas e caracteres invisíveis.
+ */
+function safeNext(next: string | null, origin: string): string {
+  if (!next || /[\x00-\x1f\\]/.test(next)) return "/";
+  try {
+    const url = new URL(next, origin);
+    if (url.origin !== origin) return "/";
+    return url.pathname + url.search + url.hash;
+  } catch {
+    return "/";
+  }
 }
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
-  const next = safeNext(searchParams.get("next"));
+  const next = safeNext(searchParams.get("next"), origin);
   const lang = next.startsWith("/en") ? "en" : "pt";
   const fail = NextResponse.redirect(new URL(`/${lang}/login?erro=link`, origin));
 
