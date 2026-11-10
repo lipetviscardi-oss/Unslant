@@ -159,6 +159,7 @@ Decisões do usuário (10/11/2026): botão de sugestões sim; 5 análises por di
 ### Onde paramos (10/11/2026, ~17h)
 - Passos 1, 2 e 3 feitos: domínio na GoDaddy, US$ 15 de créditos na Anthropic, site publicado em https://unslant.vercel.app (conta nova da Vercel, e-mail da faculdade).
 - Passo 4: **resolvido**. A rota de análise quebrava na Vercel (ERR_REQUIRE_ESM no jsdom: lá o Node 22 roda sem require() de ESM). Correções: "engines": {"node": "22.x"} no package.json e `transpilePackages: ["jsdom"]` no next.config.ts (jsdom empacotado). Conferido no site publicado: exemplo pronto funciona e a leitura de links funciona. Diagnóstico em /api/health (versão do Node e carga do jsdom). Para simular a Vercel localmente: NODE_OPTIONS="--no-experimental-require-module" npx next start.
-- **Próximo: passo 5** (esperando o "GO" do usuário).
+- Passo 5 feito: https://www.unslant.world no ar (endereço principal; unslant.world redireciona para o www). Conferido daqui.
+- **Próximo: passo 6** (Supabase: Site URL https://www.unslant.world e Redirect URLs).
 - O ambiente desta sessão libera unslant.vercel.app, unslant.world e www.unslant.world (dá para testar o site publicado daqui).
 - Depois: passo 5 (ligar unslant.world na Vercel + DNS na GoDaddy), 6 (Supabase URLs), 7 (Resend), 8 (e-mail de contato), 9 (teste final), 10 (convite: 4 análises por pessoa, sugerir 2 papers + 2 notícias).
