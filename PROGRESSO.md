@@ -84,3 +84,21 @@ pode instalar @supabase/supabase-js e @supabase/ssr.
 | I3 | Teste automático com pares EUA e Reino Unido (simetria em vários pares) | feito (falta o usuário salvar os artigos EUA/Reino Unido) |
 - Próximo: Fase 4. O usuário vai criar a conta no Supabase (Leste dos EUA) e pôr as chaves no .env.local:
   NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, SUPABASE_SECRET_KEY.
+
+## Fase 4 — em andamento (chaves conferidas pelo usuário com npm run verificar)
+| Item | O quê | Status |
+|---|---|---|
+| P1 | Instalar @supabase/supabase-js e @supabase/ssr (aprovado) | feito |
+| P2 | Clientes do Supabase (navegador, servidor, admin) + sessão no proxy.ts | a fazer |
+| P3 | Tabelas e regras de acesso (supabase/migrations) | a fazer |
+| P4 | Login por link no e-mail: página Entrar, /auth/callback, menu da conta | a fazer |
+| P5 | Limites: visitante 1 simples; grátis 3 simples + 1 detalhada por dia (meia-noite local); cache não conta | a fazer |
+| P6 | Minhas análises (histórico, abrir, apagar) + página da análise salva | a fazer |
+| P7 | Análise em segundo plano (etapas salvas no banco) | a fazer |
+| P8 | Privacidade, README, testes | a fazer |
+
+## Rodada 8 — ajustes da versão em inglês (plano enviado; aguardando decisões; Fase 4 pausada até terminar)
+1 faixas (manter 3 ou voltar a 5? aguardando); 2 idioma misturado (identificação sem instrução de idioma; rodapé com nomes internos);
+3 códigos internos no resumo; 4 CBS: MBFC diz RIGHT-CENTER (2.2), atualizado 28/04/2026 — manter com data ou tirar? (aguardando) + reconferir a lista toda;
+5 resumo × gênero; 6 limpar newsletter/tags/"leia também" do texto; 7 equilibrar com pelo menos 1 veículo do outro lado (+ National Review, The Dispatch, Washington Examiner);
+8 imagens: só o visível; 9 teste: Mother Jones e Federalist 4–7, Reuters 1–3 (mesmo acontecimento? simetria?).
