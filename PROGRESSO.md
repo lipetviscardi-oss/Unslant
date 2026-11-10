@@ -25,3 +25,8 @@ Cada item concluído é salvo no GitHub logo em seguida.
 
 ## Rodada 3 (concluída)
 Faixas da nota, dados/estatística, versão neutra no estilo de notícia, bug visual da disputa, diagnóstico e 2ª rodada da busca, Haiku na identificação e na busca.
+
+### Resultado do teste automático (10/11/2026)
+- Esforço padrão: aprovado (BdF 4,7 · Terra 4,2 · CNN 1,5; diferença 0,5; lados opostos). Custo médio US$ 0,140.
+- Esforço baixo: aprovado (4,3 · 4,5 · 1,6; diferença 0,2). Custo médio US$ 0,140, sem economia → fica o esforço padrão.
+- Próximo passo proposto (aguardando aprovação): experimento com especialistas no Haiku (todos ou "misto") para chegar abaixo de US$ 0,10.
