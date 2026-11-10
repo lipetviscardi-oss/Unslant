@@ -51,8 +51,8 @@ Faixas da nota, dados/estatística, versão neutra no estilo de notícia, bug vi
 |---|---|---|
 | 1 | Limite por minuto: fila de chamadas por estimativa de tokens + espera quando a Anthropic pedir | feito |
 | 3 | Tabelas da web em linhas legíveis; PDF sem cabeçalho/rodapé repetido; PDF em duas colunas | feito |
-| 2 | Etapa "Imagens e gráficos" (PDF: páginas com figura/tabela, até 20; link: até 6 imagens), 2 categorias novas, seção no resultado | em andamento |
-| 5 | Metodologia/README: limitações (gráficos interativos, PDF escaneado) | a fazer |
+| 2 | Etapa "Imagens e gráficos" (PDF: páginas com figura/tabela, até 20; link: até 6 imagens), 2 categorias novas, seção no resultado | feito |
+| 5 | Metodologia/README: limitações (gráficos interativos, PDF escaneado) | em andamento |
 | T | Teste automático com um paper com gráficos (aprovado) | a fazer |
 | 4 | Análise em segundo plano (tempo limite da Vercel) | fica para a Fase 4 |
 Retomada automática: tarefa agendada "Retomar unslant" (a cada hora). Apagar quando tudo estiver feito.

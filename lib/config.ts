@@ -131,6 +131,23 @@ export const config = {
   },
 
   /** Busca na web: seção "Para equilibrar sua leitura". */
+  /**
+   * Etapa "Imagens e gráficos": a IA vê as figuras, gráficos e tabelas.
+   * Custo extra estimado: ~US$ 0,02–0,04 por matéria com imagens e
+   * ~US$ 0,05–0,15 por paper com gráficos (só quando há imagens).
+   */
+  visual: {
+    enabled: true,
+    /** PDF: no máximo quantas páginas com figura/tabela viram imagem. */
+    maxPdfPages: 20,
+    /** Link: no máximo quantas imagens da matéria. */
+    maxUrlImages: 6,
+    /** Texto enviado junto: inteiro até este tamanho; acima, só os trechos que falam das figuras. */
+    maxContextWords: 4_000,
+    effort: "medium" as const,
+    maxTokens: 8_000,
+  },
+
   balance: {
     /** Liga ou desliga a busca (false = a seção não aparece e não há custo de busca). */
     enabled: true,
@@ -152,6 +169,9 @@ export const config = {
     timeoutMs: 15_000,
     maxBytes: 5 * 1024 * 1024, // 5 MB
     maxRedirects: 5,
+    /** Imagens da matéria (etapa "Imagens e gráficos"): tamanho máximo e tempo limite de cada download. */
+    maxImageBytes: 3_500_000, // a Anthropic aceita até 5 MB por imagem (em base64)
+    imageTimeoutMs: 8_000,
   },
 
   /** Proteções contra gastos inesperados. */

@@ -143,6 +143,16 @@ export interface StructuredCallOptions<T extends z.ZodType> {
   signal?: AbortSignal;
   /** Avisado quando a chamada precisa esperar o limite por minuto da IA. */
   onWait?: () => void;
+  /** Imagens enviadas junto (etapa "Imagens e gráficos"). Cada uma vem depois do seu rótulo. */
+  images?: CallImage[];
+}
+
+export interface CallImage {
+  /** Rótulo mostrado à IA antes da imagem (ex.: "[img-1 — página 7]"). */
+  label: string;
+  mediaType: "image/jpeg" | "image/png" | "image/gif" | "image/webp";
+  /** Conteúdo da imagem em base64 (sem o prefixo "data:"). */
+  data: string;
 }
 
 /** Chamada estruturada: vai para a IA escolhida em config.ai.provider. */
@@ -157,7 +167,7 @@ async function callStructuredAnthropic<T extends z.ZodType>(opts: StructuredCall
   // O modelo leve (Haiku) não tem troca automática em caso de recusa.
   const useFallback = config.ai.useRefusalFallback && !opts.light;
 
-  const content: Anthropic.Beta.BetaTextBlockParam[] = [];
+  const content: (Anthropic.Beta.BetaTextBlockParam | Anthropic.Beta.BetaImageBlockParam)[] = [];
   if (opts.documentBlock) {
     // cache_control: guarda o documento por alguns minutos; as próximas
     // etapas pagam ~10% do preço normal por essa parte.
@@ -166,6 +176,10 @@ async function callStructuredAnthropic<T extends z.ZodType>(opts: StructuredCall
         ? { type: "text", text: opts.documentBlock, cache_control: { type: "ephemeral" } }
         : { type: "text", text: opts.documentBlock },
     );
+  }
+  for (const img of opts.images ?? []) {
+    content.push({ type: "text", text: img.label });
+    content.push({ type: "image", source: { type: "base64", media_type: img.mediaType, data: img.data } });
   }
   content.push({ type: "text", text: opts.task });
 
@@ -177,7 +191,8 @@ async function callStructuredAnthropic<T extends z.ZodType>(opts: StructuredCall
   const maxAttempts = 2; // a tentativa original + 1 nova tentativa
   let lastProblem = "";
 
-  const estimated = estimateTokens(SYSTEM_PROMPT, opts.documentBlock, opts.task);
+  // Cada imagem custa no máximo ~1.600 tokens (a Anthropic reduz imagens grandes).
+  const estimated = estimateTokens(SYSTEM_PROMPT, opts.documentBlock, opts.task) + (opts.images?.length ?? 0) * 1_600;
   let rateRetries = 0;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {

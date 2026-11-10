@@ -26,6 +26,8 @@ import { overviewPrompt } from "@/lib/prompts/overview";
 import { synthesisPrompt } from "@/lib/prompts/synthesis";
 import { claimCheckPrompt } from "@/lib/prompts/claimCheck";
 import { balancePrompt } from "@/lib/prompts/balance";
+import { visualPrompt } from "@/lib/prompts/visual";
+import { figureLabel, toCallImages, visualContext, type VisualInput } from "./visuals";
 import { searchBalance } from "@/lib/ai/balance";
 import { promptVersion } from "@/lib/prompts/version";
 import {
@@ -35,6 +37,8 @@ import {
   TriageSchema,
   specialistSchema,
   specialistWithOverviewSchema,
+  visualSchema,
+  type VisualOutput,
   type ClaimCheckOutput,
   type SpecialistOutput,
   type SynthesisOutput,
@@ -59,6 +63,8 @@ export interface PipelineInput {
   lang: Lang;
   signal?: AbortSignal;
   onProgress: (event: StreamEvent) => void;
+  /** Imagens do conteúdo (páginas de PDF com figuras, imagens da matéria). */
+  visuals?: VisualInput[];
   /** Só para testes: troca o "esforço" dos especialistas (ver npm run teste -- --baixo). */
   specialistEffort?: "low" | "medium" | "high";
   /** Só para testes: especialistas no modelo leve — todos ("haiku") ou menos o da visão geral ("mixed"). */
@@ -69,7 +75,7 @@ export interface PipelineInput {
  * Junta os grupos ativos nas chamadas definidas em config.ai.specialistBundles.
  * Grupos que não estiverem em nenhum pacote viram uma chamada própria.
  */
-const count = (bundle: BiasGroup[]) => bundle.reduce((n, g) => n + g.categories.length, 0);
+const count = (bundle: BiasGroup[]) => bundle.reduce((n, g) => n + g.categories.filter((c) => !c.visualOnly).length, 0);
 
 function buildBundles(groups: BiasGroup[]): BiasGroup[][] {
   const used = new Set<string>();
@@ -124,7 +130,9 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
     ? bundles.reduce((best, b, i, all) => (count(b) < count(all[best]) ? i : best), 0)
     : -1;
   const perPart = bundles.length + (overviewHost === -1 ? 1 : 0);
-  const total = parts.length * perPart + (isClaim ? 1 : 0);
+  // Imagens só com a Anthropic (o Gemini de testes não recebe imagens aqui).
+  const visuals = config.visual.enabled && config.ai.provider === "anthropic" ? (input.visuals ?? []) : [];
+  const total = parts.length * perPart + (isClaim ? 1 : 0) + (visuals.length ? 1 : 0);
   let done = 0;
   // Texto longo: as chamadas passam do limite por minuto da IA e vão em fila (mais lento, mas não falha).
   let note: "long" | "waiting" | undefined =
@@ -144,7 +152,8 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
   parts.forEach((part, partIndex) => {
     const documentBlock = buildDocumentBlock(part.text, source, boundary, { index: partIndex, total: parts.length });
     bundles.forEach((bundle, bundleIndex) => {
-      const ids = bundle.flatMap((g) => g.categories.map((c) => c.id)) as [string, ...string[]];
+      // Categorias "só de imagem" ficam com a etapa "Imagens e gráficos".
+      const ids = bundle.flatMap((g) => g.categories.filter((c) => !c.visualOnly).map((c) => c.id)) as [string, ...string[]];
       const withOverview = bundleIndex === overviewHost;
       tasks.push(async () => {
         const output = await callStructured({
@@ -202,6 +211,35 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
     });
   }
 
+  // Imagens e gráficos: em paralelo com os especialistas.
+  let visualOutput = null as VisualOutput | null;
+  if (visuals.length) {
+    tasks.push(async () => {
+      try {
+        const ids = visuals.map((v) => v.id) as [string, ...string[]];
+        visualOutput = await callStructured({
+          label: `imagens e gráficos (${visuals.length})`,
+          stage: "imagens",
+          schema: visualSchema(ids),
+          documentBlock: buildDocumentBlock(visualContext(text), source, boundary, { index: 0, total: 1 }),
+          task: visualPrompt(triage, visuals.map(figureLabel).join("\n"), lang),
+          images: toCallImages(visuals),
+          effort: config.visual.effort,
+          maxTokens: config.visual.maxTokens,
+          usage,
+          signal,
+          onWait,
+        });
+      } catch (err) {
+        // As imagens são um complemento: se falharem, o resto da análise continua.
+        if (signal?.aborted) throw err;
+        console.warn("[unslant] imagens e gráficos falhou:", err instanceof AppError ? `${err.code} ${err.detail ?? ""}` : err);
+      }
+      tick();
+      return { part: -1, groupId: "__visual__", output: null };
+    });
+  }
+
   const outputs = await runLimited(tasks, config.ai.maxParallelRequests[config.ai.provider]);
 
   const rawParts: RawPart[] = parts.map((p, i) => {
@@ -226,7 +264,8 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
   });
 
   // 3. Conferência das citações e cálculo das notas
-  const findings = buildFindings(text, triage, rawParts, lang);
+  const visual = visuals.length ? { inputs: visuals, output: visualOutput } : null;
+  const findings = buildFindings(text, triage, rawParts, lang, visual);
 
   // 4. Síntese + busca de textos para equilibrar, ao mesmo tempo
   onProgress({ type: "stage", stage: "balancing" });
@@ -343,6 +382,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
     findings,
     synthesis,
     rewriteDiscarded,
+    visual,
     claimCheck,
     balance,
     stats: {

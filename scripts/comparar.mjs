@@ -52,7 +52,7 @@ function disputeText(d) {
 /** Destaques únicos (trechos sobrepostos contam como um só), total e moderados/fortes. */
 function highlights(r) {
   const evs = r.groups
-    .flatMap((g) => g.categories.flatMap((c) => c.evidence.map((e) => ({ s: e.start, e: e.end, score: c.score }))))
+    .flatMap((g) => g.categories.flatMap((c) => c.evidence.filter((e) => e.start >= 0).map((e) => ({ s: e.start, e: e.end, score: c.score }))))
     .sort((a, b) => a.s - b.s);
   const clusters = [];
   for (const x of evs) {

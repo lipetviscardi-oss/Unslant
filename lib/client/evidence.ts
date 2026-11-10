@@ -44,6 +44,7 @@ export interface Segment {
  */
 export function buildSegments(textLength: number, index: Map<string, EvidenceRef>, minScore = 0): Segment[] {
   const evs = [...index.values()]
+    .filter((r) => r.evidence.start >= 0) // evidências em imagens não têm posição no texto
     .map((r) => ({ id: r.evidence.id, start: r.evidence.start, end: r.evidence.end, score: r.category.score }))
     .sort((a, b) => a.start - b.start || b.end - a.end);
 

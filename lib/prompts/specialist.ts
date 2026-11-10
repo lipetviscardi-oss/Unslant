@@ -15,6 +15,7 @@ export function specialistPrompt(groups: BiasGroup[], triage: TriageOutput, lang
   const sections = groups
     .map((group) => {
       const categories = group.categories
+        .filter((c) => !c.visualOnly) // essas são avaliadas pela etapa "Imagens e gráficos"
         .map((c) => `- ${c.id} — ${c.name.pt}: ${c.description.pt} O que procurar: ${c.aiHint}`)
         .join("\n");
       return `GRUPO "${group.name.pt}" (${group.description.pt})\n${categories}`;

@@ -7,6 +7,7 @@
 import { useCallback, useMemo, useState } from "react";
 import type { AnalysisResult } from "@/lib/analysis/types";
 import { buildEvidenceIndex } from "@/lib/client/evidence";
+import { Figures } from "./Figures";
 import { formatDate } from "@/lib/client/format";
 import { useDict, useLang } from "@/lib/i18n";
 import { ScoreCard } from "./ScoreCard";
@@ -122,12 +123,20 @@ export function ResultView({
 
   const showEvidence = useCallback(
     (evidenceId: string) => {
+      // Evidência numa imagem: rola até a figura na seção "Imagens e gráficos".
+      const figureId = index.get(evidenceId)?.evidence.figureId;
+      if (figureId) {
+        const el = document.getElementById(`figure-${figureId}`);
+        el?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+        el?.focus({ preventScroll: true });
+        return;
+      }
       if (scrollToEvidence(evidenceId)) return;
       // O trecho é leve e está escondido: mostra todos e tenta de novo.
       setShowAll(true);
       setTimeout(() => scrollToEvidence(evidenceId), 60);
     },
-    [scrollToEvidence],
+    [scrollToEvidence, index],
   );
 
   const showGroup = useCallback((groupId: string) => {
@@ -255,6 +264,8 @@ export function ResultView({
         showAll={showAll}
         onToggleAll={() => setShowAll((v) => !v)}
       />
+
+      <Figures result={result} />
 
       <div className="grid gap-10 lg:grid-cols-2">
         <Omissions result={result} />

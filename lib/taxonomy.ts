@@ -40,6 +40,12 @@ export interface BiasCategory {
   aiHint: string;
   /** Peso dentro do grupo (padrão: 1). */
   weight?: number;
+  /**
+   * true = só pode ser avaliada olhando imagens (gráficos, fotos). Fica fora
+   * dos especialistas de texto e é avaliada pela etapa "Imagens e gráficos".
+   * Sem imagens no conteúdo, aparece como "não se aplica".
+   */
+  visualOnly?: boolean;
 }
 
 export interface BiasGroup {
@@ -177,6 +183,17 @@ export const TAXONOMY: BiasGroup[] = [
         },
         aiHint:
           "O mesmo dado poderia ser descrito de forma neutra, mas é apresentado com interpretação embutida ('apenas 40% aprovam' vs '40% aprovam'; 'mesmo com a alta' vs 'com a alta').",
+      },
+      {
+        id: "visual_framing",
+        name: { pt: "Enquadramento por imagem", en: "Visual framing" },
+        description: {
+          pt: "Fotos, ilustrações ou legendas que induzem uma leitura do assunto.",
+          en: "Photos, illustrations or captions that steer how the subject is read.",
+        },
+        aiHint:
+          "Só imagens enviadas junto com o texto. Foto que mostra um dos lados de forma desfavorável (expressão, ângulo, contexto) enquanto o outro aparece de forma favorável; legenda carregada ou que afirma mais do que a imagem mostra; imagem que não corresponde ao fato relatado. Fotos neutras de registro não são problema.",
+        visualOnly: true,
       },
     ],
   },
@@ -331,6 +348,17 @@ export const TAXONOMY: BiasGroup[] = [
           en: "Numbers or charts with no indication of where they came from.",
         },
         aiHint: "Números que APARECEM no texto sem qualquer fonte identificável. Se o texto não traz números, use not_applicable. Não aponte dados que deveriam existir e não aparecem: isso é 'Contexto relevante omitido'.",
+      },
+      {
+        id: "misleading_chart",
+        name: { pt: "Gráfico ou tabela enganosa", en: "Misleading chart or table" },
+        description: {
+          pt: "Gráficos e tabelas que distorcem os dados ou dizem algo diferente do texto.",
+          en: "Charts and tables that distort the data or say something different from the text.",
+        },
+        aiHint:
+          "Só gráficos e tabelas enviados como imagem. Eixo vertical que não começa no zero exagerando diferenças; escala distorcida, quebrada ou dupla sem aviso; recorte de período escolhido a dedo; efeito 3D ou áreas desproporcionais; gráfico ou tabela sem fonte; texto que descreve o gráfico de forma diferente do que ele mostra (ex.: 'forte alta' quando a linha está quase estável). Gráficos corretos não são problema.",
+        visualOnly: true,
       },
     ],
   },

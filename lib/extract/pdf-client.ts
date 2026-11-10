@@ -15,6 +15,48 @@
 import { AppError } from "@/lib/errors";
 import { normalizeText } from "@/lib/text";
 import type { SourceInfo } from "@/lib/analysis/types";
+import { config } from "@/lib/config";
+
+/** Página com figura/tabela, transformada em imagem para a etapa "Imagens e gráficos". */
+export interface PdfPageImage {
+  page: number;
+  /** JPEG em base64 (sem o prefixo "data:"), para a IA. */
+  data: string;
+  /** Miniatura pequena (data URL), para a tela. */
+  thumb: string;
+  /** Legenda encontrada na página ("Figura 2 — …"), se houver. */
+  caption?: string;
+}
+
+/** Começo de legenda: "Figura 3", "Fig. 2", "Tabela 1", "Gráfico 4", "Quadro 2", "Chart 1". */
+const CAPTION_RE = /^(fig(?:ura|ure)?\.?|tabela|table|gr[aá]fico|quadro|chart|graph)\s*\d+/i;
+
+/** Total máximo das imagens enviadas (o servidor da Vercel aceita até ~4,5 MB por pedido). */
+const IMAGE_BUDGET_CHARS = 3_200_000;
+
+/** Desenha a página num canvas com o lado maior em `longSide` pixels. */
+async function renderPage(page: PdfPage, longSide: number): Promise<HTMLCanvasElement> {
+  const base = page.getViewport({ scale: 1 });
+  const viewport = page.getViewport({ scale: longSide / Math.max(base.width, base.height) });
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(viewport.width);
+  canvas.height = Math.round(viewport.height);
+  await page.render({ canvas, viewport }).promise;
+  return canvas;
+}
+
+const jpeg = (canvas: HTMLCanvasElement, quality: number) => canvas.toDataURL("image/jpeg", quality);
+
+/** Miniatura: cópia reduzida do canvas da página. */
+function thumbnail(canvas: HTMLCanvasElement, width = 240): string {
+  const t = document.createElement("canvas");
+  t.width = width;
+  t.height = Math.round((canvas.height / canvas.width) * width);
+  t.getContext("2d")?.drawImage(canvas, 0, 0, t.width, t.height);
+  return jpeg(t, 0.6);
+}
+
+type PdfPage = Awaited<ReturnType<Awaited<ReturnType<typeof import("unpdf")["getDocumentProxy"]>>["getPage"]>>;
 
 interface Line {
   text: string;
@@ -155,7 +197,43 @@ function linesToParagraphs(clean: Line[]): string[] {
   return paragraphs;
 }
 
-export async function extractFromPdf(file: File): Promise<{ text: string; source: SourceInfo }> {
+/**
+ * Escolhe e desenha as páginas com figuras/tabelas: primeiro as que têm
+ * legenda ("Figura 2", "Tabela 1"), depois as que têm imagem. Se quase todas
+ * as páginas têm imagem (ex.: logotipo no topo), só as legendas contam.
+ */
+async function renderVisualPages(
+  pdf: { numPages: number; getPage: (n: number) => Promise<PdfPage> },
+  hints: { page: number; caption?: string; hasImage: boolean }[],
+): Promise<PdfPageImage[]> {
+  if (typeof document === "undefined" || hints.length === 0) return [];
+  const imageOnly = hints.filter((h) => !h.caption && h.hasImage);
+  const logoEverywhere = hints.filter((h) => h.hasImage).length > pdf.numPages * 0.8;
+  const chosen = [...hints.filter((h) => h.caption), ...(logoEverywhere ? [] : imageOnly)]
+    .slice(0, config.visual.maxPdfPages)
+    .sort((a, b) => a.page - b.page);
+  const perImage = IMAGE_BUDGET_CHARS / Math.max(1, chosen.length);
+  const out: PdfPageImage[] = [];
+  for (const h of chosen) {
+    try {
+      const page = await pdf.getPage(h.page);
+      let canvas = await renderPage(page, 1400);
+      let url = jpeg(canvas, 0.72);
+      if (url.length > perImage) url = jpeg(canvas, 0.5);
+      if (url.length > perImage) {
+        canvas = await renderPage(page, 1000);
+        url = jpeg(canvas, 0.5);
+      }
+      if (url.length > perImage * 1.5) continue; // página pesada demais: fica só como texto
+      out.push({ page: h.page, data: url.slice(url.indexOf(",") + 1), thumb: thumbnail(canvas), caption: h.caption });
+    } catch {
+      /* página que não desenha: fica só como texto */
+    }
+  }
+  return out;
+}
+
+export async function extractFromPdf(file: File): Promise<{ text: string; source: SourceInfo; images: PdfPageImage[] }> {
   const { getDocumentProxy } = await import("unpdf");
   let pdf;
   try {
@@ -166,6 +244,9 @@ export async function extractFromPdf(file: File): Promise<{ text: string; source
   }
 
   const pages: Line[][] = [];
+  /** Sinais de figura por página: legenda encontrada e/ou imagem desenhada. */
+  const visualHints: { page: number; caption?: string; hasImage: boolean }[] = [];
+  const OPS = config.visual.enabled ? (await (await import("unpdf")).getResolvedPDFJS()).OPS : null;
   let chars = 0;
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
@@ -175,7 +256,19 @@ export async function extractFromPdf(file: File): Promise<{ text: string; source
       (it): it is TextItemLike => typeof it === "object" && it !== null && "str" in it,
     );
     chars += items.reduce((s, it) => s + it.str.trim().length, 0);
-    pages.push(orderColumns(pageToLines(items, pageWidth), pageWidth));
+    const lines = orderColumns(pageToLines(items, pageWidth), pageWidth);
+    pages.push(lines);
+    if (OPS) {
+      const caption = lines.find((l) => CAPTION_RE.test(l.text))?.text.slice(0, 200);
+      let hasImage = false;
+      try {
+        const ops = await page.getOperatorList();
+        hasImage = ops.fnArray.some((f) => f === OPS.paintImageXObject || f === OPS.paintInlineImageXObject);
+      } catch {
+        /* sem lista de operações: usa só a legenda */
+      }
+      if (caption || hasImage) visualHints.push({ page: i, caption, hasImage });
+    }
   }
   const paragraphs = removeRepeatedHeaders(pages).flatMap(linesToParagraphs);
 
@@ -192,10 +285,12 @@ export async function extractFromPdf(file: File): Promise<{ text: string; source
   } catch {
     /* metadados são opcionais */
   }
+  const images = await renderVisualPages(pdf, visualHints);
   await pdf.cleanup();
 
   return {
     text: normalizeText(paragraphs.join("\n\n")),
     source: { type: "pdf", title: title ?? file.name.replace(/\.pdf$/i, ""), author },
+    images,
   };
 }

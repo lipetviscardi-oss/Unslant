@@ -58,6 +58,7 @@ export const pt = {
       dropHelp: "ou arraste o PDF para cá. O arquivo é lido no seu navegador.",
       reading: (name: string) => `Lendo ${name}…`,
       extracted: (n: number) => `(${num(n)} palavras extraídas)`,
+      figures: (n: number) => `${n === 1 ? "1 página com figura ou tabela será analisada" : `${n} páginas com figuras ou tabelas serão analisadas`} também como imagem.`,
       notPdf: "Esse arquivo não é um PDF.",
     },
     claim: {
@@ -193,6 +194,14 @@ export const pt = {
       none: "Nenhuma omissão relevante foi identificada.",
     },
 
+    figures: {
+      title: "Imagens e gráficos",
+      intro: (n: number) =>
+        `A IA examinou ${n === 1 ? "1 imagem" : `${n} imagens`} do conteúdo (gráficos, tabelas, fotos) e comparou com o que o texto diz.`,
+      noIssues: "Nenhum problema encontrado nesta imagem.",
+      hidden: (n: number) => `${n === 1 ? "1 imagem decorativa ou sem relação com o assunto foi omitida" : `${n} imagens decorativas ou sem relação com o assunto foram omitidas`}.`,
+    },
+
     rewrite: {
       title: "Como ficaria mais neutro",
       original: "Trecho original",
@@ -241,6 +250,7 @@ export const pt = {
         not_applicable: "Não se aplica a este texto",
       },
       showInText: "Ver no texto",
+      showFigure: "Ver a imagem",
       discarded: (n: number) =>
         `${n === 1 ? "1 trecho citado pela IA foi descartado" : `${n} trechos citados pela IA foram descartados`} por não existir no texto original.`,
     },
@@ -294,6 +304,16 @@ export const pt = {
       not_applicable: "É opinião: não se verifica como verdadeiro ou falso",
     },
     languageName: { pt: "português", en: "inglês" },
+    figureKind: {
+      chart: "gráfico",
+      table: "tabela",
+      photo: "foto",
+      illustration: "ilustração",
+      diagram: "diagrama",
+      map: "mapa",
+      infographic: "infográfico",
+      other: "imagem",
+    },
     editorialLine: {
       left: "esquerda",
       center_left: "centro-esquerda",

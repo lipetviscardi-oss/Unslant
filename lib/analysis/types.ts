@@ -3,7 +3,16 @@
  * Este formato também é o que será salvo no banco de dados na Fase 4.
  */
 
-import type { AxisPosition, BalanceOutput, CategoryStatus, ClaimCheckOutput, Confidence, ContentType, DisputeStatus } from "./schemas";
+import type {
+  AxisPosition,
+  BalanceOutput,
+  CategoryStatus,
+  ClaimCheckOutput,
+  Confidence,
+  ContentType,
+  DisputeStatus,
+  FigureKind,
+} from "./schemas";
 import type { Lang } from "@/lib/taxonomy";
 
 export type SourceType = "url" | "text" | "pdf" | "claim";
@@ -34,6 +43,22 @@ export interface Evidence {
   end: number;
   /** true = o trecho está entre aspas: é fala de alguém citado, não do autor. */
   quoted?: boolean;
+  /** Evidência numa imagem (não no texto): id da figura; start/end ficam -1. */
+  figureId?: string;
+}
+
+/** Uma imagem, gráfico ou tabela analisada pela etapa "Imagens e gráficos". */
+export interface FigureResult {
+  id: string;
+  /** Rótulo para o leitor (ex.: "Página 7", "Imagem 2"). */
+  label: string;
+  kind: FigureKind;
+  description: string;
+  relevant: boolean;
+  /** Miniatura para a tela: endereço da imagem (links) ou imagem pequena embutida (PDF). */
+  thumb?: string;
+  /** Legenda encontrada perto da figura, se houver. */
+  caption?: string;
 }
 
 export interface CategoryResult {
@@ -146,6 +171,8 @@ export interface AnalysisResult {
   } | null;
   /** true = nenhum trecho do autor precisava de reescrita (mostra "Nenhum trecho precisa de reescrita"). */
   rewriteNone?: boolean;
+  /** Imagens, gráficos e tabelas analisados (só quando o conteúdo tinha imagens). */
+  figures?: FigureResult[];
   groups: GroupResult[];
   /** Só para afirmações: o que se sabe, de onde a ideia vem, como verificar. */
   claimCheck?: ClaimCheckOutput | null;

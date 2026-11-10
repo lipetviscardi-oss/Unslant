@@ -7,6 +7,7 @@
 
 import { useId, useRef, useState } from "react";
 import type { AnalyzeRequest, DeclaredType } from "@/lib/client/analyze";
+import type { PdfPageImage } from "@/lib/extract/pdf-client";
 import { CLAIM_EXAMPLES, EXAMPLES } from "@/lib/examples";
 import { AppError, errorMessage } from "@/lib/errors";
 import { countWords } from "@/lib/text";
@@ -23,6 +24,8 @@ interface PdfState {
   title?: string;
   author?: string;
   error?: string;
+  /** Páginas com figura/tabela, já como imagem (vão para a etapa "Imagens e gráficos"). */
+  images?: PdfPageImage[];
 }
 
 const inputClass =
@@ -54,7 +57,7 @@ export function AnalyzeForm({ onSubmit }: { onSubmit: (req: AnalyzeRequest) => v
     try {
       const { extractFromPdf } = await import("@/lib/extract/pdf-client");
       const out = await extractFromPdf(file);
-      setPdf({ status: "ready", fileName: file.name, text: out.text, title: out.source.title, author: out.source.author });
+      setPdf({ status: "ready", fileName: file.name, text: out.text, title: out.source.title, author: out.source.author, images: out.images });
     } catch (err) {
       const code = err instanceof AppError ? err.code : "PDF_INVALID";
       setPdf({ status: "error", fileName: file.name, error: errorMessage(code, lang) });
@@ -74,7 +77,15 @@ export function AnalyzeForm({ onSubmit }: { onSubmit: (req: AnalyzeRequest) => v
     if (tab === "url") onSubmit({ mode: "url", url: url.trim(), lang, contentType });
     else if (tab === "text") onSubmit({ mode: "text", text, lang, contentType });
     else if (tab === "claim") onSubmit({ mode: "claim", text: claim, meta: { context: claimContext.trim() || undefined }, lang });
-    else if (pdf.text) onSubmit({ mode: "pdf", text: pdf.text, meta: { title: pdf.title, author: pdf.author }, lang, contentType });
+    else if (pdf.text)
+      onSubmit({
+        mode: "pdf",
+        text: pdf.text,
+        meta: { title: pdf.title, author: pdf.author },
+        images: pdf.images?.length ? pdf.images : undefined,
+        lang,
+        contentType,
+      });
   }
 
   function loadExample(id: string) {
@@ -203,6 +214,7 @@ export function AnalyzeForm({ onSubmit }: { onSubmit: (req: AnalyzeRequest) => v
                   <p>
                     <strong>{pdf.title || pdf.fileName}</strong>
                     <span className="text-muted"> {t.home.pdf.extracted(countWords(pdf.text ?? ""))}</span>
+                    {pdf.images?.length ? <span className="block text-muted">{t.home.pdf.figures(pdf.images.length)}</span> : null}
                   </p>
                 )}
                 {pdf.status === "error" && <p className="text-ember-ink">{pdf.error}</p>}

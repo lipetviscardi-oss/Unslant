@@ -58,6 +58,7 @@ export const en: Dict = {
       dropHelp: "or drag the PDF here. The file is read in your browser.",
       reading: (name: string) => `Reading ${name}…`,
       extracted: (n: number) => `(${num(n)} words extracted)`,
+      figures: (n: number) => `${n === 1 ? "1 page with a figure or table" : `${n} pages with figures or tables`} will also be analyzed as images.`,
       notPdf: "That file is not a PDF.",
     },
     claim: {
@@ -192,6 +193,14 @@ export const en: Dict = {
       none: "No relevant omissions were identified.",
     },
 
+    figures: {
+      title: "Images and charts",
+      intro: (n: number) =>
+        `The AI examined ${n === 1 ? "1 image" : `${n} images`} from the content (charts, tables, photos) and compared them with what the text says.`,
+      noIssues: "No problems found in this image.",
+      hidden: (n: number) => `${n === 1 ? "1 decorative or unrelated image was" : `${n} decorative or unrelated images were`} left out.`,
+    },
+
     rewrite: {
       title: "A more neutral version",
       original: "Original passage",
@@ -240,6 +249,7 @@ export const en: Dict = {
         not_applicable: "Not applicable to this text",
       },
       showInText: "Show in text",
+      showFigure: "Show the image",
       discarded: (n: number) =>
         `${n === 1 ? "1 passage quoted by the AI was" : `${n} passages quoted by the AI were`} discarded because ${n === 1 ? "it does" : "they do"} not exist in the original text.`,
     },
@@ -293,6 +303,16 @@ export const en: Dict = {
       not_applicable: "It's an opinion: not true or false as such",
     },
     languageName: { pt: "Portuguese", en: "English" },
+    figureKind: {
+      chart: "chart",
+      table: "table",
+      photo: "photo",
+      illustration: "illustration",
+      diagram: "diagram",
+      map: "map",
+      infographic: "infographic",
+      other: "image",
+    },
     editorialLine: {
       left: "left",
       center_left: "center-left",

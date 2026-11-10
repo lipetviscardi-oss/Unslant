@@ -151,10 +151,11 @@ async function assertPublicUrl(raw: string): Promise<URL> {
 
 /* ---------------------------------------------------------- download */
 
-async function readLimited(res: UndiciResponse, maxBytes: number): Promise<string> {
+/** Lê o corpo da resposta, parando se passar de `maxBytes`. */
+async function readBytes(res: UndiciResponse, maxBytes: number): Promise<Buffer> {
   const declared = Number(res.headers.get("content-length") ?? 0);
   if (declared > maxBytes) throw new AppError("FETCH_TOO_LARGE");
-  if (!res.body) return "";
+  if (!res.body) return Buffer.alloc(0);
   const reader = res.body.getReader();
   const chunks: Uint8Array[] = [];
   let size = 0;
@@ -168,7 +169,11 @@ async function readLimited(res: UndiciResponse, maxBytes: number): Promise<strin
     }
     chunks.push(value);
   }
-  const buf = Buffer.concat(chunks);
+  return Buffer.concat(chunks);
+}
+
+async function readLimited(res: UndiciResponse, maxBytes: number): Promise<string> {
+  const buf = await readBytes(res, maxBytes);
   // Detecta a codificação declarada (ex.: sites antigos em ISO-8859-1).
   const ctype = res.headers.get("content-type") ?? "";
   let charset = /charset=([\w-]+)/i.exec(ctype)?.[1];
@@ -183,19 +188,23 @@ async function readLimited(res: UndiciResponse, maxBytes: number): Promise<strin
   }
 }
 
-async function fetchPage(rawUrl: string): Promise<{ html: string; finalUrl: string }> {
+/**
+ * Download seguro: só endereços públicos (conferidos também na conexão),
+ * redirecionamentos seguidos à mão e conferidos um a um, com tempo limite.
+ */
+async function safeGet(rawUrl: string, accept: string, timeoutMs: number): Promise<{ res: UndiciResponse; finalUrl: string }> {
   let url = await assertPublicUrl(rawUrl);
   for (let hop = 0; hop <= config.fetch.maxRedirects; hop++) {
     let res: UndiciResponse;
     try {
       res = await undiciFetch(url, {
         redirect: "manual", // seguimos os redirecionamentos à mão, conferindo cada destino
-        signal: AbortSignal.timeout(config.fetch.timeoutMs),
+        signal: AbortSignal.timeout(timeoutMs),
         // Em testes locais (UNSLANT_ALLOW_LOCAL_URLS) a conferência na conexão é desligada.
         dispatcher: allowLocal() ? undefined : safeAgent,
         headers: {
           "User-Agent": USER_AGENT,
-          Accept: "text/html,application/xhtml+xml;q=0.9,*/*;q=0.5",
+          Accept: accept,
           "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
         },
       });
@@ -206,28 +215,101 @@ async function fetchPage(rawUrl: string): Promise<{ html: string; finalUrl: stri
       }
       throw new AppError("FETCH_FAILED", err instanceof Error ? err.message : String(err));
     }
-
     if (res.status >= 300 && res.status < 400) {
       const location = res.headers.get("location");
       if (!location) throw new AppError("FETCH_FAILED", `redirect sem destino (${res.status})`);
       url = await assertPublicUrl(new URL(location, url).toString());
       continue;
     }
-    if (res.status === 401 || res.status === 402) throw new AppError("PAYWALL", `HTTP ${res.status}`);
-    if (res.status === 403 || res.status === 429 || res.status === 451) {
-      throw new AppError("FETCH_BLOCKED", `HTTP ${res.status}`);
-    }
-    if (!res.ok) throw new AppError("FETCH_FAILED", `HTTP ${res.status}`);
-
-    const ctype = (res.headers.get("content-type") ?? "").toLowerCase();
-    if (ctype.includes("application/pdf")) throw new AppError("URL_IS_PDF");
-    if (ctype && !ctype.includes("html") && !ctype.includes("xml") && !ctype.includes("text/plain")) {
-      throw new AppError("NOT_HTML", ctype);
-    }
-    const html = await readLimited(res, config.fetch.maxBytes);
-    return { html, finalUrl: url.toString() };
+    return { res, finalUrl: url.toString() };
   }
   throw new AppError("FETCH_FAILED", "redirecionamentos demais");
+}
+
+async function fetchPage(rawUrl: string): Promise<{ html: string; finalUrl: string }> {
+  const { res, finalUrl } = await safeGet(rawUrl, "text/html,application/xhtml+xml;q=0.9,*/*;q=0.5", config.fetch.timeoutMs);
+  if (res.status === 401 || res.status === 402) throw new AppError("PAYWALL", `HTTP ${res.status}`);
+  if (res.status === 403 || res.status === 429 || res.status === 451) {
+    throw new AppError("FETCH_BLOCKED", `HTTP ${res.status}`);
+  }
+  if (!res.ok) throw new AppError("FETCH_FAILED", `HTTP ${res.status}`);
+
+  const ctype = (res.headers.get("content-type") ?? "").toLowerCase();
+  if (ctype.includes("application/pdf")) throw new AppError("URL_IS_PDF");
+  if (ctype && !ctype.includes("html") && !ctype.includes("xml") && !ctype.includes("text/plain")) {
+    throw new AppError("NOT_HTML", ctype);
+  }
+  const html = await readLimited(res, config.fetch.maxBytes);
+  return { html, finalUrl };
+}
+
+/* ---------------------------------------------------------- imagens */
+
+export interface ArticleImage {
+  url: string;
+  alt?: string;
+  caption?: string;
+}
+
+/**
+ * Imagens dentro do texto principal da matéria (já sem menus e anúncios,
+ * graças ao Readability). Ignora ícones, imagens pequenas e formatos que a IA
+ * não lê (ex.: SVG). Gráficos interativos (iframes) não são imagens e ficam de fora.
+ */
+export function collectArticleImages(articleHtml: string, baseUrl: string, max: number): ArticleImage[] {
+  const dom = new JSDOM(`<body>${articleHtml}</body>`);
+  const out: ArticleImage[] = [];
+  const seen = new Set<string>();
+  for (const img of Array.from(dom.window.document.querySelectorAll("img"))) {
+    // srcset: pega a maior versão; data-src: imagens carregadas sob demanda
+    const srcset = img.getAttribute("srcset") || img.getAttribute("data-srcset") || "";
+    const fromSet = srcset
+      .split(",")
+      .map((s) => s.trim().split(/\s+/))
+      .filter((p) => p[0])
+      .sort((a, b) => (parseInt(b[1] ?? "0") || 0) - (parseInt(a[1] ?? "0") || 0))[0]?.[0];
+    const raw = fromSet || img.getAttribute("data-src") || img.getAttribute("src") || "";
+    let url: string;
+    try {
+      url = new URL(raw, baseUrl).toString();
+    } catch {
+      continue;
+    }
+    if (!/^https?:/i.test(url) || /\.svg(\?|$)/i.test(url) || seen.has(url)) continue;
+    const w = Number(img.getAttribute("width") ?? 0);
+    const h = Number(img.getAttribute("height") ?? 0);
+    if ((w && w < 200) || (h && h < 120)) continue; // ícones, avatares, pixels de rastreamento
+    seen.add(url);
+    const caption = img.closest("figure")?.querySelector("figcaption")?.textContent?.replace(/\s+/g, " ").trim();
+    const alt = img.getAttribute("alt")?.replace(/\s+/g, " ").trim();
+    out.push({ url, alt: alt || undefined, caption: caption?.slice(0, 300) || undefined });
+    if (out.length >= max) break;
+  }
+  return out;
+}
+
+const IMAGE_TYPES = {
+  "image/jpeg": (b: Buffer) => b[0] === 0xff && b[1] === 0xd8,
+  "image/png": (b: Buffer) => b.subarray(0, 4).toString("hex") === "89504e47",
+  "image/gif": (b: Buffer) => b.subarray(0, 4).toString("latin1") === "GIF8",
+  "image/webp": (b: Buffer) => b.subarray(0, 4).toString("latin1") === "RIFF" && b.subarray(8, 12).toString("latin1") === "WEBP",
+} as const;
+type ImageType = keyof typeof IMAGE_TYPES;
+
+/**
+ * Baixa uma imagem com as mesmas proteções das páginas. Confere o tipo pelo
+ * conteúdo do arquivo (não só pelo que o site declara). Devolve null se falhar.
+ */
+export async function fetchImage(rawUrl: string): Promise<{ mediaType: ImageType; data: string } | null> {
+  try {
+    const { res } = await safeGet(rawUrl, "image/avif;q=0,image/webp,image/png,image/jpeg,image/gif;q=0.8", config.fetch.imageTimeoutMs);
+    if (!res.ok) return null;
+    const buf = await readBytes(res, config.fetch.maxImageBytes);
+    const type = (Object.keys(IMAGE_TYPES) as ImageType[]).find((t) => IMAGE_TYPES[t](buf));
+    return type ? { mediaType: type, data: buf.toString("base64") } : null;
+  } catch {
+    return null; // imagem é complemento: se não baixar, a análise segue sem ela
+  }
 }
 
 /* ---------------------------------------------------------- extração */
@@ -340,7 +422,7 @@ function formatDate(raw?: string): string | undefined {
   return d.toISOString().slice(0, 10);
 }
 
-export async function extractFromUrl(rawUrl: string): Promise<{ text: string; source: SourceInfo }> {
+export async function extractFromUrl(rawUrl: string): Promise<{ text: string; source: SourceInfo; images: ArticleImage[] }> {
   const { html, finalUrl } = await fetchPage(rawUrl);
 
   // Scripts e recursos externos ficam desligados (padrão do jsdom): só lemos o HTML.
@@ -405,5 +487,7 @@ export async function extractFromUrl(rawUrl: string): Promise<{ text: string; so
   };
 
   dom.window.close();
-  return { text, source };
+  // Imagens dentro da matéria (para a etapa "Imagens e gráficos").
+  const images = article?.content ? collectArticleImages(article.content, finalUrl, config.visual.maxUrlImages) : [];
+  return { text, source, images };
 }

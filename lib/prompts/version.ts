@@ -20,13 +20,14 @@ import { synthesisPrompt } from "./synthesis";
 import { claimCheckPrompt } from "./claimCheck";
 import { balancePrompt } from "./balance";
 import { OUTLETS } from "@/lib/veiculos";
+import { visualPrompt } from "./visual";
 
 /**
  * Aumente este número sempre que mudar a parte da análise feita pelo próprio
  * site (conferência das citações, regras das aspas, cálculo das notas, versão
  * neutra etc.). Assim os resultados guardados com a lógica antiga são refeitos.
  */
-export const ANALYSIS_VERSION = 5;
+export const ANALYSIS_VERSION = 6;
 
 const SAMPLE_TRIAGE: TriageOutput = {
   contentType: "news",
@@ -55,6 +56,7 @@ export function promptVersion(): string {
   h.update(JSON.stringify(SCORING));
   h.update(JSON.stringify(config.ai));
   h.update(JSON.stringify(config.balance));
+  h.update(JSON.stringify(config.visual));
   for (const lang of ["pt", "en"] as const) {
     h.update(triagePrompt(lang));
     h.update(triagePrompt(lang, true));
@@ -62,6 +64,7 @@ export function promptVersion(): string {
     for (const g of TAXONOMY) h.update(specialistPrompt([g], SAMPLE_TRIAGE, lang));
     h.update(overviewPrompt(SAMPLE_TRIAGE, lang));
     h.update(synthesisPrompt("{}", lang));
+    h.update(visualPrompt(SAMPLE_TRIAGE, "", lang));
     const axis = { position: "unidentified", confidence: "low", justification: "", quote: "", start: null, end: null } as const;
     h.update(balancePrompt({ triage: SAMPLE_TRIAGE, economic: axis, social: axis, omissions: [], lang }));
   }

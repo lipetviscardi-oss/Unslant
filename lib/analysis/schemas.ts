@@ -134,6 +134,48 @@ export const OverviewSchema = z.object({
 });
 export type OverviewOutput = z.infer<typeof OverviewSchema>;
 
+/* Etapa 2 (em paralelo) — imagens e gráficos */
+export const FigureKindSchema = z.enum(["chart", "table", "photo", "illustration", "diagram", "map", "infographic", "other"]);
+export type FigureKind = z.infer<typeof FigureKindSchema>;
+
+/** Os ids das figuras viram uma lista fechada: a IA só pode citar figuras que recebeu. */
+export function visualSchema(figureIds: readonly [string, ...string[]]) {
+  return z.object({
+    figures: z.array(
+      z.object({
+        figureId: z.enum(figureIds),
+        kind: FigureKindSchema,
+        /** O que a figura mostra, em 1 a 2 frases. */
+        description: z.string(),
+        /** false = decorativa ou sem relação com o assunto. */
+        relevant: z.boolean(),
+      }),
+    ),
+    findings: z.array(
+      z.object({
+        categoryId: z.enum(["misleading_chart", "visual_framing"]),
+        figureId: z.enum(figureIds),
+        score: z.number(),
+        confidence: ConfidenceSchema,
+        explanation: z.string(),
+        /** Trecho EXATO do texto que a figura contradiz ou ilustra ("" se nenhum). */
+        textQuote: z.string(),
+      }),
+    ),
+  });
+}
+export interface VisualOutput {
+  figures: { figureId: string; kind: FigureKind; description: string; relevant: boolean }[];
+  findings: {
+    categoryId: "misleading_chart" | "visual_framing";
+    figureId: string;
+    score: number;
+    confidence: Confidence;
+    explanation: string;
+    textQuote: string;
+  }[];
+}
+
 /* Etapa 3 — síntese */
 export const SynthesisSchema = z.object({
   summary: z.string(),

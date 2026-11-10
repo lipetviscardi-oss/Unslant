@@ -22,7 +22,15 @@ export type DeclaredType =
 export type AnalyzeRequest = (
   | { mode: "url"; url: string; lang: Lang; contentType?: DeclaredType }
   | { mode: "text"; text: string; lang: Lang; contentType?: DeclaredType }
-  | { mode: "pdf"; text: string; meta: { title?: string; author?: string }; lang: Lang; contentType?: DeclaredType }
+  | {
+      mode: "pdf";
+      text: string;
+      meta: { title?: string; author?: string };
+      /** Páginas com figura/tabela, já como imagem. */
+      images?: { page: number; data: string; thumb?: string; caption?: string }[];
+      lang: Lang;
+      contentType?: DeclaredType;
+    }
   | { mode: "claim"; text: string; meta: { context?: string }; lang: Lang }
   | { mode: "demo"; demoId: string; lang: Lang }
 ) & {

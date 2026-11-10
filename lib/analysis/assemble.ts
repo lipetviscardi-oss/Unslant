@@ -18,8 +18,10 @@ import type {
   SpecialistOutput,
   SynthesisOutput,
   TriageOutput,
+  VisualOutput,
 } from "./schemas";
-import type { AnalysisResult, AxisResult, CategoryResult, DisputeResult, Evidence, GroupResult, SourceInfo } from "./types";
+import type { VisualInput } from "./visuals";
+import type { AnalysisResult, AxisResult, CategoryResult, DisputeResult, Evidence, FigureResult, GroupResult, SourceInfo } from "./types";
 
 /** Respostas da IA para UMA parte do texto. */
 export interface RawPart {
@@ -40,6 +42,18 @@ export interface Findings {
 const CONF_RANK: Record<Confidence, number> = { low: 0, medium: 1, high: 2 };
 
 const NOTES = {
+  noVisuals: {
+    pt: "O conteúdo não tinha imagens, gráficos ou tabelas para analisar.",
+    en: "The content had no images, charts or tables to analyze.",
+  },
+  visualFailed: {
+    pt: "Não foi possível analisar as imagens desta vez.",
+    en: "The images could not be analyzed this time.",
+  },
+  visualOk: {
+    pt: "As imagens analisadas não mostram esse problema.",
+    en: "The analyzed images do not show this problem.",
+  },
   quotedOnly: {
     pt: "Os trechos apontados eram falas de pessoas citadas, entre aspas, e não afirmações do próprio autor. Por isso, não contam aqui.",
     en: "The flagged passages were quotes from other people, in quotation marks, not the author's own statements, so they don't count here.",
@@ -277,7 +291,7 @@ export function rewriteCandidates(findings: Findings, text: string): Set<string>
     for (const c of g.categories) {
       if (c.status !== "found" || c.score < SCORING.intensity.moderate) continue;
       for (const e of c.evidence) {
-        if (e.quoted) continue;
+        if (e.quoted || e.start < 0) continue; // fala citada ou evidência numa imagem
         const sentence = sentenceAround(text, e.start, e.end);
         if (ATTRIBUTION.test(sentence) || ATTRIBUTION_SEGUNDO.test(sentence)) continue;
         ids.add(e.id);
@@ -341,11 +355,64 @@ export function rewriteProblem(findings: Findings, synthesis: SynthesisOutput, t
  * Monta as conclusões a partir das respostas da IA: confere citações,
  * junta partes e calcula notas. A síntese (resumo) vem depois.
  */
+/** O que a etapa "Imagens e gráficos" devolveu (null = não havia imagens). */
+export interface VisualFindingsInput {
+  inputs: VisualInput[];
+  /** null = a etapa falhou. */
+  output: VisualOutput | null;
+}
+
+/**
+ * Categorias "só de imagem": montadas a partir da etapa "Imagens e gráficos".
+ * Cada problema vira uma evidência ligada à figura; se a IA citou um trecho do
+ * texto que a figura contradiz, ele também é destacado (depois de conferido).
+ */
+function visualCategory(
+  categoryId: string,
+  visual: VisualFindingsInput | null,
+  matcher: QuoteMatcher,
+  lang: Lang,
+): CategoryResult {
+  const empty = (summary: string, status: CategoryResult["status"]): CategoryResult => ({
+    id: categoryId,
+    status,
+    score: 0,
+    confidence: "medium",
+    summary,
+    evidence: [],
+    discarded: 0,
+  });
+  if (!visual || visual.inputs.length === 0) return empty(NOTES.noVisuals[lang], "not_applicable");
+  if (!visual.output) return empty(NOTES.visualFailed[lang], "not_applicable");
+  const labels = new Map(visual.inputs.map((v) => [v.id, v.label]));
+  const found = visual.output.findings.filter((f) => f.categoryId === categoryId && labels.has(f.figureId));
+  if (found.length === 0) return empty(NOTES.visualOk[lang], "none_found");
+
+  const evidence: Evidence[] = [];
+  for (const f of found.slice(0, config.ai.maxEvidencePerCategory * 2)) {
+    evidence.push({ id: "", quote: labels.get(f.figureId)!, explanation: f.explanation, start: -1, end: -1, figureId: f.figureId });
+    const pos = f.textQuote.trim() ? matcher.find(f.textQuote) : null;
+    if (pos) evidence.push({ id: "", quote: f.textQuote, explanation: `${labels.get(f.figureId)}: ${f.explanation}`, start: pos.start, end: pos.end });
+  }
+  evidence.forEach((e, i) => (e.id = `${categoryId}-${i + 1}`));
+  const rank = { low: 0, medium: 1, high: 2 } as const;
+  return {
+    id: categoryId,
+    status: "found",
+    score: Math.round(Math.max(...found.map((f) => clamp(f.score, 0, 10))) * 10) / 10,
+    confidence: found.reduce((best, f) => (rank[f.confidence] > rank[best] ? f.confidence : best), found[0].confidence),
+    summary: found[0].explanation,
+    evidence,
+    discarded: 0,
+  };
+}
+
 export function buildFindings(
   text: string,
   triage: TriageOutput,
   rawParts: RawPart[],
   lang: Lang,
+  visual: VisualFindingsInput | null = null,
 ): Findings {
   const matcher = createQuoteMatcher(text);
   const groups: GroupResult[] = [];
@@ -357,6 +424,7 @@ export function buildFindings(
 
   for (const group of activeGroups(triage)) {
     const categories: CategoryResult[] = group.categories.map((cat) => {
+      if (cat.visualOnly) return visualCategory(cat.id, visual, matcher, lang);
       if (group.id === "data" && !hasNumbers) {
         return {
           id: cat.id,
@@ -445,7 +513,9 @@ export function findingsForSynthesis(triage: TriageOutput, findings: Findings, t
               ...(e.quoted ? { citacaoDeTerceiro: true } : {}),
               ...(candidates.has(e.id) ? { podeReescrever: true } : {}),
               // frase em volta do trecho, para a reescrita saber quem disse o quê
-              contexto: text.slice(Math.max(0, e.start - 220), Math.min(text.length, e.end + 220)),
+              ...(e.figureId
+                ? { figura: e.quote }
+                : { contexto: text.slice(Math.max(0, e.start - 220), Math.min(text.length, e.end + 220)) }),
               explicacao: e.explanation,
             })),
           })),
@@ -482,6 +552,23 @@ export function findingsForSynthesis(triage: TriageOutput, findings: Findings, t
   ).replace(/</g, "\\u003c"); // impede que trechos do documento imitem marcações
 }
 
+/** Lista das figuras para a tela: o que a IA descreveu + miniatura e legenda. */
+function figuresResult(visual: VisualFindingsInput | null): FigureResult[] | undefined {
+  if (!visual || visual.inputs.length === 0) return undefined;
+  return visual.inputs.map((v) => {
+    const f = visual.output?.figures.find((x) => x.figureId === v.id);
+    return {
+      id: v.id,
+      label: v.label,
+      kind: f?.kind ?? "other",
+      description: f?.description ?? "",
+      relevant: f?.relevant ?? true,
+      thumb: v.thumb,
+      caption: v.caption,
+    };
+  });
+}
+
 /** Junta tudo no resultado final. */
 export function finalizeResult(params: {
   id: string;
@@ -496,6 +583,8 @@ export function finalizeResult(params: {
   synthesis: SynthesisOutput | null;
   /** true = a versão neutra foi descartada por inventar algo (não mostra "nenhum trecho precisa"). */
   rewriteDiscarded?: boolean;
+  /** Imagens analisadas (etapa "Imagens e gráficos"). */
+  visual?: VisualFindingsInput | null;
   claimCheck?: ClaimCheckOutput | null;
   balance?: AnalysisResult["balance"];
   stats: Omit<AnalysisResult["stats"], "discardedEvidence">;
@@ -557,6 +646,7 @@ export function finalizeResult(params: {
     summarySimple: synthesis?.summarySimple || triage.contentSummary,
     omissions: findings.omissions,
     rewrite,
+    figures: figuresResult(params.visual ?? null),
     // Sem trecho elegível, ou a IA não viu nenhum que valesse reescrever (com a síntese funcionando).
     rewriteNone: !rewrite && !!synthesis && !params.rewriteDiscarded && (rewriteCandidates(findings, text).size === 0 || !synthesis.rewrite.evidenceId),
     groups: findings.groups,

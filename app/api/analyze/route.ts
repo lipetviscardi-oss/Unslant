@@ -10,7 +10,8 @@ import { z } from "zod";
 import { config } from "@/lib/config";
 import { AppError, errorMessage } from "@/lib/errors";
 import { countWords, normalizeText } from "@/lib/text";
-import { extractFromUrl } from "@/lib/extract/url";
+import { extractFromUrl, fetchImage, type ArticleImage } from "@/lib/extract/url";
+import type { VisualInput } from "@/lib/analysis/visuals";
 import { runPipeline } from "@/lib/analysis/pipeline";
 import { cacheKey, readCache, writeCache } from "@/lib/analysis/cache";
 import { releaseDailySlot, reserveDailySlot } from "@/lib/analysis/limits";
@@ -35,6 +36,21 @@ const RequestSchema = z.object({
     })
     .optional(),
   demoId: z.string().max(50).optional(),
+  /**
+   * Aba PDF: páginas com figura/tabela, já transformadas em imagem pelo
+   * navegador (JPEG em base64). A miniatura é uma imagem pequena para a tela.
+   */
+  images: z
+    .array(
+      z.object({
+        page: z.number().int().min(1).max(10_000),
+        data: z.string().max(700_000).regex(/^[A-Za-z0-9+/=]+$/),
+        thumb: z.string().max(80_000).regex(/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/).optional(),
+        caption: z.string().max(300).optional(),
+      }),
+    )
+    .max(config.visual.maxPdfPages)
+    .optional(),
   /** true = ignora o resultado guardado e analisa de novo (botão "Analisar de novo"). */
   fresh: z.boolean().optional(),
   /** Tipo de texto escolhido pelo usuário (opcional; sem ele, a IA identifica). */
@@ -91,9 +107,12 @@ export async function POST(request: Request) {
         send({ type: "stage", stage: "extracting" });
         let text: string;
         let source: SourceInfo;
+        let visuals: VisualInput[] = [];
         if (body.mode === "url") {
           if (!body.url) throw new AppError("URL_INVALID");
-          ({ text, source } = await extractFromUrl(body.url));
+          const page = await extractFromUrl(body.url);
+          ({ text, source } = page);
+          visuals = await downloadArticleImages(page.images, lang);
         } else {
           text = normalizeText(body.text ?? "");
           source =
@@ -126,7 +145,18 @@ export async function POST(request: Request) {
         // 3. Análise com a IA
         reserveDailySlot();
         reserved = true;
+        if (body.mode === "pdf" && body.images?.length) {
+          visuals = body.images.map((img, i) => ({
+            id: `img-${i + 1}`,
+            label: `${lang === "pt" ? "Página" : "Page"} ${img.page}`,
+            caption: img.caption,
+            mediaType: "image/jpeg" as const,
+            data: img.data,
+            thumb: img.thumb,
+          }));
+        }
         const result = await runPipeline({
+          visuals,
           text,
           source,
           lang,
@@ -164,4 +194,24 @@ export async function POST(request: Request) {
       "X-Accel-Buffering": "no",
     },
   });
+}
+
+/** Baixa as imagens da matéria (em paralelo, com as proteções de lib/extract/url.ts). As que falharem são puladas. */
+async function downloadArticleImages(images: ArticleImage[], lang: "pt" | "en"): Promise<VisualInput[]> {
+  if (!config.visual.enabled || images.length === 0) return [];
+  const files = await Promise.all(images.map((img) => fetchImage(img.url)));
+  const out: VisualInput[] = [];
+  files.forEach((file, i) => {
+    if (!file) return;
+    const img = images[i];
+    out.push({
+      id: `img-${out.length + 1}`,
+      label: `${lang === "pt" ? "Imagem" : "Image"} ${out.length + 1}`,
+      caption: img.caption || img.alt,
+      mediaType: file.mediaType,
+      data: file.data,
+      thumb: img.url,
+    });
+  });
+  return out;
 }

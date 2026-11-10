@@ -152,10 +152,10 @@ function GroupDetails({ group, onShow }: { group: GroupResult; onShow: (evidence
                 <ul className="grid gap-3">
                   {c.evidence.map((e) => (
                     <li key={e.id} className="grid gap-1 rounded-xl bg-mist px-4 py-3">
-                      <p className="text-[15px] italic">“{e.quote}”</p>
+                      <p className="text-[15px] italic">{e.figureId ? e.quote : `“${e.quote}”`}</p>
                       <p className="text-[15px] text-muted">{e.explanation}</p>
                       <button type="button" onClick={() => onShow(e.id)} className="justify-self-start text-sm text-teal-deep underline underline-offset-4">
-                        {t.result.details.showInText}
+                        {e.figureId ? t.result.details.showFigure : t.result.details.showInText}
                       </button>
                     </li>
                   ))}
