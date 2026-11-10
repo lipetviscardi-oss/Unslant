@@ -30,3 +30,6 @@ Faixas da nota, dados/estatística, versão neutra no estilo de notícia, bug vi
 - Esforço padrão: aprovado (BdF 4,7 · Terra 4,2 · CNN 1,5; diferença 0,5; lados opostos). Custo médio US$ 0,140.
 - Esforço baixo: aprovado (4,3 · 4,5 · 1,6; diferença 0,2). Custo médio US$ 0,140, sem economia → fica o esforço padrão.
 - Aprovado: experimentos `npm run teste -- --haiku` e `-- --misto` (feito; aguardando o usuário rodar). Se algum passar e ficar < US$ 0,10, vira padrão (config.ai).
+- --haiku: REPROVADO (BdF 3,0 · Terra 3,2 · CNN 1,9; US$ 0,040). Simétrico, mas menos sensível: a distância entre os textos enviesados e o neutro cai de ~3 para ~1,2 ponto; CNN passa a "favorece levemente".
+- --misto: REPROVADO (2,9 · 3,1 · 1,6; US$ 0,066). Mesmo problema: as notas vêm das categorias, que ficaram quase todas no Haiku.
+- Decisão: especialistas continuam no Sonnet (padrão atual, US$ 0,14). Próxima ideia (aguardando o usuário): experimento "enxuto" no Sonnet (2 chamadas em vez de 4, até 2 buscas, explicações mais curtas).
