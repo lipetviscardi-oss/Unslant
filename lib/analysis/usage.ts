@@ -110,7 +110,11 @@ export async function usedToday(v: Viewer): Promise<Record<Kind, number> | null>
   if (v.userId) {
     // Conta: inclui os usos de uma conta apagada hoje com o mesmo e-mail (ver detachUsage).
     const owner = [`user_id.eq.${v.userId}`, v.email && `anon_key.eq.${emailKey(v.email)}`].filter(Boolean).join(",");
-    q = q.eq("local_day", v.day).or(owner);
+    const windowDays = config.limits.perDay.free.windowDays;
+    // Limite por período (ex.: fase de testes, 4 por semana) ou pelo dia de hoje.
+    q = windowDays
+      ? q.gte("created_at", new Date(Date.now() - windowDays * 24 * 60 * 60 * 1000).toISOString()).or(owner)
+      : q.eq("local_day", v.day).or(owner);
   }
   else {
     // Visitante: últimas 24 horas, pelo cookie OU pelo endereço (apagar o cookie não zera o limite).

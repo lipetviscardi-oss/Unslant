@@ -4,7 +4,7 @@
  */
 
 import type { Lang } from "@/lib/taxonomy";
-import { FREE_PLAN, FREE_TOTAL } from "@/lib/plans";
+import { COMES_BACK, FREE_PLAN, FREE_TOTAL, PERIOD } from "@/lib/plans";
 
 export type ErrorCode =
   | "INVALID_INPUT"
@@ -146,17 +146,17 @@ export const ERROR_MESSAGES: Record<ErrorCode, Record<Lang, string>> = {
     en: "The site's daily analysis limit was reached. Try again tomorrow.",
   },
   LIMIT_SIMPLE: {
-    pt: `Você já usou ${FREE_TOTAL != null ? "as análises" : "as análises simples"} de hoje. Amanhã (à meia-noite no seu horário) elas voltam. Textos que alguém já analisou continuam saindo na hora.`,
-    en: `You've used today's ${FREE_TOTAL != null ? "analyses" : "simple analyses"}. They come back tomorrow (at midnight your time). Texts someone has already analyzed still come out instantly.`,
+    pt: `Você já usou ${FREE_TOTAL != null ? `as ${FREE_TOTAL} análises` : "as análises simples"} ${PERIOD.pt}. ${COMES_BACK.pt} Textos que alguém já analisou continuam saindo na hora.`,
+    en: `You've used your ${FREE_TOTAL != null ? `${FREE_TOTAL} analyses` : "simple analyses"} ${PERIOD.en}. ${COMES_BACK.en} Texts someone has already analyzed still come out instantly.`,
   },
   LIMIT_DETAILED: {
     pt:
       FREE_TOTAL != null
-        ? "Você já usou as análises de hoje. Amanhã (à meia-noite no seu horário) elas voltam."
+        ? `Você já usou as ${FREE_TOTAL} análises ${PERIOD.pt}. ${COMES_BACK.pt}`
         : "Você já usou a análise detalhada de hoje. Escolha \"Simples\" ou tente amanhã (à meia-noite no seu horário).",
     en:
       FREE_TOTAL != null
-        ? "You've used today's analyses. They come back tomorrow (at midnight your time)."
+        ? `You've used your ${FREE_TOTAL} analyses ${PERIOD.en}. ${COMES_BACK.en}`
         : "You've used today's detailed analysis. Choose \"Simple\" or try again tomorrow (at midnight your time).",
   },
   LIMIT_ANON: {

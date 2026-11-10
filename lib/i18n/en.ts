@@ -8,7 +8,7 @@
  */
 
 import type { Dict } from "./pt";
-import { FREE_PLAN } from "@/lib/plans";
+import { COMES_BACK, FREE_PLAN, PERIOD } from "@/lib/plans";
 
 const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
 const num = (n: number) => n.toLocaleString("en-US");
@@ -135,7 +135,7 @@ export const en: Dict = {
       help: "Both use the same full analysis; only what you see changes.",
       needsLogin: "For the detailed analysis, sign in with your email (no password).",
       remaining: (s: number, d: number) => `Today you still have ${s} simple ${s === 1 ? "analysis" : "analyses"} and ${d} detailed.`,
-      remainingTotal: (n: number) => `You have ${n} ${n === 1 ? "analysis" : "analyses"} left today (simple or detailed).`,
+      remainingTotal: (n: number) => `You have ${n} ${n === 1 ? "analysis" : "analyses"} left ${PERIOD.en} (simple or detailed).`,
       remainingAnon: (s: number) => (s > 0 ? `Without an account: 1 simple analysis every 24 hours. Sign in (no password) to get ${FREE_PLAN.en}.` : `You've used your free analysis for the last 24 hours. Sign in (no password) to get ${FREE_PLAN.en}.`),
     },
     genre: {
@@ -210,8 +210,8 @@ export const en: Dict = {
     unlock: {
       use: "Use today's detailed analysis",
       working: "Unlocking…",
-      useHelp: (n: number) => `The full analysis is already done: this doesn't call the AI again. ${n === 1 ? "1 detailed analysis" : `${n} detailed analyses`} left today.`,
-      usedUp: "You've used today's detailed analysis. It comes back tomorrow, at midnight your time.",
+      useHelp: (n: number) => `The full analysis is already done: this doesn't call the AI again. ${n === 1 ? "1 detailed analysis" : `${n} detailed analyses`} left ${PERIOD.en}.`,
+      usedUp: `You've used your detailed analyses ${PERIOD.en}. ${COMES_BACK.en}`,
       signIn: "Sign in to see the full analysis",
       signInWhy: `No password, just your email. With an account you get ${FREE_PLAN.en}.`,
     },

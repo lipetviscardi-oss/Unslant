@@ -36,7 +36,7 @@ O unslant analisa um texto (link de matéria, texto colado, PDF ou uma afirmaç�
 - **Para equilibrar sua leitura:** depois da análise, a IA busca na web outras coberturas do mesmo assunto, de perspectivas diferentes, e explica o que cada uma acrescenta. Só aparecem links que vieram de fato da busca (o site confere).
 - **Dois exemplos prontos** (uma notícia e uma afirmação), que funcionam sem chave e sem custo.
 - **Imagens, gráficos e tabelas:** a IA vê as figuras do PDF e as imagens da matéria e aponta gráficos enganosos.
-- **Contas por e-mail** (link de acesso, sem senha), **Minhas análises** (abrir e apagar) e **limites por dia**: visitante sem conta, 1 análise simples; conta grátis, 3 por dia, simples ou detalhadas, durante a fase de testes (depois, 3 simples e 1 detalhada). Numa análise simples, "Usar minha análise detalhada do dia" libera tudo sem chamar a IA de novo.
+- **Contas por e-mail** (link de acesso, sem senha), **Minhas análises** (abrir e apagar) e **limites por dia**: visitante sem conta, 1 análise simples; conta grátis, 4 por semana, simples ou detalhadas, durante a fase de testes (depois, 3 simples e 1 detalhada). Numa análise simples, "Usar minha análise detalhada do dia" libera tudo sem chamar a IA de novo.
 - **Análise em segundo plano:** com conta, você pode fechar a página; a análise continua e aparece em Minhas análises.
 
 ---
@@ -200,7 +200,7 @@ Sem o Supabase configurado, o site funciona normalmente, só que sem login, sem 
 
 **Sugestões dos testadores:** o botão "Enviar sugestão" (canto da tela) guarda as mensagens no banco. Para ler, abra o painel do Supabase → **Table Editor** → tabela **feedback**. Elas são apagadas sozinhas depois de 12 meses.
 
-**Os limites** ficam em `lib/config.ts`, seção `limits.perDay`. Na fase de testes: 3 por dia, simples ou detalhadas (campo `total`). Depois dos testes, volte para `{ simple: 3, detailed: 1 }`. O dia de quem tem conta zera à meia-noite no fuso horário da pessoa (fixado na primeira análise); para visitantes, vale uma janela de 24 horas. Resultados reaproveitados (o mesmo texto já analisado) não contam no limite.
+**Os limites** ficam em `lib/config.ts`, seção `limits.perDay`. Na fase de testes: 4 por semana, simples ou detalhadas (campos `total` e `windowDays`). Depois dos testes, volte para `{ simple: 3, detailed: 1 }`. O dia de quem tem conta zera à meia-noite no fuso horário da pessoa (fixado na primeira análise); para visitantes, vale uma janela de 24 horas. Resultados reaproveitados (o mesmo texto já analisado) não contam no limite.
 
 **Prazos de guarda** (cache compartilhado e registros de uso: 30 dias) e o **e-mail de contato** da página Privacidade ficam em `lib/config.ts`, seção `privacy`. **Preencha `contactEmail` antes de publicar o site.**
 

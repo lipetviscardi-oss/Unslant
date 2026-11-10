@@ -191,10 +191,12 @@ export const config = {
       anonymous: { simple: 1, detailed: 0 } as DayLimits,
       /**
        * Conta grátis. total (opcional) = máximo somando simples e detalhadas.
-       * FASE DE TESTES (amigos testando): 3 por dia, simples ou detalhadas.
-       * Plano normal, depois dos testes: { simple: 3, detailed: 1 } (sem total).
+       * windowDays (opcional) = o limite vale para esse número de dias, e não por dia.
+       * FASE DE TESTES (amigos testando): 4 por semana, simples ou detalhadas
+       * (a ideia é 2 papers + 2 notícias por pessoa).
+       * Plano normal, depois dos testes: { simple: 3, detailed: 1 } (sem total nem windowDays).
        */
-      free: { simple: 3, detailed: 3, total: 3 } as DayLimits,
+      free: { simple: 4, detailed: 4, total: 4, windowDays: 7 } as DayLimits,
     },
   },
 
@@ -260,4 +262,6 @@ export interface DayLimits {
   detailed: number;
   /** Máximo somando os dois tipos (opcional). */
   total?: number;
+  /** O limite vale para os últimos N dias, e não para o dia de hoje (opcional). */
+  windowDays?: number;
 }

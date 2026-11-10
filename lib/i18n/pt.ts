@@ -9,7 +9,7 @@
  * ============================================================================
  */
 
-import { FREE_PLAN } from "@/lib/plans";
+import { COMES_BACK, FREE_PLAN, PERIOD } from "@/lib/plans";
 
 const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
 const num = (n: number) => n.toLocaleString("pt-BR");
@@ -136,7 +136,7 @@ export const pt = {
       help: "As duas usam a mesma análise completa; muda o que você vê.",
       needsLogin: "Para a detalhada, entre com seu e-mail (sem senha).",
       remaining: (s: number, d: number) => `Hoje você ainda tem ${s} ${s === 1 ? "análise simples" : "análises simples"} e ${d} ${d === 1 ? "detalhada" : "detalhadas"}.`,
-      remainingTotal: (n: number) => `Hoje você ainda tem ${n} ${n === 1 ? "análise" : "análises"} (simples ou detalhadas).`,
+      remainingTotal: (n: number) => `Você ainda tem ${n} ${n === 1 ? "análise" : "análises"} ${PERIOD.pt} (simples ou detalhadas).`,
       remainingAnon: (s: number): string => (s > 0 ? `Sem conta: 1 análise simples a cada 24 horas. Entre (sem senha) para ter ${FREE_PLAN.pt}.` : `Você já usou a análise grátis das últimas 24 horas. Entre (sem senha) para ter ${FREE_PLAN.pt}.`),
     },
     genre: {
@@ -211,8 +211,8 @@ export const pt = {
     unlock: {
       use: "Usar minha análise detalhada de hoje",
       working: "Liberando…",
-      useHelp: (n: number) => `A análise completa já foi feita: não chama a IA de novo. ${n === 1 ? "Resta 1 análise detalhada" : `Restam ${n} análises detalhadas`} hoje.`,
-      usedUp: "Você já usou a análise detalhada de hoje. Ela volta amanhã, à meia-noite no seu horário.",
+      useHelp: (n: number) => `A análise completa já foi feita: não chama a IA de novo. ${n === 1 ? "Resta 1 análise detalhada" : `Restam ${n} análises detalhadas`} ${PERIOD.pt}.`,
+      usedUp: `Você já usou as análises detalhadas ${PERIOD.pt}. ${COMES_BACK.pt}`,
       signIn: "Entrar para ver a análise completa",
       signInWhy: `Sem senha: é só o seu e-mail. Com conta, você tem ${FREE_PLAN.pt}.`,
     },

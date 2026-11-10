@@ -133,7 +133,7 @@ Decisões do usuário (10/11/2026): botão de sugestões sim; 5 análises por di
 
 | # | Item | Status |
 |---|---|---|
-| D1 | Limites da fase de testes: 3 por dia somando simples e detalhadas (era 5; usuário reduziu para caber em US$ 25) e teto do site 15 por dia (config.limits.perDay.free.total); frases geradas da config (lib/plans.ts) | feito |
+| D1 | Limites da fase de testes: 4 por pessoa na SEMANA (janela de 7 dias), somando simples e detalhadas; orientação de 2 papers + 2 notícias vai no convite; teto do site 15 por dia. Orçamento: US$ 25 (config.limits.perDay.free.total); frases geradas da config (lib/plans.ts) | feito |
 | D2 | Botão "Enviar sugestão" (tabela feedback no SQL, /api/feedback com limite de 5 por hora, apagadas em 12 meses; Privacidade e README atualizados) | feito |
 | D3 | Domínio: unslant.world, comprado na GoDaddy em 10/11/2026 | feito |
 | D4 | Publicar na Vercel (contas do usuário: Vercel; chaves nas configurações da Vercel) | a fazer |
