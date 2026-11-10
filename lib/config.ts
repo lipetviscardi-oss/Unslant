@@ -223,7 +223,7 @@ export const config = {
      * E-mail de contato para pedidos de privacidade (ver, corrigir ou apagar dados).
      * PREENCHER antes de publicar o site. Vazio = a página diz que será informado.
      */
-    contactEmail: "",
+    contactEmail: "unslanttheworld@gmail.com",
   },
 
   /**
