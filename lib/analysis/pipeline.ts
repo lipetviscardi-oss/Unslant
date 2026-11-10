@@ -45,6 +45,7 @@ import {
   buildFindings,
   finalizeResult,
   findingsForSynthesis,
+  rewriteCandidates,
   rewriteProblem,
   type RawPart,
 } from "./assemble";
@@ -233,9 +234,13 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
       signal,
     });
 
+  // Trechos do próprio autor com problema pelo menos moderado (os únicos que podem ganhar versão neutra).
+  const hasRewriteCandidates = rewriteCandidates(findings, text).size > 0;
+
   const synthesisTask = (async (): Promise<SynthesisOutput | null> => {
     try {
       let out = await runSynthesis();
+      if (!hasRewriteCandidates) return { ...out, rewrite: { evidenceId: "", rewritten: "", explanation: "" } };
       // A versão neutra não pode inventar fontes ou números: confere e, se precisar, refaz uma vez.
       let problem = rewriteProblem(findings, out, text);
       if (problem) {

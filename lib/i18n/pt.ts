@@ -194,6 +194,7 @@ export const pt = {
       original: "Trecho original",
       suggested: "Versão neutra sugerida",
       show: "Ver o trecho no texto",
+      none: "Nenhum trecho precisa de reescrita: os problemas encontrados estão em falas citadas ou são leves.",
     },
 
     claim: {

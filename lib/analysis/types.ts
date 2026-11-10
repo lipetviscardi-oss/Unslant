@@ -144,6 +144,8 @@ export interface AnalysisResult {
     start: number;
     end: number;
   } | null;
+  /** true = nenhum trecho do autor precisava de reescrita (mostra "Nenhum trecho precisa de reescrita"). */
+  rewriteNone?: boolean;
   groups: GroupResult[];
   /** Só para afirmações: o que se sabe, de onde a ideia vem, como verificar. */
   claimCheck?: ClaimCheckOutput | null;

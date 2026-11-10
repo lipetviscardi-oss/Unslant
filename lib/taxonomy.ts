@@ -741,6 +741,12 @@ export const SCORING = {
   topGroupsCount: 3,
   /** Peso de cada nível de confiança no cálculo das médias. */
   confidenceWeight: { low: 0.6, medium: 0.85, high: 1 },
+  /**
+   * Escala única de intensidade usada no site inteiro (notas, cores,
+   * destaques, versão neutra): abaixo de "moderate" = leve; de "moderate"
+   * até antes de "strong" = moderado; a partir de "strong" = forte.
+   */
+  intensity: { moderate: 3.5, strong: 6.5 },
   /** Faixas da nota geral (limite superior de cada faixa). */
   labels: [
     { max: 2, pt: "Viés leve", en: "Mild bias", simplePt: "levemente enviesado", simpleEn: "slightly biased" },

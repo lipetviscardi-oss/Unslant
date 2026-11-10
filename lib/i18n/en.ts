@@ -193,6 +193,7 @@ export const en: Dict = {
       original: "Original passage",
       suggested: "Suggested neutral version",
       show: "Show passage in the text",
+      none: "No passage needs rewriting: the problems found are in quoted statements or are mild.",
     },
 
     claim: {

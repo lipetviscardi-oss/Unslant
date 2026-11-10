@@ -7,7 +7,7 @@
  */
 
 import { config } from "@/lib/config";
-import { TAXONOMY, type BiasGroup, type ContentKind, type Lang } from "@/lib/taxonomy";
+import { SCORING, TAXONOMY, type BiasGroup, type ContentKind, type Lang } from "@/lib/taxonomy";
 import { createQuoteMatcher, type QuoteMatcher } from "./verify";
 import { clamp, scoreGroup, scoreOverall } from "./scoring";
 import type {
@@ -253,12 +253,48 @@ const META_START = /^\s*(o|este|esse|a)\s+(texto|autor|autora|artigo|trecho|repo
  *    não aparecem em nenhum lugar do texto original.
  * Devolve a descrição do problema, ou null se estiver tudo certo.
  */
+/** Verbos e expressões que indicam que a frase relata a fala de alguém (não é a voz do autor). */
+const ATTRIBUTION =
+  /\b(disse|diz|dizem|disseram|afirm(?:ou|a|am|aram)|declar(?:ou|a|am|aram)|de acordo com|aleg(?:ou|a|am|aram)|acus(?:ou|a|am|aram)|critic(?:ou|aram)|defend(?:eu|eram)|ressalt(?:ou|aram)|destac(?:ou|aram)|avali(?:ou|aram)|argument(?:ou|a|aram)|garant(?:iu|iram)|neg(?:ou|aram)|admit(?:iu|iram)|explic(?:ou|aram)|coment(?:ou|aram)|apont(?:ou|aram)|sustent(?:ou|aram)|escreveu|questionou|rebateu|reagiu|classific(?:ou|aram)|said|says|stated|claimed|according to|argued|told|wrote|accused|denied)\b/i;
+/** "segundo" só conta como atribuição antes de quem fala ("segundo o ministro"), não em "segundo turno". */
+const ATTRIBUTION_SEGUNDO = /\b[Ss]egundo\s+(?:o|a|os|as|ele|ela|eles|elas|fontes?|[A-ZÁÉÍÓÚÂÊÔ])/;
+
+/** A frase inteira em volta de um trecho (do ponto anterior ao próximo). */
+function sentenceAround(text: string, start: number, end: number): string {
+  const before = Math.max(text.lastIndexOf(".", start - 1), text.lastIndexOf("!", start - 1), text.lastIndexOf("?", start - 1), text.lastIndexOf("\n", start - 1));
+  const after = [".", "!", "?", "\n"].map((c) => text.indexOf(c, end)).filter((i) => i !== -1);
+  return text.slice(before + 1, after.length ? Math.min(...after) + 1 : text.length);
+}
+
+/**
+ * Trechos que podem ganhar uma versão neutra: problema pelo menos moderado,
+ * fora das aspas e numa frase que não relata a fala de alguém
+ * ("disse", "afirmou", "segundo"...). Se não houver nenhum, não há reescrita.
+ */
+export function rewriteCandidates(findings: Findings, text: string): Set<string> {
+  const ids = new Set<string>();
+  for (const g of findings.groups) {
+    for (const c of g.categories) {
+      if (c.status !== "found" || c.score < SCORING.intensity.moderate) continue;
+      for (const e of c.evidence) {
+        if (e.quoted) continue;
+        const sentence = sentenceAround(text, e.start, e.end);
+        if (ATTRIBUTION.test(sentence) || ATTRIBUTION_SEGUNDO.test(sentence)) continue;
+        ids.add(e.id);
+      }
+    }
+  }
+  return ids;
+}
+
 export function rewriteProblem(findings: Findings, synthesis: SynthesisOutput, text: string): string | null {
   const rw = synthesis.rewrite;
   if (!rw.evidenceId || !rw.rewritten.trim()) return null;
   const rewritten = rw.rewritten.trim();
   const chosen = findings.groups.flatMap((g) => g.categories).flatMap((c) => c.evidence).find((e) => e.id === rw.evidenceId);
   if (chosen?.quoted) return "escolheu uma fala citada entre aspas, que é de outra pessoa e não do autor; escolha um trecho escrito pelo próprio jornalista";
+  if (!rewriteCandidates(findings, text).has(rw.evidenceId))
+    return "escolheu um trecho que não está marcado com \"podeReescrever\" (fala atribuída a alguém ou problema leve); escolha só entre os marcados, ou deixe a reescrita vazia";
   if (META_START.test(rewritten)) return "virou um comentário sobre o texto em vez de uma reescrita no estilo de notícia";
 
   const lowerText = text.toLowerCase();
@@ -366,6 +402,7 @@ export function buildFindings(
 
 /** Texto compacto com as conclusões, enviado à IA para a síntese. */
 export function findingsForSynthesis(triage: TriageOutput, findings: Findings, text: string): string {
+  const candidates = rewriteCandidates(findings, text);
   const groups = findings.groups
     .filter((g) => g.score !== null)
     .map((g) => {
@@ -383,6 +420,7 @@ export function findingsForSynthesis(triage: TriageOutput, findings: Findings, t
               id: e.id,
               trecho: e.quote,
               ...(e.quoted ? { citacaoDeTerceiro: true } : {}),
+              ...(candidates.has(e.id) ? { podeReescrever: true } : {}),
               // frase em volta do trecho, para a reescrita saber quem disse o quê
               contexto: text.slice(Math.max(0, e.start - 220), Math.min(text.length, e.end + 220)),
               explicacao: e.explanation,
@@ -493,6 +531,8 @@ export function finalizeResult(params: {
     summarySimple: synthesis?.summarySimple || triage.contentSummary,
     omissions: findings.omissions,
     rewrite,
+    // Sem trecho elegível, ou a IA não viu nenhum que valesse reescrever (com a síntese funcionando).
+    rewriteNone: !rewrite && !!synthesis && (rewriteCandidates(findings, text).size === 0 || !synthesis.rewrite.evidenceId),
     groups: findings.groups,
     claimCheck: params.claimCheck ?? null,
     balance: params.balance ?? { status: "disabled", data: null },

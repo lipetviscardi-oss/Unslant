@@ -58,7 +58,17 @@ export function Omissions({ result }: { result: AnalysisResult }) {
 
 export function Rewrite({ result, onShow }: { result: AnalysisResult; onShow: (evidenceId: string) => void }) {
   const t = useDict();
-  if (!result.rewrite) return null;
+  if (!result.rewrite) {
+    if (!result.rewriteNone) return null;
+    return (
+      <section aria-labelledby="rewrite-title" className="flex flex-col gap-4">
+        <h2 id="rewrite-title" className="text-2xl font-medium">
+          {t.result.rewrite.title}
+        </h2>
+        <p className="rounded-[20px] bg-paper p-5 text-[15px] text-muted sm:p-6">{t.result.rewrite.none}</p>
+      </section>
+    );
+  }
   const rw = result.rewrite;
   return (
     <section aria-labelledby="rewrite-title" className="grid content-start gap-4">
