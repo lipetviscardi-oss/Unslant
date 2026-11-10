@@ -202,7 +202,7 @@ for (const c of manifest.casos) {
   // Eixo econômico esperado (caso.eixoEconomico: "left" ou "right").
   if (c.eixoEconomico) {
     const pos = r.political.economic.position;
-    const name = { left: "esquerda", right: "direita", center: "centro", not_identified: "não identificado" };
+    const name = { left: "esquerda", right: "direita", center: "centro", unidentified: "não identificado", not_applicable: "não se aplica" };
     console.log(`  Eixo econômico: ${name[pos] ?? pos}`);
     check(pos === c.eixoEconomico, `${c.nome}: eixo econômico ${name[c.eixoEconomico]} (deu ${name[pos] ?? pos})`);
   }

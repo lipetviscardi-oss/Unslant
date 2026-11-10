@@ -232,7 +232,8 @@ function mergeAxes(axes: AxisResult[]): AxisResult {
 
 function verifyDispute(d: OverviewOutput["dispute"], matcher: QuoteMatcher, lang: Lang): DisputeResult {
   if (d.status !== "favors_a" && d.status !== "favors_b") {
-    return { ...d, quote: "", start: null, end: null };
+    // Sem lado favorecido, não há ressalva a fazer.
+    return { ...d, quote: "", caveat: "", start: null, end: null };
   }
   const pos = matcher.find(d.quote);
   if (!pos) {
