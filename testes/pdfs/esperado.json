@@ -1,0 +1,32 @@
+{
+  "sobre": "O que o site deve ler de cada PDF (npm run checar-pdfs). Os PDFs em privados/ têm direitos autorais e ficam fora do GitHub: copie-os para testes/pdfs/privados/ no seu computador. autores = um trecho que precisa aparecer.",
+  "pdfs": [
+    {
+      "arquivo": "seralini-2014.pdf",
+      "titulo": "Republished study: long-term toxicity of a Roundup herbicide and a Roundup-tolerant genetically modified maize",
+      "autores": "Gilles-Eric Séralini, Emilie Clair",
+      "revista": "Environmental Sciences Europe",
+      "data": "16 May 2014"
+    },
+    {
+      "arquivo": "privados/nejm-dexametasona-2021.pdf",
+      "titulo": "Dexamethasone in Hospitalized Patients with Covid-19",
+      "autores": "The RECOVERY Collaborative Group",
+      "revista": "The New England Journal of Medicine",
+      "data": "February 25, 2021"
+    },
+    {
+      "arquivo": "duas-colunas.pdf",
+      "titulo": "Titulo do artigo de teste com duas colunas"
+    },
+    {
+      "arquivo": "paper-grafico.pdf",
+      "titulo": "Efeito do Programa Renda Local sobre a renda familiar"
+    },
+    {
+      "arquivo": "privados/telegrama-gordon-1964.pdf",
+      "escaneado": true,
+      "sobre": "Telegrama do embaixador Lincoln Gordon, março de 1964 (cópia escaneada, sem texto selecionável)."
+    }
+  ]
+}

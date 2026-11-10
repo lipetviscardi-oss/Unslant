@@ -93,7 +93,9 @@ function pageToLines(items: TextItemLike[], pageWidth: number): Line[] {
     // para a direita (o pedaço pertence à outra coluna, na mesma altura).
     const newLine =
       current &&
-      (Math.abs(current.y - y) > Math.max(2, (current.height || 10) * 0.4) || x - current.xEnd > pageWidth * 0.06 || x < current.x - 1);
+      (Math.abs(current.y - y) > Math.max(2, (current.height || 10) * 0.4) ||
+        x - current.xEnd > Math.min(pageWidth * 0.06, Math.max(pageWidth * 0.015, (current.height || 10) * 1.2)) ||
+        x < current.x - 1);
     if (newLine && current) {
       lines.push(current);
       current = null;
@@ -110,27 +112,112 @@ function pageToLines(items: TextItemLike[], pageWidth: number): Line[] {
     }
   }
   if (current) lines.push(current);
-  return lines
-    .map((l) => ({ ...l, text: l.text.replace(/\s+/g, " ").trim() }))
-    .filter((l) => l.text && !/^\d{1,4}$/.test(l.text)); // remove números de página soltos
+  const clean = lines.map((l) => ({ ...l, text: l.text.replace(/\s+/g, " ").trim() })).filter((l) => l.text);
+  // Número sozinho só é número de página no topo ou no pé da página (no meio, é valor de tabela).
+  const ys = clean.map((l) => l.y);
+  const top = Math.max(...ys);
+  const bottom = Math.min(...ys);
+  return clean.filter((l) => !(/^\d{1,4}$/.test(l.text) && (l.y >= top - 2 || l.y <= bottom + 2)));
+}
+
+const JOURNAL_LIKE = /\b(journal|revista|review|proceedings|annals|bulletin|magazine|letters|gazette|gazeta|jornal|di[áa]rio|quarterly)\b/i;
+const MONTHS_EN = "January|February|March|April|May|June|July|August|September|October|November|December";
+const MONTHS_PT = "janeiro|fevereiro|março|marco|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro";
+
+/** Linhas da página agrupadas por altura na página (pedaços na mesma altura viram uma linha). */
+function rows(lines: Line[]): Line[] {
+  const sorted = [...lines].sort((a, b) => b.y - a.y);
+  const groups: Line[][] = [];
+  for (const l of sorted) {
+    const g = groups[groups.length - 1];
+    if (g && Math.abs(g[0].y - l.y) <= Math.max(2, l.height * 0.35) && Math.abs(g[0].height - l.height) <= Math.max(g[0].height, l.height) * 0.5) g.push(l);
+    else groups.push([l]);
+  }
+  // Dentro da mesma linha, da esquerda para a direita.
+  return groups.map((g) => {
+    const parts = [...g].sort((a, b) => a.x - b.x);
+    return { ...parts[0], height: Math.max(...parts.map((p) => p.height)), text: parts.map((p) => p.text).join(" ").replace(/\s+([,.;])/g, "$1") };
+  });
+}
+
+/** Remove marcas de nota dos nomes dos autores ("Séralini 1*", "Group*"). */
+const cleanAuthors = (s: string) =>
+  s
+    .split(/\s+[—–]\s+/)[0] // "A. Hart, J. Moreno — Instituto X": fica só com os nomes
+    .replace(/(\p{L})\s*\d+(?:,\d+)*\*?/gu, "$1").replace(/\*/g, "").replace(/\s+,/g, ",").replace(/,\s*,/g, ",").replace(/\s+/g, " ").replace(/[,\s]+$/, "").trim();
+const looksLikeNames = (s: string) => {
+  const w = s.split(/\s+/).filter((x) => /\p{L}/u.test(x));
+  if (w.length === 0 || w.length > 60 || s.length > 400) return false;
+  const caps = w.filter((x) => /^\p{Lu}/u.test(x)).length;
+  return caps / w.length >= 0.45 && (/[,&]|\b(and|e|group|grupo|consortium|collaborat)/i.test(s) || w.length <= 6);
+};
+
+/** Data no texto (nunca a do arquivo, que é quando o PDF foi gerado ou escaneado). */
+function findDate(page1: string, all: string): string | undefined {
+  const pub = all.match(new RegExp(`\\b(?:Published(?: online)?|Publicado(?: em)?)\\s*:?\\s*(\\d{1,2}\\s+(?:${MONTHS_EN})\\s+\\d{4}|(?:${MONTHS_EN})\\s+\\d{1,2},\\s+\\d{4})`, "i"));
+  if (pub) return pub[1];
+  const patterns = [
+    new RegExp(`\\b(?:${MONTHS_EN})\\s+\\d{1,2},\\s+\\d{4}\\b`, "i"),
+    new RegExp(`\\b\\d{1,2}\\s+(?:${MONTHS_EN})\\s+\\d{4}\\b`, "i"),
+    new RegExp(`\\b\\d{1,2}\\s+de\\s+(?:${MONTHS_PT})\\s+de\\s+\\d{4}\\b`, "i"),
+  ];
+  for (const re of patterns) {
+    const m = page1.match(re);
+    if (m) return m[0];
+  }
+  const acc = all.match(new RegExp(`\\bAccepted\\s*:?\\s*(\\d{1,2}\\s+(?:${MONTHS_EN})\\s+\\d{4})`, "i"));
+  return acc?.[1];
 }
 
 /**
- * Título pela primeira página: as linhas seguidas com a maior letra
- * (papers costumam ter o título quebrado em 2 ou 3 linhas).
+ * Título, autores, revista e data pela primeira página:
+ *  - título: o bloco com a maior letra que NÃO é o nome da revista
+ *    (no NEJM, o nome da revista no topo tem letra maior que o título);
+ *  - autores: as linhas logo abaixo do título, se parecerem nomes;
+ *  - revista: o bloco com cara de nome de revista ou a citação do artigo;
+ *  - data: escrita no texto (a data guardada no arquivo é ignorada).
  */
-function titleFromFirstPage(lines: Line[]): string | undefined {
-  const candidates = lines.filter((l) => /\p{L}{3}/u.test(l.text) && l.text.length >= 4);
-  if (candidates.length === 0) return undefined;
-  const max = Math.max(...candidates.map((l) => l.height));
-  // A letra do título precisa ser claramente maior que a do texto normal.
-  if (max < median(candidates.map((l) => l.height)) * 1.3) return undefined;
-  const first = lines.findIndex((l) => candidates.includes(l) && l.height >= max * 0.9);
-  const parts: string[] = [];
-  for (let k = first; k < lines.length && lines[k].height >= max * 0.9 && parts.length < 4; k++) parts.push(lines[k].text);
-  const title = parts.join(" ").replace(/\s+/g, " ").trim();
-  const words = title.split(" ").length;
-  return words >= 3 && words <= 40 ? title : undefined;
+function documentInfo(page1: Line[], allText: string) {
+  const r = rows(page1).filter((l) => /\p{L}/u.test(l.text));
+  if (r.length === 0) return {};
+  const body = median(r.map((l) => l.height));
+  // Blocos de letra grande: linhas seguidas com a mesma altura de letra.
+  const blocks: { lines: Line[]; height: number }[] = [];
+  for (const l of r) {
+    if (l.height < body * 1.3) continue;
+    const last = blocks[blocks.length - 1];
+    const prev = last?.lines[last.lines.length - 1];
+    if (last && prev && Math.abs(prev.height - l.height) <= l.height * 0.12 && prev.y - l.y <= l.height * 2.2) last.lines.push(l);
+    else blocks.push({ lines: [l], height: l.height });
+  }
+  const text = (b: { lines: Line[] }) => b.lines.map((l) => l.text).join(" ").replace(/\s+/g, " ").trim();
+  const nWords = (t: string) => t.split(/\s+/).length;
+  const byHeight = [...blocks].sort((a, b) => b.height - a.height);
+  const journalBlock = byHeight.find((b) => JOURNAL_LIKE.test(text(b)) && nWords(text(b)) <= 8);
+  const titleBlock = byHeight.find((b) => b !== journalBlock && nWords(text(b)) >= 3 && nWords(text(b)) <= 40 && !/^(r\s?e\s?s\s?e\s?a\s?r\s?c\s?h|open access|article|artigo)/i.test(text(b)));
+  const title = titleBlock ? text(titleBlock) : undefined;
+
+  let authors: string | undefined;
+  if (titleBlock) {
+    const lastTitle = titleBlock.lines[titleBlock.lines.length - 1];
+    const below = r.filter((l) => l.y < lastTitle.y && lastTitle.y - l.y <= titleBlock.height * 5).slice(0, 3);
+    const picked: string[] = [];
+    for (const l of below) {
+      if (/^(a\s?b\s?s\s?t\s?r\s?a\s?c\s?t|resumo|background|summary|introdu|key ?words)/i.test(l.text)) break;
+      if (!looksLikeNames(l.text)) break;
+      picked.push(l.text);
+    }
+    const a = cleanAuthors(picked.join(" "));
+    if (a && looksLikeNames(a)) authors = a;
+  }
+
+  const page1Text = r.map((l) => l.text).join(" ");
+  let publication = journalBlock ? text(journalBlock).replace(/\b\p{L}/gu, (c) => c.toUpperCase()).replace(/\b(Of|And|The|De|Da|Do)\b/g, (w, _x, i) => (i === 0 ? w : w.toLowerCase())) : undefined;
+  if (!publication) {
+    const cite = allText.match(/Cite this article as:[^\n]*?\.\s+([A-Z][A-Za-z&\- ]{3,60}?)\s+(?:19|20)\d{2},?\s*\d*\s*:\s*\d+/);
+    publication = cite?.[1]?.trim();
+  }
+  return { title, authors, publication, publishedAt: findDate(page1Text, allText) };
 }
 
 /** Título dos metadados que é só lixo (nome de arquivo, "Microsoft Word - ...", "Untitled"). */
@@ -143,14 +230,31 @@ function usefulMetaTitle(title: string | undefined, fileName: string): string | 
 }
 
 /**
- * 2. Páginas em duas colunas (comum em papers): lê a coluna da esquerda
- * inteira antes da direita. Linhas que ocupam a largura toda (título,
- * resumo) ficam antes ou depois das colunas, conforme a posição.
+ * Onde fica o espaço vazio entre as duas colunas. Não precisa ser no meio:
+ * revistas como o NEJM têm uma coluna larga e outra estreita. Testa cortes
+ * de 25% a 85% da largura e fica com o que deixa mais texto dos dois lados
+ * e menos linhas atravessando.
  */
+function findGutter(lines: Line[], pageWidth: number): number | null {
+  let best: { g: number; score: number } | null = null;
+  for (let f = 0.25; f <= 0.85; f += 0.01) {
+    const g = pageWidth * f;
+    const left = lines.filter((l) => l.xEnd <= g).length;
+    const right = lines.filter((l) => l.x >= g).length;
+    const cross = lines.length - left - right;
+    if (left < 5 || right < 5 || cross > lines.length * 0.4) continue;
+    // Mais texto nos dois lados e menos linhas cruzando; empate: mais perto do meio.
+    const score = Math.min(left, right) - cross * 2 - Math.abs(f - 0.5);
+    if (!best || score > best.score) best = { g, score };
+  }
+  return best?.g ?? null;
+}
+
 function orderColumns(lines: Line[], pageWidth: number): Line[] {
-  const mid = pageWidth / 2;
-  const left = lines.filter((l) => l.xEnd <= mid + pageWidth * 0.03);
-  const right = lines.filter((l) => l.x >= mid - pageWidth * 0.03);
+  const g = findGutter(lines, pageWidth);
+  if (g === null) return lines;
+  const left = lines.filter((l) => l.xEnd <= g + pageWidth * 0.01);
+  const right = lines.filter((l) => l.x >= g - pageWidth * 0.01);
   // Só reordena quando as duas colunas têm bastante texto.
   if (left.length < 5 || right.length < 5 || left.length + right.length < lines.length * 0.6) return lines;
   // A área das colunas vai de onde as DUAS começam até onde as duas terminam.
@@ -308,18 +412,26 @@ export async function extractFromPdf(file: File): Promise<{ text: string; source
     const meta = await pdf.getMetadata();
     const info = meta.info as Record<string, unknown>;
     title = typeof info?.Title === "string" && info.Title.trim() ? info.Title.trim() : undefined;
-    author = typeof info?.Author === "string" && info.Author.trim() ? info.Author.trim() : undefined;
+    author = typeof info?.Author === "string" && info.Author.trim() && !/^(anonymous|unknown|admin|user|autor)$/i.test(info.Author.trim()) ? info.Author.trim() : undefined;
   } catch {
     /* metadados são opcionais */
   }
   const images = await renderVisualPages(pdf, visualHints);
   await pdf.cleanup();
 
-  // Título: a maior letra da primeira página; senão, os metadados (se não forem lixo); senão, o nome do arquivo.
-  const bestTitle = (pages[0] && titleFromFirstPage(pages[0])) ?? usefulMetaTitle(title, file.name) ?? file.name.replace(/\.pdf$/i, "");
+  const fullText = normalizeText(paragraphs.join("\n\n"));
+  // Título, autores, revista e data: pela primeira página; senão, os metadados (se não forem lixo); senão, o nome do arquivo.
+  const info = pages[0] ? documentInfo(pages[0], fullText) : {};
+  const bestTitle = info.title ?? usefulMetaTitle(title, file.name) ?? file.name.replace(/\.pdf$/i, "");
   return {
-    text: normalizeText(paragraphs.join("\n\n")),
-    source: { type: "pdf", title: bestTitle, author },
+    text: fullText,
+    source: {
+      type: "pdf",
+      title: bestTitle,
+      author: info.authors ?? author,
+      ...(info.publication ? { outlet: info.publication } : {}),
+      ...(info.publishedAt ? { publishedAt: info.publishedAt } : {}),
+    },
     images,
   };
 }

@@ -39,6 +39,9 @@ const RequestSchema = z.object({
     .object({
       title: z.string().max(500).optional(),
       author: z.string().max(500).optional(),
+      /** PDFs: revista/veículo e data lidos da primeira página. */
+      outlet: z.string().max(300).optional(),
+      publishedAt: z.string().max(100).optional(),
       /** Afirmações: onde a pessoa viu ou ouviu. */
       context: z.string().max(300).optional(),
     })
@@ -167,7 +170,13 @@ export async function POST(request: Request) {
           text = normalizeText(body.text ?? "");
           source =
             body.mode === "pdf"
-              ? { type: "pdf", title: body.meta?.title || undefined, author: body.meta?.author || undefined }
+              ? {
+                  type: "pdf",
+                  title: body.meta?.title || undefined,
+                  author: body.meta?.author || undefined,
+                  outlet: body.meta?.outlet || undefined,
+                  publishedAt: body.meta?.publishedAt || undefined,
+                }
               : body.mode === "claim"
                 ? { type: "claim", claimContext: body.meta?.context?.trim() || undefined }
                 : { type: "text" };

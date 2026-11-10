@@ -49,3 +49,6 @@ next-env.d.ts
 # unslant: textos e resultados do teste automático (só no seu computador)
 /testes/textos/
 /testes/resultados/
+
+# PDFs com direitos autorais: só no computador de quem testa (npm run checar-pdfs)
+/testes/pdfs/privados/

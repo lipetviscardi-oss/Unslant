@@ -24,6 +24,8 @@ interface PdfState {
   text?: string;
   title?: string;
   author?: string;
+  outlet?: string;
+  publishedAt?: string;
   error?: string;
   /** Páginas com figura/tabela, já como imagem (vão para a etapa "Imagens e gráficos"). */
   images?: PdfPageImage[];
@@ -77,7 +79,7 @@ export function AnalyzeForm({ onSubmit }: { onSubmit: (req: AnalyzeRequest) => v
     try {
       const { extractFromPdf } = await import("@/lib/extract/pdf-client");
       const out = await extractFromPdf(file);
-      setPdf({ status: "ready", fileName: file.name, text: out.text, title: out.source.title, author: out.source.author, images: out.images });
+      setPdf({ status: "ready", fileName: file.name, text: out.text, title: out.source.title, author: out.source.author, outlet: out.source.outlet, publishedAt: out.source.publishedAt, images: out.images });
     } catch (err) {
       const code = err instanceof AppError ? err.code : "PDF_INVALID";
       setPdf({ status: "error", fileName: file.name, error: errorMessage(code, lang) });
@@ -101,7 +103,7 @@ export function AnalyzeForm({ onSubmit }: { onSubmit: (req: AnalyzeRequest) => v
       send({
         mode: "pdf",
         text: pdf.text,
-        meta: { title: pdf.title, author: pdf.author },
+        meta: { title: pdf.title, author: pdf.author, outlet: pdf.outlet, publishedAt: pdf.publishedAt },
         images: pdf.images?.length ? pdf.images : undefined,
         lang,
         contentType,

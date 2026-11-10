@@ -25,7 +25,7 @@ export type AnalyzeRequest = (
   | {
       mode: "pdf";
       text: string;
-      meta: { title?: string; author?: string };
+      meta: { title?: string; author?: string; outlet?: string; publishedAt?: string };
       /** Páginas com figura/tabela, já como imagem. */
       images?: { page: number; data: string; thumb?: string; caption?: string }[];
       lang: Lang;
