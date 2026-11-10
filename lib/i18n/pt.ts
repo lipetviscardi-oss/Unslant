@@ -208,6 +208,11 @@ export const pt = {
     },
 
     mode: { label: "Modo de exibição", simple: "Simples", detailed: "Detalhado" },
+    references: {
+      show: "Mostrar referências",
+      hide: "Esconder referências",
+      note: "A lista de referências não entra na análise: ela não tem viés a avaliar. As citações dentro do texto continuam sendo analisadas.",
+    },
     unlock: {
       use: "Usar minha análise detalhada de hoje",
       working: "Liberando…",

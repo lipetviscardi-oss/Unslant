@@ -207,6 +207,11 @@ export const en: Dict = {
     },
 
     mode: { label: "Display mode", simple: "Simple", detailed: "Detailed" },
+    references: {
+      show: "Show references",
+      hide: "Hide references",
+      note: "The reference list is not part of the analysis: there is no bias to assess in it. Citations within the text are still analyzed.",
+    },
     unlock: {
       use: "Use today's detailed analysis",
       working: "Unlocking…",

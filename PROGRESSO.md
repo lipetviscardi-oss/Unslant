@@ -172,8 +172,8 @@ Decisões: A) item 9 = intensidade por trecho; B) limite de imagens e PDF contar
 | # | Item | Status |
 |---|---|---|
 | R9-1 | Título do PDF (maior letra da 1ª página → metadados → nome do arquivo) | feito (testado em 4 PDFs) |
-| R9-2 | Referências recolhidas e fora da análise; anúncios de editora | a fazer |
-| R9-3 | Lixo por site (lib/extract/lixo-por-site.ts) + parágrafos duplicados | a fazer |
+| R9-2 | Referências recolhidas e fora da análise (lib/extract/references.ts; botão "Mostrar referências"; a IA é avisada); anúncios de editora | feito (Séralini: 2.501 palavras de referências separadas) |
+| R9-3 | Lixo por site (lib/extract/lixo-por-site.ts) + parágrafos duplicados | feito (Outras Palavras: boletim, apoio, tags e 2 parágrafos repetidos removidos; a repetição existe no HTML original) |
 | R9-4 | Versão neutra não repete número "sem fonte" como fato (regra + conferência) | a fazer |
 | R9-5 | Problemas das imagens entram nas notas das categorias; mesmo critério para figuras parecidas | a fazer |
 | R9-6 | "Respostas do autor às críticas" (avaliação: procede / em parte / não) | a fazer |

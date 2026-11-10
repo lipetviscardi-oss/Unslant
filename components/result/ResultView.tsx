@@ -14,6 +14,7 @@ import { ScoreCard } from "./ScoreCard";
 import { PoliticalAxes } from "./PoliticalAxes";
 import { GroupOverview } from "./GroupOverview";
 import { HighlightedText } from "./HighlightedText";
+import { References } from "./References";
 import { ClaimCheck } from "./ClaimCheck";
 import { Balance } from "./Balance";
 import { ModeToggle, PoliticalLine, TopProblems } from "./SimpleView";
@@ -378,6 +379,8 @@ export function ResultView({
             showAll={showAll}
             onToggleAll={() => setShowAll((v) => !v)}
           />
+
+          <References result={result} />
 
           <Figures result={result} />
 

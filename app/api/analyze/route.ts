@@ -14,6 +14,7 @@ import { AppError, errorMessage } from "@/lib/errors";
 import { countWords, normalizeText } from "@/lib/text";
 import { extractFromUrl, fetchImage, type ArticleImage } from "@/lib/extract/url";
 import { cleanArticleText } from "@/lib/extract/clean";
+import { splitReferences } from "@/lib/extract/references";
 import type { VisualInput } from "@/lib/analysis/visuals";
 import { runPipeline } from "@/lib/analysis/pipeline";
 import { cacheKey, readCache, writeCache } from "@/lib/analysis/cache";
@@ -174,9 +175,16 @@ export async function POST(request: Request) {
 
         // Tira chamadas de newsletter, propaganda do veículo, "leia também" e listas de tags.
         if (body.mode !== "claim") {
-          const cleaned = cleanArticleText(text);
+          const domain = source.url ? safeHost(source.url) : undefined;
+          const cleaned = cleanArticleText(text, domain);
           if (cleaned.removed.length) console.info(`[unslant] limpeza: ${cleaned.removed.length} trecho(s) removido(s)`, cleaned.removed);
           text = cleaned.text;
+          // Lista de referências (papers): sai da análise e aparece recolhida na tela.
+          const split = splitReferences(text);
+          if (split.references) {
+            text = split.body;
+            source = { ...source, references: split.references };
+          }
         }
 
         if (body.contentType && body.mode !== "claim") source = { ...source, declaredType: body.contentType };
@@ -313,4 +321,12 @@ async function downloadArticleImages(images: ArticleImage[], lang: "pt" | "en"):
     });
   });
   return out;
+}
+
+function safeHost(url: string): string | undefined {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return undefined;
+  }
 }

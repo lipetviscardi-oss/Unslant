@@ -5,7 +5,13 @@
  * propaganda do próprio veículo, blocos de "leia também" e listas de tags no
  * fim. A regra é conservadora: só parágrafos CURTOS que começam com essas
  * chamadas (ou listas no fim do texto) saem; frases normais do texto ficam.
+ * Os padrões que você pode ampliar (por site, newsletter, apoio, editoras)
+ * ficam em lib/extract/lixo-por-site.ts. Parágrafos repetidos (o mesmo
+ * parágrafo duas vezes, comum quando o site tem versões para celular e
+ * computador) também saem.
  */
+
+import { lixoPara } from "./lixo-por-site";
 
 /** Chamadas típicas no começo de um parágrafo (inglês e português). */
 const PROMO_START =
@@ -15,6 +21,14 @@ const PROMO_START =
 const PROMO_ANYWHERE =
   /\b(sign up for|subscribe to (our|the)|our (free )?newsletter|in your inbox|inscreva-se (na|em)|nossa newsletter|assine (a|o|já)|receba (as )?not[íi]cias)\b/i;
 
+/** Título "Tags" sozinho num parágrafo (a lista vem no parágrafo seguinte). */
+const TAG_HEADING = /^(tags?|topics?|t[óo]picos|temas|assuntos|palavras-chave|keywords|categorias|categories)$/i;
+/** Lista separada por vírgulas: 3 ou mais itens curtos, sem frase. */
+const looksLikeCommaList = (p: string) => {
+  const items = p.split(/\s*[,;·|]\s*/).filter(Boolean);
+  return items.length >= 3 && items.every((it) => it.split(/\s+/).length <= 5) && !/[.!?]$/.test(p.trim());
+};
+
 /** Lista de tags/temas com rótulo ("Tags: …", "Topics: …", "Tópicos: …", "Filed under …"). */
 const TAG_LINE = /^(tags?|topics?|filed under|categories|categorias|t[óo]picos|assuntos|temas|palavras-chave|keywords)\s*[:|]/i;
 
@@ -23,7 +37,9 @@ const words = (s: string) => s.split(/\s+/).filter(Boolean).length;
 const looksLikeTag = (p: string) => words(p) <= 6 && !/[.!?:;"”»]$/.test(p.trim()) && !/^["“«]/.test(p.trim());
 const looksLikeHeadline = (p: string) => words(p) <= 20 && !/[.!?"”»]$/.test(p.trim());
 
-export function cleanArticleText(text: string): { text: string; removed: string[] } {
+/** domain = site de onde o texto veio (ativa os padrões daquele site em lixo-por-site.ts). */
+export function cleanArticleText(text: string, domain?: string): { text: string; removed: string[] } {
+  const rules = lixoPara(domain);
   const paragraphs = text.split(/\n{2,}/);
   const keep: boolean[] = paragraphs.map(() => true);
   const removed: string[] = [];
@@ -34,9 +50,28 @@ export function cleanArticleText(text: string): { text: string; removed: string[
     }
   };
 
+  const seen = new Set<string>();
+  let dupWords = 0;
   paragraphs.forEach((raw, i) => {
     const p = raw.trim();
     if (!p) return;
+    // Parágrafo repetido (mesmo texto de novo): sai a repetição.
+    if (words(p) >= 15) {
+      const norm = p.toLowerCase().replace(/\s+/g, " ");
+      if (seen.has(norm)) {
+        dupWords += words(p);
+        return drop(i);
+      }
+      seen.add(norm);
+    }
+    // Padrões de lixo-por-site.ts (só em parágrafos curtos).
+    if (words(p) <= 60 && rules.some((r) => r.test(p))) return drop(i);
+    // "Tags" sozinho, seguido da lista separada por vírgulas.
+    if (TAG_HEADING.test(p)) {
+      drop(i);
+      if (i + 1 < paragraphs.length && looksLikeCommaList(paragraphs[i + 1].trim())) drop(i + 1);
+      return;
+    }
     const short = words(p) <= 40;
     if ((short && PROMO_START.test(p)) || (short && PROMO_ANYWHERE.test(p)) || (words(p) <= 60 && TAG_LINE.test(p))) {
       drop(i);
@@ -57,6 +92,7 @@ export function cleanArticleText(text: string): { text: string; removed: string[
 
   // Segurança: se a limpeza fosse tirar quase tudo, devolve o texto original.
   const cleaned = paragraphs.filter((_, i) => keep[i]).join("\n\n");
-  if (words(cleaned) < words(text) * 0.5) return { text, removed: [] };
+  // (As repetições não entram nessa conta: tirar a cópia de um parágrafo nunca é perigoso.)
+  if (words(cleaned) < (words(text) - dupWords) * 0.5) return { text, removed: [] };
   return { text: cleaned, removed };
 }

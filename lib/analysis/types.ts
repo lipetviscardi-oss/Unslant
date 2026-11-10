@@ -31,6 +31,8 @@ export interface SourceInfo {
   section?: string;
   /** Tipo de texto escolhido pelo usuário no formulário (se escolheu). */
   declaredType?: ContentType;
+  /** Lista de referências do paper, separada do texto (não vai para a análise; aparece recolhida na tela). */
+  references?: string;
 }
 
 export interface Evidence {

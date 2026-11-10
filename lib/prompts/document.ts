@@ -45,6 +45,11 @@ export function buildDocumentBlock(
     claim: "afirmação curta enviada pelo usuário (algo que alguém disse ou que circula)",
   }[source.type];
   meta.push(`Origem: ${origin}`);
+  if (source.references) {
+    meta.push(
+      "Observação: a lista de referências do fim do documento foi separada automaticamente e não aparece abaixo. NÃO trate a ausência dela como falta de referências; as citações dentro do texto continuam valendo.",
+    );
+  }
   if (source.claimContext) meta.push(`Onde a afirmação foi vista ou ouvida (segundo o usuário): ${cleanMeta(source.claimContext)}`);
 
   const partNote =
