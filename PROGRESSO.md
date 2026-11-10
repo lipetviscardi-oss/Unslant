@@ -155,3 +155,9 @@ Decisões do usuário (10/11/2026): botão de sugestões sim; 5 análises por di
 ### Lembretes
 - Conta da Vercel criada com o e-mail da faculdade (a antiga foi apagada e prendia o GitHub/Apple). **Antes da formatura**, trocar o e-mail da conta da Vercel por um pessoal (Account Settings → General → Email).
 - Anthropic: US$ 15 de créditos para a semana de testes (esperado ~US$ 10).
+
+### Onde paramos (10/11/2026, ~17h)
+- Passos 1, 2 e 3 feitos: domínio na GoDaddy, US$ 15 de créditos na Anthropic, site publicado em https://unslant.vercel.app (conta nova da Vercel, e-mail da faculdade).
+- Passo 4 (teste rápido): páginas, uso e sugestões funcionaram; o exemplo pronto falhou. Causa (logs da Vercel): ERR_REQUIRE_ESM ao carregar o jsdom (versão do Node da Vercel). Correção enviada: "engines": {"node": "22.x"} no package.json (commit 57bdda6). **Próximo: conferir se a nova versão funcionou** (curl em /api/analyze com corpo vazio deve dar 400, e o exemplo pronto deve devolver o resultado). Se ainda falhar, ver nos Logs da Vercel; alternativa: Project Settings → Build and Deployment → Node.js Version = 22.x.
+- O ambiente desta sessão libera unslant.vercel.app, unslant.world e www.unslant.world (dá para testar o site publicado daqui).
+- Depois: passo 5 (ligar unslant.world na Vercel + DNS na GoDaddy), 6 (Supabase URLs), 7 (Resend), 8 (e-mail de contato), 9 (teste final), 10 (convite: 4 análises por pessoa, sugerir 2 papers + 2 notícias).
