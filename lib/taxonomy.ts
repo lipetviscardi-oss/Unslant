@@ -747,13 +747,14 @@ export const SCORING = {
    * até antes de "strong" = moderado; a partir de "strong" = forte.
    */
   intensity: { moderate: 3.5, strong: 6.5 },
-  /** Faixas da nota geral (limite superior de cada faixa). */
+  /**
+   * Faixas da nota geral (limite superior de cada faixa), na mesma escala de
+   * "intensity" acima: leve até 3,4; moderado de 3,5 a 6,4; forte a partir de 6,5.
+   */
   labels: [
-    { max: 2, pt: "Viés leve", en: "Mild bias", simplePt: "levemente enviesado", simpleEn: "slightly biased" },
-    { max: 4, pt: "Viés moderado", en: "Moderate bias", simplePt: "moderadamente enviesado", simpleEn: "moderately biased" },
-    { max: 6, pt: "Viés acentuado", en: "Marked bias", simplePt: "claramente enviesado", simpleEn: "clearly biased" },
-    { max: 8, pt: "Viés forte", en: "Strong bias", simplePt: "fortemente enviesado", simpleEn: "strongly biased" },
-    { max: 10, pt: "Viés muito forte", en: "Very strong bias", simplePt: "muito enviesado", simpleEn: "very biased" },
+    { max: 3.4, pt: "Viés leve", en: "Mild bias", simplePt: "levemente enviesado", simpleEn: "slightly biased" },
+    { max: 6.4, pt: "Viés moderado", en: "Moderate bias", simplePt: "moderadamente enviesado", simpleEn: "moderately biased" },
+    { max: 10, pt: "Viés forte", en: "Strong bias", simplePt: "fortemente enviesado", simpleEn: "strongly biased" },
   ],
 } as const;
 

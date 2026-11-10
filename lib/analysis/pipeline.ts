@@ -47,6 +47,7 @@ import {
   findingsForSynthesis,
   rewriteCandidates,
   rewriteProblem,
+  summaryProblem,
   type RawPart,
 } from "./assemble";
 import type { BiasGroup } from "@/lib/taxonomy";
@@ -237,19 +238,33 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
   // Trechos do próprio autor com problema pelo menos moderado (os únicos que podem ganhar versão neutra).
   const hasRewriteCandidates = rewriteCandidates(findings, text).size > 0;
 
+  const blankRewrite = (out: SynthesisOutput): SynthesisOutput => ({ ...out, rewrite: { evidenceId: "", rewritten: "", explanation: "" } });
+  // Confere a síntese: a versão neutra não pode inventar nada e o resumo precisa usar a intensidade certa.
+  const synthesisProblem = (out: SynthesisOutput) => {
+    const rw = rewriteProblem(findings, out, text);
+    if (rw) return { kind: "rewrite" as const, note: `a versão neutra ${rw}. Isso é proibido: reescreva usando só o que está no trecho original.` };
+    const sm = summaryProblem(findings, out);
+    if (sm) return { kind: "summary" as const, note: `o resumo ${sm}.` };
+    return null;
+  };
+  let rewriteDiscarded = false;
+
   const synthesisTask = (async (): Promise<SynthesisOutput | null> => {
     try {
       let out = await runSynthesis();
-      if (!hasRewriteCandidates) return { ...out, rewrite: { evidenceId: "", rewritten: "", explanation: "" } };
-      // A versão neutra não pode inventar fontes ou números: confere e, se precisar, refaz uma vez.
-      let problem = rewriteProblem(findings, out, text);
+      if (!hasRewriteCandidates) out = blankRewrite(out);
+      let problem = synthesisProblem(out);
       if (problem) {
-        console.warn(`[unslant] versão neutra refeita: ${problem}`);
-        out = await runSynthesis(`na tentativa anterior a versão neutra ${problem}. Isso é proibido: reescreva usando só o que está no trecho original.`);
-        problem = rewriteProblem(findings, out, text);
-        if (problem) {
-          console.warn(`[unslant] versão neutra descartada: ${problem}`);
-          out = { ...out, rewrite: { evidenceId: "", rewritten: "", explanation: "" } };
+        console.warn(`[unslant] síntese refeita: ${problem.note}`);
+        out = await runSynthesis(`na tentativa anterior ${problem.note}`);
+        if (!hasRewriteCandidates) out = blankRewrite(out);
+        problem = synthesisProblem(out);
+        if (problem?.kind === "rewrite") {
+          console.warn(`[unslant] versão neutra descartada: ${problem.note}`);
+          rewriteDiscarded = true;
+          out = blankRewrite(out);
+        } else if (problem) {
+          console.warn(`[unslant] resumo mantido apesar do aviso: ${problem.note}`);
         }
       }
       return out;
@@ -318,6 +333,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
     triage,
     findings,
     synthesis,
+    rewriteDiscarded,
     claimCheck,
     balance,
     stats: {

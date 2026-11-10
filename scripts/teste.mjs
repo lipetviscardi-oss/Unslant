@@ -53,7 +53,7 @@ const n = (x, digits = 1) => x.toFixed(digits).replace(".", ",");
 
 function disputeText(d) {
   if (!d) return "—";
-  const s = { slight: "leve", clear: "clara", strong: "forte" }[d.strength] ?? "";
+  const s = { slight: "leve", moderate: "moderada", clear: "moderada", strong: "forte" }[d.strength] ?? "";
   if (d.status === "favors_a") return `Favorece ${d.sideA} (${s})`;
   if (d.status === "favors_b") return `Favorece ${d.sideB} (${s})`;
   return { balanced: "Equilibrado", unidentified: "Não identificada", not_applicable: "Não se aplica" }[d.status] ?? d.status;

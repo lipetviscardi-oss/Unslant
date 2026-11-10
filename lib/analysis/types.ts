@@ -68,7 +68,7 @@ export interface DisputeResult {
   sideA: string;
   sideB: string;
   /** Intensidade do favorecimento (pode faltar em resultados antigos). */
-  strength?: "slight" | "clear" | "strong";
+  strength?: "slight" | "moderate" | "strong";
   confidence: Confidence;
   justification: string;
   quote: string;

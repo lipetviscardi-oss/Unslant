@@ -142,7 +142,7 @@ export const en: Dict = {
         name: "Which side of the dispute it favors",
         help: "Government × opposition, candidates",
         favors: (side: string) => `Favors ${side}`,
-        strength: { slight: "(slightly)", clear: "(clearly)", strong: "(strongly)" },
+        strength: { slight: "(slightly)", moderate: "(moderately)", strong: "(strongly)" },
         balanced: "Balanced",
         unidentified: "Unidentified",
         notApplicable: "Not applicable: the text is not about a dispute between political sides.",

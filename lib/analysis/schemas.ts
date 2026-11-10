@@ -111,7 +111,7 @@ const DisputeSchema = z.object({
   /** Lado de fora (oposição, desafiante). */
   sideB: z.string(),
   /** Intensidade do favorecimento (só vale para favors_a / favors_b). */
-  strength: z.enum(["slight", "clear", "strong"]),
+  strength: z.enum(["slight", "moderate", "strong"]),
   confidence: ConfidenceSchema,
   justification: z.string(),
   quote: z.string(),

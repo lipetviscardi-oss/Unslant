@@ -7,7 +7,7 @@
  */
 
 import { config } from "@/lib/config";
-import { SCORING, TAXONOMY, type BiasGroup, type ContentKind, type Lang } from "@/lib/taxonomy";
+import { SCORING, TAXONOMY, scoreLabel, type BiasGroup, type ContentKind, type Lang } from "@/lib/taxonomy";
 import { createQuoteMatcher, type QuoteMatcher } from "./verify";
 import { clamp, scoreGroup, scoreOverall } from "./scoring";
 import type {
@@ -287,6 +287,29 @@ export function rewriteCandidates(findings: Findings, text: string): Set<string>
   return ids;
 }
 
+const LEVEL_WORDS = { leve: /\b(leve|levemente|mild|slightly)\b/i, moderado: /\b(moderad[oa]|moderadamente|moderate|moderately)\b/i, forte: /\b(forte|fortemente|strong|strongly)\b/i };
+/** Gradações fora da escala única do site (leve / moderado / forte). */
+const OFF_SCALE = /\b(acentuad[oa]s?|muito fortes?|extremamente enviesad[oa]|claramente enviesad[oa]|marked bias|very strong|heavily biased)\b/i;
+
+/**
+ * Confere se o resumo usa a escala única do site e a mesma intensidade da nota
+ * geral quando qualifica o texto como um todo ("viés moderado", "levemente enviesado").
+ */
+export function summaryProblem(findings: Findings, synthesis: SynthesisOutput): string | null {
+  const expected = scoreLabel(findings.overall.score).pt.replace("Viés ", ""); // leve | moderado | forte
+  for (const summary of [synthesis.summary, synthesis.summarySimple]) {
+    const off = summary.match(OFF_SCALE);
+    if (off) return `usou a gradação "${off[0]}", que não existe no site; use só leve, moderado ou forte`;
+    // Só as frases que qualificam o texto inteiro: "viés X", "X enviesado", "bias X".
+    for (const m of summary.matchAll(/\b(?:viés|bias)\s+(\p{L}+)|\b(\p{L}+)\s+(?:enviesad[oa]|biased)\b/giu)) {
+      const word = m[1] ?? m[2];
+      const level = (Object.keys(LEVEL_WORDS) as (keyof typeof LEVEL_WORDS)[]).find((k) => LEVEL_WORDS[k].test(word));
+      if (level && level !== expected) return `chamou o viés do texto de "${level}", mas a nota geral corresponde a "${expected}"`;
+    }
+  }
+  return null;
+}
+
 export function rewriteProblem(findings: Findings, synthesis: SynthesisOutput, text: string): string | null {
   const rw = synthesis.rewrite;
   if (!rw.evidenceId || !rw.rewritten.trim()) return null;
@@ -438,6 +461,7 @@ export function findingsForSynthesis(triage: TriageOutput, findings: Findings, t
         resumo: triage.contentSummary,
       },
       notaGeral: findings.overall.score,
+      intensidadeGeral: scoreLabel(findings.overall.score).pt.replace("Viés ", ""),
       inclinacao: {
         economica: { posicao: findings.political.economic.position, justificativa: findings.political.economic.justification },
         social: { posicao: findings.political.social.position, justificativa: findings.political.social.justification },
@@ -470,6 +494,8 @@ export function finalizeResult(params: {
   triage: TriageOutput;
   findings: Findings;
   synthesis: SynthesisOutput | null;
+  /** true = a versão neutra foi descartada por inventar algo (não mostra "nenhum trecho precisa"). */
+  rewriteDiscarded?: boolean;
   claimCheck?: ClaimCheckOutput | null;
   balance?: AnalysisResult["balance"];
   stats: Omit<AnalysisResult["stats"], "discardedEvidence">;
@@ -532,7 +558,7 @@ export function finalizeResult(params: {
     omissions: findings.omissions,
     rewrite,
     // Sem trecho elegível, ou a IA não viu nenhum que valesse reescrever (com a síntese funcionando).
-    rewriteNone: !rewrite && !!synthesis && (rewriteCandidates(findings, text).size === 0 || !synthesis.rewrite.evidenceId),
+    rewriteNone: !rewrite && !!synthesis && !params.rewriteDiscarded && (rewriteCandidates(findings, text).size === 0 || !synthesis.rewrite.evidenceId),
     groups: findings.groups,
     claimCheck: params.claimCheck ?? null,
     balance: params.balance ?? { status: "disabled", data: null },

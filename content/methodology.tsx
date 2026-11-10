@@ -33,7 +33,7 @@ function Bands({ lang }: { lang: "pt" | "en" }) {
     <ul>
       {SCORING.labels.map((l, i) => (
         <li key={l.max}>
-          {fmt(i === 0 ? 0 : SCORING.labels[i - 1].max, lang)} – {fmt(l.max, lang)}: <strong>{l[lang]}</strong>
+          {fmt(i === 0 ? 0 : SCORING.labels[i - 1].max + 0.1, lang)} – {fmt(l.max, lang)}: <strong>{l[lang]}</strong>
         </li>
       ))}
     </ul>
@@ -158,7 +158,7 @@ export function MethodologyPt() {
         texto trata de uma disputa concreta (governo × oposição, candidato A × candidato B), a IA diz se ele favorece um
         lado, se é equilibrado ou se não dá para afirmar. Para que a régua seja a mesma para os dois lados, eles são
         sempre apresentados na mesma ordem: primeiro quem está no poder, depois quem está fora. A classificação precisa
-        de um trecho do texto como prova e indica a intensidade (levemente, claramente ou fortemente). O resumo da
+        de um trecho do texto como prova e indica a intensidade (levemente, moderadamente ou fortemente). O resumo da
         análise é instruído a dizer a mesma coisa que esse marcador.
       </p>
       <p>
@@ -409,7 +409,7 @@ export function MethodologyEn() {
         the text covers a concrete dispute (government × opposition, candidate A × candidate B), the AI says whether it
         favors one side, is balanced, or cannot be determined. To apply the same yardstick to both sides, they are always
         listed in the same order: first whoever holds power, then whoever is outside it. The classification must be backed
-        by a passage from the text and states the intensity (slightly, clearly or strongly). The analysis summary is
+        by a passage from the text and states the intensity (slightly, moderately or strongly). The analysis summary is
         instructed to say the same thing as this marker.
       </p>
       <p>

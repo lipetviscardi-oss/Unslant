@@ -186,7 +186,7 @@ Com o site ligado em `http://localhost:3000`:
 
 | Teste | Como fazer | O que deve acontecer |
 |---|---|---|
-| **Exemplo pronto** (grátis) | Clique em **Ver uma análise pronta** | Nota 5,9 ("Viés alto"), inclinação econômica "Esquerda", social "Não identificado" e dezenas de trechos destacados |
+| **Exemplo pronto** (grátis) | Clique em **Ver uma análise pronta** | Nota 5,9 ("Viés moderado"), inclinação econômica "Esquerda", social "Não identificado" e dezenas de trechos destacados |
 | **Afirmação pronta** (grátis) | Clique em **Ver uma afirmação analisada** | Nota 3,7 ("Viés moderado") e o quadro "Verificação da afirmação" |
 | **Idioma** (grátis) | Clique em **English** no topo | O site inteiro muda para inglês (endereço `/en`); o botão vira **Português** |
 | **Páginas** (grátis) | Clique em **Metodologia**, **Tipos de viés** e **Privacidade** no topo (no celular, ficam no rodapé) | Textos completos nos dois idiomas |

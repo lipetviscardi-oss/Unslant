@@ -9,10 +9,11 @@ import { useMemo } from "react";
 import type { AnalysisResult } from "@/lib/analysis/types";
 import { buildSegments, countHighlights, type EvidenceRef } from "@/lib/client/evidence";
 import { formatScore, severity, SEVERITY_SOFT, SEVERITY_TEXT } from "@/lib/client/format";
+import { SCORING } from "@/lib/taxonomy";
 import { useDict, useLang } from "@/lib/i18n";
 
 /** Nota mínima para um destaque aparecer por padrão (moderado e forte). */
-export const DEFAULT_MIN_SCORE = 3.5;
+export const DEFAULT_MIN_SCORE = SCORING.intensity.moderate;
 
 interface Props {
   result: AnalysisResult;
