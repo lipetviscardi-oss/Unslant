@@ -12,6 +12,7 @@ import { config } from "@/lib/config";
 import { AppError, errorMessage } from "@/lib/errors";
 import { countWords, normalizeText } from "@/lib/text";
 import { extractFromUrl, fetchImage, type ArticleImage } from "@/lib/extract/url";
+import { cleanArticleText } from "@/lib/extract/clean";
 import type { VisualInput } from "@/lib/analysis/visuals";
 import { runPipeline } from "@/lib/analysis/pipeline";
 import { cacheKey, readCache, writeCache } from "@/lib/analysis/cache";
@@ -122,6 +123,13 @@ export async function POST(request: Request) {
               : body.mode === "claim"
                 ? { type: "claim", claimContext: body.meta?.context?.trim() || undefined }
                 : { type: "text" };
+        }
+
+        // Tira chamadas de newsletter, propaganda do veículo, "leia também" e listas de tags.
+        if (body.mode !== "claim") {
+          const cleaned = cleanArticleText(text);
+          if (cleaned.removed.length) console.info(`[unslant] limpeza: ${cleaned.removed.length} trecho(s) removido(s)`, cleaned.removed);
+          text = cleaned.text;
         }
 
         if (body.contentType && body.mode !== "claim") source = { ...source, declaredType: body.contentType };

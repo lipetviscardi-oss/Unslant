@@ -111,8 +111,8 @@ Decisões: 1b (5 faixas nos dois idiomas: 0–2 leve/Mild, 2–4 moderado/Modera
 | R3 | Resumo sem códigos internos (dados legíveis + regra + conferência) | feito |
 | R5 | Resumo coerente com o gênero | feito |
 | R4 | Reconferir a lista de veículos (avaliação, país, data) + National Review, The Dispatch, Washington Examiner | feito |
-| R6 | Limpar newsletter, propaganda, "leia também" e tags do texto | em andamento |
-| R7 | Equilibrar: pelo menos 1 veículo do outro lado (busca dirigida se faltar) | a fazer |
+| R6 | Limpar newsletter, propaganda, "leia também" e tags do texto | feito |
+| R7 | Equilibrar: pelo menos 1 veículo do outro lado (busca dirigida se faltar) | em andamento |
 | R8 | Imagens: só o visível | a fazer |
 | R9 | Teste: Mother Jones e Federalist 4–7, Reuters 1–3, simetria MJ × Federalist | a fazer |
 Depois: Fase 4 (P2 em diante). Retomada automática: tarefa "Retomar unslant".
