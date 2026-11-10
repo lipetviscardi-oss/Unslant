@@ -117,3 +117,4 @@ Decisões: 1b (5 faixas nos dois idiomas: 0–2 leve/Mild, 2–4 moderado/Modera
 | R9 | Teste: Mother Jones e Federalist 4–7, Reuters 1–3, simetria MJ × Federalist | feito |
 Depois: Fase 4 (P2 em diante). Retomada automática: tarefa "Retomar unslant".
 - R4: 55 páginas reconferidas (todas iguais à lista; CBS = RIGHT-CENTER, atualizada em 04/2026). Novos: National Review (right), The Dispatch e Washington Examiner (center_right).
+- Teste da rodada 8 (10/11/2026): APROVADO — 7 artigos; simetria BR 0,9 e EUA 0,3 (lados opostos); custo médio US$ 0,148.
