@@ -14,6 +14,7 @@ ${findingsJson}
 </resultados>
 
 Preencha:
+- COERÊNCIA OBRIGATÓRIA: ao mencionar a disputa política, descreva exatamente a classificação recebida em "inclinacao.disputa" (situacao + intensidade: "slight" = leve, "clear" = clara, "strong" = forte). Se a situação for "balanced", diga que o texto é equilibrado entre os lados; se for "favors_a"/"favors_b", diga qual lado e com qual intensidade. Nunca contradiga essa classificação nem as dos eixos.
 - summary: resumo da análise em 3 a 5 frases, para um leitor exigente: principais problemas encontrados (ou a ausência deles), em quais aspectos o texto é sólido, e a inclinação política se houver. Seja equilibrado e específico; não repita números de notas.
 - summarySimple: o mesmo em 2 a 3 frases curtas, em linguagem bem simples, para alguém sem familiaridade com o tema.
 - rewrite: escolha UM trecho entre as evidências listadas (use o "id" dela em evidenceId) que melhor ilustra o problema principal e que possa ser reescrito de forma neutra. Em "rewritten", escreva a versão neutra (mesmo idioma do trecho original). Em "explanation", diga em 1 a 2 frases o que mudou e por quê. Se não houver nenhuma evidência, use evidenceId "" e deixe os outros campos vazios.

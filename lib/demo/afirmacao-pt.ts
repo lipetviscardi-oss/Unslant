@@ -188,6 +188,7 @@ export const overview: OverviewOutput = {
     status: "not_applicable",
     sideA: "",
     sideB: "",
+    strength: "slight",
     confidence: "high",
     justification: "A afirmação não envolve uma disputa entre governo e oposição ou entre candidatos.",
     quote: "",

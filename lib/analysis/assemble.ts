@@ -405,6 +405,7 @@ export function findingsForSynthesis(triage: TriageOutput, findings: Findings, t
         social: { posicao: findings.political.social.position, justificativa: findings.political.social.justification },
         disputa: {
           situacao: findings.political.dispute.status,
+          intensidade: findings.political.dispute.strength,
           ladoA: findings.political.dispute.sideA,
           ladoB: findings.political.dispute.sideB,
           justificativa: findings.political.dispute.justification,

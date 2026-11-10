@@ -133,6 +133,7 @@ export const pt = {
         name: "Favorece qual lado da disputa",
         help: "Governo × oposição, candidatos",
         favors: (side: string) => `Favorece ${side}`,
+        strength: { slight: "(levemente)", clear: "(claramente)", strong: "(fortemente)" },
         balanced: "Equilibrado",
         unidentified: "Não identificado",
         notApplicable: "Não se aplica: o texto não trata de uma disputa entre lados políticos.",

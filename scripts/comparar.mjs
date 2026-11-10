@@ -43,8 +43,9 @@ for (const r of results) {
 const pos = { left: "Esquerda", right: "Direita", unidentified: "Não identif.", not_applicable: "Não se aplica" };
 function disputeText(d) {
   if (!d) return "(não existia)";
-  if (d.status === "favors_a") return `Favorece ${d.sideA}`;
-  if (d.status === "favors_b") return `Favorece ${d.sideB}`;
+  const s = { slight: " (leve)", clear: " (clara)", strong: " (forte)" }[d.strength] ?? "";
+  if (d.status === "favors_a") return `Favorece ${d.sideA}${s}`;
+  if (d.status === "favors_b") return `Favorece ${d.sideB}${s}`;
   return { balanced: "Equilibrado", unidentified: "Não identif.", not_applicable: "Não se aplica" }[d.status] ?? d.status;
 }
 

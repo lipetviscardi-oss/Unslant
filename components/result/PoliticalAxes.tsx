@@ -95,12 +95,14 @@ function Dispute({ dispute }: { dispute: DisputeResult }) {
   const active =
     dispute.status === "favors_a" ? "a" : dispute.status === "favors_b" ? "b" : dispute.status === "balanced" ? "mid" : "none";
   const middle = dispute.status === "unidentified" ? D.unidentified : D.balanced;
-  const favored = dispute.status === "favors_a" ? dispute.sideA : dispute.status === "favors_b" ? dispute.sideB : null;
+  const favoredSide = dispute.status === "favors_a" ? dispute.sideA : dispute.status === "favors_b" ? dispute.sideB : null;
+  const favored = favoredSide ? `${favoredSide}${dispute.strength ? ` ${D.strength[dispute.strength]}` : ""}` : null;
   return (
     <div className="flex flex-col gap-3">
       <Header name={D.name} help={D.help} />
       <Pills
         label={favored ? D.favors(favored) : middle}
+        /* o marcador fica sempre no lado favorecido, inclusive quando a inclinação é leve */
         options={[
           { id: "a", text: dispute.sideA || "A" },
           { id: dispute.status === "unidentified" ? "none" : "mid", text: middle },

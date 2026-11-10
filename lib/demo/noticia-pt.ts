@@ -229,6 +229,7 @@ export const overview: OverviewOutput = {
     status: "favors_b",
     sideA: "Prefeitura de Vale Verde",
     sideB: "Oposição na Câmara",
+    strength: "strong",
     confidence: "high",
     justification:
       "As críticas da oposição e do sindicato abrem e dominam o texto; a explicação da prefeitura aparece só no fim, com verbos que sugerem desconfiança.",

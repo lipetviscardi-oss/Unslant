@@ -10,7 +10,7 @@ Cada item concluído é salvo no GitHub logo em seguida.
 |---|---|---|
 | A | Custo: desligar cache/aquecimento onde não é lido; rodapé mostra os dois modelos | feito |
 | B | Citações entre aspas não contam como voz do autor (instrução + trava no código + versão neutra) | feito |
-| C | Coerência da disputa: intensidade leve/clara/forte; resumo não pode contradizer o marcador | a fazer |
+| C | Coerência da disputa: intensidade leve/clara/forte; resumo não pode contradizer o marcador | feito |
 | D | Gênero: critérios fixos, motivo mostrado, editoria/seção da página como pista, seletor de gênero no formulário | a fazer |
 | E | Linha editorial dos veículos sugeridos (tabela lib/veiculos.ts + estimativa da IA) | a fazer |
 | F | Custo: visão geral junto de um pacote de especialistas (4 chamadas em vez de 5) | a fazer |
