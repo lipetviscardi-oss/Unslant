@@ -37,6 +37,7 @@ export function buildDocumentBlock(
   if (source.author) meta.push(`Autor: ${cleanMeta(source.author)}`);
   if (source.publishedAt) meta.push(`Data: ${cleanMeta(source.publishedAt)}`);
   if (source.url) meta.push(`Endereço: ${cleanMeta(source.url)}`);
+  if (source.section) meta.push(`Seção/editoria indicada pela página: ${cleanMeta(source.section)}`);
   const origin = {
     url: "página da web",
     pdf: "arquivo PDF",

@@ -7,10 +7,22 @@ import type { AnalysisResult, StreamEvent } from "@/lib/analysis/types";
 import { errorMessage } from "@/lib/errors";
 import type { Lang } from "@/lib/taxonomy";
 
+/** Tipos de texto que o usuário pode escolher no formulário. */
+export type DeclaredType =
+  | "news"
+  | "feature"
+  | "analysis"
+  | "opinion"
+  | "editorial"
+  | "academic_paper"
+  | "press_release"
+  | "blog"
+  | "other";
+
 export type AnalyzeRequest =
-  | { mode: "url"; url: string; lang: Lang }
-  | { mode: "text"; text: string; lang: Lang }
-  | { mode: "pdf"; text: string; meta: { title?: string; author?: string }; lang: Lang }
+  | { mode: "url"; url: string; lang: Lang; contentType?: DeclaredType }
+  | { mode: "text"; text: string; lang: Lang; contentType?: DeclaredType }
+  | { mode: "pdf"; text: string; meta: { title?: string; author?: string }; lang: Lang; contentType?: DeclaredType }
   | { mode: "claim"; text: string; meta: { context?: string }; lang: Lang }
   | { mode: "demo"; demoId: string; lang: Lang };
 

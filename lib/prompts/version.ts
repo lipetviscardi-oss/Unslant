@@ -19,6 +19,7 @@ import { balancePrompt } from "./balance";
 
 const SAMPLE_TRIAGE: TriageOutput = {
   contentType: "news",
+  contentTypeReason: "X",
   country: "X",
   countryCode: "X",
   politicalContext: "X",

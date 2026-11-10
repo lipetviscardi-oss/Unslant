@@ -47,6 +47,7 @@ export const source: SourceInfo = { type: "claim", claimContext: "grupo de famí
 
 export const triage: TriageOutput = {
   contentType: "claim",
+  contentTypeReason: "Frase curta enviada na aba Afirmação.",
   country: "Brasil",
   countryCode: "BR",
   politicalContext:

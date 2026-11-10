@@ -17,7 +17,9 @@ export type Confidence = z.infer<typeof ConfidenceSchema>;
 
 export const ContentTypeSchema = z.enum([
   "news",
+  "feature",
   "opinion",
+  "editorial",
   "analysis",
   "academic_paper",
   "press_release",
@@ -30,6 +32,8 @@ export type ContentType = z.infer<typeof ContentTypeSchema>;
 /* Etapa 1 — identificação */
 export const TriageSchema = z.object({
   contentType: ContentTypeSchema,
+  /** Uma frase explicando por que o texto recebeu esse tipo. */
+  contentTypeReason: z.string(),
   country: z.string(),
   countryCode: z.string(),
   politicalContext: z.string(),

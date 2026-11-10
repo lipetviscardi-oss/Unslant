@@ -70,6 +70,11 @@ export const pt = {
       count: (n: number) => `${num(n)} ${plural(n, "palavra", "palavras")} (de 3 a 300)`,
     },
     submit: "Analisar",
+    genre: {
+      label: "Tipo de texto",
+      auto: "Detectar automaticamente",
+      help: "Se você souber, escolha. Senão, a IA identifica e explica o motivo.",
+    },
     reportLanguage: "O relatório sai em português. Para receber em inglês, mude o idioma no topo da página.",
     examples: {
       title: "Sem um texto em mãos?",
@@ -109,6 +114,8 @@ export const pt = {
     openOriginal: "Abrir a página original",
     untitled: "Texto analisado",
     claimHeading: "Afirmação analisada",
+    typeReason: (type: string) => `Por que "${type}": `,
+    typeByUser: "Tipo informado por você.",
     claimSeenAt: "Vista ou ouvida em:",
     summaryTitle: "Resumo da análise",
     contextConsidered: "Contexto considerado: ",
@@ -244,6 +251,8 @@ export const pt = {
   labels: {
     contentType: {
       news: "Notícia",
+      feature: "Reportagem",
+      editorial: "Editorial",
       opinion: "Opinião",
       analysis: "Análise",
       academic_paper: "Artigo acadêmico",

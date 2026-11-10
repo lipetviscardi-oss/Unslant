@@ -48,6 +48,7 @@ export const claimCheck = null;
 
 export const triage: TriageOutput = {
   contentType: "news",
+  contentTypeReason: "Publicado como notícia, mas o próprio autor faz avaliações e apelos fora das aspas; a classificação de gênero segue a forma de publicação.",
   country: "Brasil",
   countryCode: "BR",
   politicalContext:

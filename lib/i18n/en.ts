@@ -70,6 +70,11 @@ export const en: Dict = {
       count: (n: number) => `${num(n)} ${plural(n, "word", "words")} (3 to 300)`,
     },
     submit: "Analyze",
+    genre: {
+      label: "Type of text",
+      auto: "Detect automatically",
+      help: "If you know it, choose it. Otherwise the AI identifies it and explains why.",
+    },
     reportLanguage: "The report will be in English. For Portuguese, switch the language at the top of the page.",
     examples: {
       title: "No text at hand?",
@@ -109,6 +114,8 @@ export const en: Dict = {
     openOriginal: "Open the original page",
     untitled: "Analyzed text",
     claimHeading: "Analyzed claim",
+    typeReason: (type: string) => `Why "${type}": `,
+    typeByUser: "Type chosen by you.",
     claimSeenAt: "Seen or heard at:",
     summaryTitle: "Summary",
     contextConsidered: "Context considered: ",
@@ -243,6 +250,8 @@ export const en: Dict = {
   labels: {
     contentType: {
       news: "News",
+      feature: "Feature",
+      editorial: "Editorial",
       opinion: "Opinion",
       analysis: "Analysis",
       academic_paper: "Academic paper",

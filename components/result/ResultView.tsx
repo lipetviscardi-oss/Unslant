@@ -150,6 +150,18 @@ export function ResultView({ result, onReset }: { result: AnalysisResult; onRese
             {context.country && <Chip>{context.country}</Chip>}
             {context.topic && <Chip>{context.topic}</Chip>}
           </div>
+          {!isClaim && (context.contentTypeSource === "user" || context.contentTypeReason) && (
+            <p className="max-w-[70ch] text-sm text-muted">
+              {context.contentTypeSource === "user" ? (
+                t.result.typeByUser
+              ) : (
+                <>
+                  <span className="font-medium text-ink">{t.result.typeReason(t.labels.contentType[context.contentType])}</span>
+                  {context.contentTypeReason}
+                </>
+              )}
+            </p>
+          )}
           {isClaim ? (
             <>
               <p className="text-sm text-muted">{t.result.claimHeading}</p>

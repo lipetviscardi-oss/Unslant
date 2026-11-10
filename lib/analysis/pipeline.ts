@@ -90,7 +90,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
     light: true, // tarefa simples: tipo de texto, país e contexto
     schema: TriageSchema,
     documentBlock: buildDocumentBlock(parts[0].text, source, boundary, { index: 0, total: parts.length }),
-    task: triagePrompt(lang, isClaim),
+    task: triagePrompt(lang, isClaim, source.declaredType),
     effort: config.ai.effort.triage,
     maxTokens: config.ai.maxTokens.triage,
     usage,
@@ -98,7 +98,12 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
   });
 
   // Na aba "Afirmação", o tipo é sempre "afirmação" (define os grupos analisados).
-  const triage: TriageOutput = isClaim ? { ...identified, contentType: "claim" } : identified;
+  // Se o usuário escolheu o tipo do texto no formulário, ele prevalece.
+  const triage: TriageOutput = isClaim
+    ? { ...identified, contentType: "claim" }
+    : source.declaredType
+      ? { ...identified, contentType: source.declaredType, contentTypeReason: "" }
+      : identified;
 
   // 2. Especialistas (agrupados) + visão geral (+ verificação, para afirmações), em paralelo
   const groups = activeGroups(triage);

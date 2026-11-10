@@ -265,6 +265,7 @@ function meta(doc: Document, ...selectors: string[]): string | undefined {
 }
 
 interface JsonLdInfo {
+  section?: string;
   author?: string;
   publisher?: string;
   datePublished?: string;
@@ -295,6 +296,11 @@ function readJsonLd(doc: Document): JsonLdInfo {
         info.publisher ??= nameOf(o.publisher);
         info.datePublished ??= typeof o.datePublished === "string" ? o.datePublished : undefined;
         info.headline ??= typeof o.headline === "string" ? o.headline : undefined;
+        if (!info.section) {
+          const sec = Array.isArray(o.articleSection) ? o.articleSection[0] : o.articleSection;
+          if (typeof sec === "string" && sec.trim()) info.section = sec.trim();
+          else if (typeof o.genre === "string" && o.genre.trim()) info.section = o.genre.trim();
+        }
         if (o.isAccessibleForFree === false || o.isAccessibleForFree === "False" || o.isAccessibleForFree === "false") {
           info.isAccessibleForFree = false;
         }
@@ -349,10 +355,20 @@ export async function extractFromUrl(rawUrl: string): Promise<{ text: string; so
     text = `${title}\n\n${body}`;
   }
 
+  // Seção/editoria: metadados da página ou trechos típicos do endereço (/opiniao/, /colunas/...).
+  const pathSection = /\/(opiniao|opinion|colunas?|columns?|colunistas|editorial|editoriais|analise|analysis|blogs?)\b/i.exec(
+    new URL(finalUrl).pathname,
+  )?.[1];
+  const section =
+    meta(doc, 'meta[property="article:section"]', 'meta[name="section"]', 'meta[name="article:section"]') ||
+    ld.section ||
+    (pathSection ? `${pathSection} (pelo endereço da página)` : undefined);
+
   const source: SourceInfo = {
     type: "url",
     url: finalUrl,
     title,
+    section,
     author:
       article?.byline?.trim() ||
       ld.author ||

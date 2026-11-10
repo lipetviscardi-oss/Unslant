@@ -6,7 +6,7 @@
  */
 
 import { useId, useRef, useState } from "react";
-import type { AnalyzeRequest } from "@/lib/client/analyze";
+import type { AnalyzeRequest, DeclaredType } from "@/lib/client/analyze";
 import { CLAIM_EXAMPLES, EXAMPLES } from "@/lib/examples";
 import { AppError, errorMessage } from "@/lib/errors";
 import { countWords } from "@/lib/text";
@@ -14,6 +14,7 @@ import { useDict, useLang } from "@/lib/i18n";
 
 type Tab = "url" | "text" | "pdf" | "claim";
 const TAB_IDS: Tab[] = ["url", "text", "pdf", "claim"];
+const GENRES: DeclaredType[] = ["news", "feature", "analysis", "opinion", "editorial", "academic_paper", "press_release", "blog", "other"];
 
 interface PdfState {
   status: "idle" | "reading" | "ready" | "error";
@@ -37,6 +38,7 @@ export function AnalyzeForm({ onSubmit }: { onSubmit: (req: AnalyzeRequest) => v
   const [claimContext, setClaimContext] = useState("");
   const [pdf, setPdf] = useState<PdfState>({ status: "idle" });
   const [dragging, setDragging] = useState(false);
+  const [genre, setGenre] = useState<DeclaredType | "">("");
   const fileInput = useRef<HTMLInputElement>(null);
   const baseId = useId();
 
@@ -68,10 +70,11 @@ export function AnalyzeForm({ onSubmit }: { onSubmit: (req: AnalyzeRequest) => v
   function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
-    if (tab === "url") onSubmit({ mode: "url", url: url.trim(), lang });
-    else if (tab === "text") onSubmit({ mode: "text", text, lang });
+    const contentType = genre || undefined;
+    if (tab === "url") onSubmit({ mode: "url", url: url.trim(), lang, contentType });
+    else if (tab === "text") onSubmit({ mode: "text", text, lang, contentType });
     else if (tab === "claim") onSubmit({ mode: "claim", text: claim, meta: { context: claimContext.trim() || undefined }, lang });
-    else if (pdf.text) onSubmit({ mode: "pdf", text: pdf.text, meta: { title: pdf.title, author: pdf.author }, lang });
+    else if (pdf.text) onSubmit({ mode: "pdf", text: pdf.text, meta: { title: pdf.title, author: pdf.author }, lang, contentType });
   }
 
   function loadExample(id: string) {
@@ -258,6 +261,28 @@ export function AnalyzeForm({ onSubmit }: { onSubmit: (req: AnalyzeRequest) => v
             </div>
           )}
         </div>
+
+        {tab !== "claim" && (
+          <div className="mt-5 grid gap-1.5">
+            <label htmlFor={`${baseId}-genre`} className="text-[15px] font-medium">
+              {t.home.genre.label}
+            </label>
+            <select
+              id={`${baseId}-genre`}
+              value={genre}
+              onChange={(e) => setGenre(e.target.value as DeclaredType | "")}
+              className="w-full max-w-sm rounded-xl border border-line bg-paper px-3 py-2.5 text-[15px] focus:border-teal focus:outline-none"
+            >
+              <option value="">{t.home.genre.auto}</option>
+              {GENRES.map((g) => (
+                <option key={g} value={g}>
+                  {t.labels.contentType[g]}
+                </option>
+              ))}
+            </select>
+            <p className="text-sm text-muted">{t.home.genre.help}</p>
+          </div>
+        )}
 
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
           <p className="max-w-[44ch] text-sm text-muted">{t.home.reportLanguage}</p>

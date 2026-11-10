@@ -476,6 +476,8 @@ export function finalizeResult(params: {
     source,
     context: {
       contentType: triage.contentType,
+      contentTypeReason: triage.contentTypeReason,
+      contentTypeSource: params.source.declaredType ? "user" : "ai",
       country: triage.country,
       countryCode: triage.countryCode,
       politicalContext: triage.politicalContext,

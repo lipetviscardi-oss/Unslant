@@ -35,6 +35,10 @@ const RequestSchema = z.object({
     })
     .optional(),
   demoId: z.string().max(50).optional(),
+  /** Tipo de texto escolhido pelo usuário (opcional; sem ele, a IA identifica). */
+  contentType: z
+    .enum(["news", "feature", "analysis", "opinion", "editorial", "academic_paper", "press_release", "blog", "other"])
+    .optional(),
 });
 
 export async function POST(request: Request) {
@@ -82,6 +86,8 @@ export async function POST(request: Request) {
                 ? { type: "claim", claimContext: body.meta?.context?.trim() || undefined }
                 : { type: "text" };
         }
+
+        if (body.contentType && body.mode !== "claim") source = { ...source, declaredType: body.contentType };
 
         const words = countWords(text);
         const isClaim = body.mode === "claim";

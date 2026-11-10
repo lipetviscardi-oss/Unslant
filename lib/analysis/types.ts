@@ -18,6 +18,10 @@ export interface SourceInfo {
   publishedAt?: string;
   /** Afirmações: onde a pessoa viu ou ouviu (informado pelo usuário). */
   claimContext?: string;
+  /** Seção/editoria indicada pela própria página (ex.: "Opinião", "Política"). */
+  section?: string;
+  /** Tipo de texto escolhido pelo usuário no formulário (se escolheu). */
+  declaredType?: ContentType;
 }
 
 export interface Evidence {
@@ -110,6 +114,10 @@ export interface AnalysisResult {
   source: SourceInfo & { wordCount: number };
   context: {
     contentType: ContentType;
+    /** Por que o texto recebeu esse tipo (pode faltar em resultados antigos). */
+    contentTypeReason?: string;
+    /** "user" = escolhido pelo usuário; "ai" = identificado pela IA. */
+    contentTypeSource?: "user" | "ai";
     country: string;
     countryCode: string;
     politicalContext: string;
