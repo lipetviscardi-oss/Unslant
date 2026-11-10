@@ -1,18 +1,26 @@
-# Progresso dos ajustes (rodada 3)
+# Progresso dos ajustes
 
 Este arquivo registra o andamento do trabalho. Se a sessão for interrompida,
 basta pedir "continue": o trabalho retoma a partir do primeiro item não concluído.
 Cada item concluído é salvo no GitHub logo em seguida.
 
+## Rodada 4 (atual)
+
 | # | Item | Estado |
 |---|---|---|
-| 5 | Faixas da nota: leve / moderado / acentuado / forte / muito forte | feito |
-| 4 | Dados e estatística: só números presentes; falta de dado = omissão; sem números = não se aplica (trava no código) | feito |
-| 2 | Versão neutra no estilo de notícia, atribuindo a quem afirmou; checagem de nomes/fontes inventados | feito |
-| 3 | Bug visual no bloco da disputa (computador e celular) | feito (layout trocado de grade para empilhamento simples; confirmar no Safari do usuário) |
-| 1 | Busca: diagnóstico guardado, conferência tolerante (utm/AMP), segunda tentativa se < 2 textos | feito |
-| 6 | Custo (opção b): busca e identificação no Haiku, aquecimento do cache (max_tokens 0) em paralelo, cache visível no comparar. Visão geral mantida em "medium" para compartilhar o cache | feito |
-| — | Verificação final (tipos, lint, build) + instruções para o usuário rodar os 3 artigos | feito — aguardando o usuário rodar os 3 artigos e o `npm run comparar` |
+| A | Custo: desligar cache/aquecimento onde não é lido; rodapé mostra os dois modelos | a fazer |
+| B | Citações entre aspas não contam como voz do autor (instrução + trava no código + versão neutra) | a fazer |
+| C | Coerência da disputa: intensidade leve/clara/forte; resumo não pode contradizer o marcador | a fazer |
+| D | Gênero: critérios fixos, motivo mostrado, editoria/seção da página como pista, seletor de gênero no formulário | a fazer |
+| E | Linha editorial dos veículos sugeridos (tabela lib/veiculos.ts + estimativa da IA) | a fazer |
+| F | Custo: visão geral junto de um pacote de especialistas (4 chamadas em vez de 5) | a fazer |
+| G | Teste automático: npm run teste:salvar e npm run teste (faixas, simetria ≤ 1,5, lados opostos) | a fazer |
+| H | Verificação final (tipos, lint, build) + README/Metodologia + instruções ao usuário | a fazer |
 
-## Decisões
-- Item 6: opção (b) — especialistas continuam com esforço "medium" no Sonnet.
+### Decisões
+- Item 5: "esforço baixo" nos especialistas fica pronto para teste, mas só será ativado se `npm run teste` passar.
+- Gênero: seletor opcional no formulário; sem seleção, a IA classifica e explica.
+- Simetria: diferença máxima de 1,5 ponto entre Brasil de Fato e Terra Brasil.
+
+## Rodada 3 (concluída)
+Faixas da nota, dados/estatística, versão neutra no estilo de notícia, bug visual da disputa, diagnóstico e 2ª rodada da busca, Haiku na identificação e na busca.
