@@ -71,10 +71,12 @@ export async function identifyViewer(tz: string | undefined): Promise<Viewer> {
   const user = await currentUser();
   if (user) {
     // Fuso fixo na conta: o primeiro informado fica guardado; os seguintes são ignorados.
-    let pinned = typeof user.user_metadata?.tz === "string" ? (user.user_metadata.tz as string) : undefined;
+    // Fica em app_metadata, que só o servidor (chave secreta) consegue alterar;
+    // user_metadata a própria pessoa poderia mudar pelo navegador.
+    let pinned = typeof user.app_metadata?.tz === "string" ? (user.app_metadata.tz as string) : undefined;
     if (!validTz(pinned) && validTz(tz)) {
       pinned = tz;
-      await supabaseAdmin()?.auth.admin.updateUserById(user.id, { user_metadata: { ...user.user_metadata, tz } });
+      await supabaseAdmin()?.auth.admin.updateUserById(user.id, { app_metadata: { ...user.app_metadata, tz } });
     }
     return { userId: user.id, email: user.email ?? null, anonKey: null, ipKey: null, day: localDay(pinned) };
   }

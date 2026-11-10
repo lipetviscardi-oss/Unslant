@@ -34,6 +34,25 @@ export const pt = {
     logout: "Sair",
   },
 
+  myAnalyses: {
+    title: "Minhas análises",
+    lede: "As análises que você fez com a sua conta. Abrir uma análise não chama a IA de novo e não gasta o limite do dia.",
+    loading: "Carregando…",
+    empty: "Você ainda não fez nenhuma análise com a sua conta.",
+    needLogin: "Entre na sua conta para ver as suas análises.",
+    loadError: "Não foi possível carregar as suas análises agora. Tente de novo em instantes.",
+    untitled: "Análise sem título",
+    simple: "simples",
+    detailed: "detalhada",
+    running: "em andamento",
+    failed: "não concluída",
+    open: "Abrir",
+    delete: "Apagar",
+    confirmDelete: "Apagar esta análise da sua conta? Isso não pode ser desfeito.",
+    deleteError: "Não foi possível apagar agora. Tente de novo.",
+    deleteNote: "Você pode apagar qualquer análise. O uso do dia não volta ao apagar.",
+  },
+
   login: {
     title: "Entrar",
     lede: "Sem senha: digite seu e-mail e enviamos um link de acesso. Na primeira vez, sua conta é criada automaticamente.",

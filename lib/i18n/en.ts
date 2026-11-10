@@ -34,6 +34,25 @@ export const en: Dict = {
     logout: "Sign out",
   },
 
+  myAnalyses: {
+    title: "My analyses",
+    lede: "The analyses you ran with your account. Opening one doesn't call the AI again and doesn't use your daily limit.",
+    loading: "Loading…",
+    empty: "You haven't run any analysis with your account yet.",
+    needLogin: "Sign in to see your analyses.",
+    loadError: "We couldn't load your analyses right now. Please try again shortly.",
+    untitled: "Untitled analysis",
+    simple: "simple",
+    detailed: "detailed",
+    running: "in progress",
+    failed: "not completed",
+    open: "Open",
+    delete: "Delete",
+    confirmDelete: "Delete this analysis from your account? This can't be undone.",
+    deleteError: "We couldn't delete it right now. Please try again.",
+    deleteNote: "You can delete any analysis. Deleting doesn't give back the day's usage.",
+  },
+
   login: {
     title: "Sign in",
     lede: "No password: enter your email and we'll send you a sign-in link. The first time, your account is created automatically.",
