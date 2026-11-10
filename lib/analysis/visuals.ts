@@ -64,3 +64,31 @@ export function visualContext(text: string): string {
   }
   return picked.join("\n\n");
 }
+
+/**
+ * Categorias em que um problema de IMAGEM pode entrar (além das duas "só de
+ * imagem"). Ex.: fotos chocantes de tumores → "Medo e indignação"; gráfico
+ * que corta o período → "Recorte temporal seletivo". A nota da categoria
+ * passa a considerar o texto e as imagens. Só valem as categorias dos grupos
+ * ativos naquela análise (as acadêmicas, só em papers).
+ */
+export const IMAGE_CATEGORY_IDS = [
+  "misleading_chart",
+  "visual_framing",
+  "fear_outrage",
+  "clickbait",
+  "misleading_numbers",
+  "cherry_picking",
+  "correlation_causation",
+  "selective_facts",
+  "stereotype_gender",
+  "stereotype_race",
+  "stereotype_class",
+  "stereotype_region",
+  "stereotype_religion",
+  "stereotype_nationality",
+  "sampling_bias",
+  "observational_causality",
+  "p_hacking",
+  "unacknowledged_limitations",
+] as const;

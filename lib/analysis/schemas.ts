@@ -139,7 +139,7 @@ export const FigureKindSchema = z.enum(["chart", "table", "photo", "illustration
 export type FigureKind = z.infer<typeof FigureKindSchema>;
 
 /** Os ids das figuras viram uma lista fechada: a IA só pode citar figuras que recebeu. */
-export function visualSchema(figureIds: readonly [string, ...string[]]) {
+export function visualSchema(figureIds: readonly [string, ...string[]], categoryIds: readonly [string, ...string[]]) {
   return z.object({
     figures: z.array(
       z.object({
@@ -153,7 +153,7 @@ export function visualSchema(figureIds: readonly [string, ...string[]]) {
     ),
     findings: z.array(
       z.object({
-        categoryId: z.enum(["misleading_chart", "visual_framing"]),
+        categoryId: z.enum(categoryIds),
         figureId: z.enum(figureIds),
         score: z.number(),
         confidence: ConfidenceSchema,
@@ -167,7 +167,7 @@ export function visualSchema(figureIds: readonly [string, ...string[]]) {
 export interface VisualOutput {
   figures: { figureId: string; kind: FigureKind; description: string; relevant: boolean }[];
   findings: {
-    categoryId: "misleading_chart" | "visual_framing";
+    categoryId: string;
     figureId: string;
     score: number;
     confidence: Confidence;

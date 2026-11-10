@@ -444,6 +444,35 @@ function visualCategory(
   };
 }
 
+/**
+ * Problemas das IMAGENS numa categoria comum (ex.: fotos de tumores → "Medo
+ * e indignação"): entram como evidências ligadas à figura, e a nota da
+ * categoria passa a ser a maior entre a do texto e a das imagens.
+ */
+function withImageFindings(cat: CategoryResult, visual: VisualFindingsInput | null, matcher: QuoteMatcher): CategoryResult {
+  if (!visual?.output) return cat;
+  const labels = new Map(visual.inputs.map((v) => [v.id, v.label]));
+  const found = visual.output.findings.filter((f) => f.categoryId === cat.id && labels.has(f.figureId));
+  if (found.length === 0) return cat;
+  const extra: Evidence[] = [];
+  for (const f of found.slice(0, config.ai.maxEvidencePerCategory)) {
+    extra.push({ id: "", quote: labels.get(f.figureId)!, explanation: f.explanation, start: -1, end: -1, figureId: f.figureId });
+    const pos = f.textQuote.trim() ? matcher.find(f.textQuote) : null;
+    if (pos) extra.push({ id: "", quote: f.textQuote, explanation: `${labels.get(f.figureId)}: ${f.explanation}`, start: pos.start, end: pos.end });
+  }
+  const evidence = [...cat.evidence, ...extra].map((e, i) => ({ ...e, id: `${cat.id}-${i + 1}` }));
+  const imageScore = Math.round(Math.max(...found.map((f) => clamp(f.score, 0, 10))) * 10) / 10;
+  const textFound = cat.status === "found";
+  return {
+    ...cat,
+    status: "found",
+    score: Math.max(textFound ? cat.score : 0, imageScore),
+    confidence: textFound ? cat.confidence : found[0].confidence,
+    summary: textFound ? cat.summary : found[0].explanation,
+    evidence,
+  };
+}
+
 export function buildFindings(
   text: string,
   triage: TriageOutput,
@@ -488,7 +517,7 @@ export function buildFindings(
         }
         return verifyCategory(cat.id, raw, matcher, lang, quotedRanges);
       });
-      return mergeCategory(perPart);
+      return withImageFindings(mergeCategory(perPart), visual, matcher);
     });
     discardedEvidence += categories.reduce((s, c) => s + c.discarded, 0);
     groups.push({ id: group.id, score: scoreGroup(group.id, categories), categories });

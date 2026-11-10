@@ -27,7 +27,7 @@ import { synthesisPrompt } from "@/lib/prompts/synthesis";
 import { claimCheckPrompt } from "@/lib/prompts/claimCheck";
 import { balancePrompt } from "@/lib/prompts/balance";
 import { visualPrompt } from "@/lib/prompts/visual";
-import { figureLabel, toCallImages, visualContext, type VisualInput } from "./visuals";
+import { figureLabel, IMAGE_CATEGORY_IDS, toCallImages, visualContext, type VisualInput } from "./visuals";
 import { searchBalance } from "@/lib/ai/balance";
 import { counterpartsFor, leaningOf } from "@/lib/veiculos";
 import { promptVersion } from "@/lib/prompts/version";
@@ -218,12 +218,14 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
     tasks.push(async () => {
       try {
         const ids = visuals.map((v) => v.id) as [string, ...string[]];
+        const active = new Set(activeGroups(triage).flatMap((g) => g.categories.map((c) => c.id)));
+        const catIds = IMAGE_CATEGORY_IDS.filter((id) => active.has(id)) as unknown as [string, ...string[]];
         visualOutput = await callStructured({
           label: `imagens e gráficos (${visuals.length})`,
           stage: "imagens",
-          schema: visualSchema(ids),
+          schema: visualSchema(ids, catIds),
           documentBlock: buildDocumentBlock(visualContext(text), source, boundary, { index: 0, total: 1 }),
-          task: visualPrompt(triage, visuals.map(figureLabel).join("\n"), lang),
+          task: visualPrompt(triage, visuals.map(figureLabel).join("\n"), lang, catIds),
           images: toCallImages(visuals),
           effort: config.visual.effort,
           maxTokens: config.visual.maxTokens,
