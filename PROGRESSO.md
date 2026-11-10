@@ -113,7 +113,7 @@ Decisões: 1b (5 faixas nos dois idiomas: 0–2 leve/Mild, 2–4 moderado/Modera
 | R4 | Reconferir a lista de veículos (avaliação, país, data) + National Review, The Dispatch, Washington Examiner | feito |
 | R6 | Limpar newsletter, propaganda, "leia também" e tags do texto | feito |
 | R7 | Equilibrar: pelo menos 1 veículo do outro lado (busca dirigida se faltar) | feito |
-| R8 | Imagens: só o visível | em andamento |
-| R9 | Teste: Mother Jones e Federalist 4–7, Reuters 1–3, simetria MJ × Federalist | a fazer |
+| R8 | Imagens: só o visível | feito |
+| R9 | Teste: Mother Jones e Federalist 4–7, Reuters 1–3, simetria MJ × Federalist | em andamento |
 Depois: Fase 4 (P2 em diante). Retomada automática: tarefa "Retomar unslant".
 - R4: 55 páginas reconferidas (todas iguais à lista; CBS = RIGHT-CENTER, atualizada em 04/2026). Novos: National Review (right), The Dispatch e Washington Examiner (center_right).

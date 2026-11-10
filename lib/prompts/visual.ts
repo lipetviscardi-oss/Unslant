@@ -31,7 +31,9 @@ ${figureList}
 
 1) Em "figures", para CADA figura enviada (use o figureId exato): kind ("chart" = gráfico, "table" = tabela, "photo" = foto, "illustration", "diagram", "map", "infographic" ou "other"), description (1 a 2 frases objetivas: o que a figura mostra; para gráficos e tabelas, cite as grandezas, o período e a tendência principal) e relevant (false se for decorativa, logotipo, anúncio ou sem relação com o assunto). Se a imagem for uma página de PDF, descreva as figuras e tabelas que estão nela.
 
-2) Em "findings", aponte SOMENTE problemas reais destas categorias:
+REGRA DO VISÍVEL (vale para "description", "explanation" e tudo o mais): descreva SOMENTE o que está visível na imagem e o que o texto ou a legenda dizem. NUNCA afirme como fato origem, autoria, data, local, identidade de pessoas, a que campanha ou evento algo pertence, se a foto é antiga ou montada, ou qualquer outro fato que não dá para verificar só olhando (ex.: proibido "o cartaz é de outra campanha"). Se isso for importante, escreva como incerteza ("parece ser", "não dá para saber pela imagem se…") e não aponte problema com base nisso.
+
+2) Em "findings", aponte SOMENTE problemas reais destas categorias, com base no que é visível e no que o texto diz:
 ${cat("misleading_chart")}
 ${cat("visual_framing")}
 Para cada problema: categoryId, figureId (a figura onde ele aparece), score (0 a 10, mesma escala das regras), confidence, explanation (1 a 2 frases: o que exatamente na imagem é problemático e por quê) e textQuote (trecho EXATO do texto que a figura contradiz ou que descreve a figura de forma distorcida; "" se não houver).
