@@ -197,3 +197,45 @@ export function lookupOutlet(host: string): OutletInfo | undefined {
   }
   return undefined;
 }
+
+/**
+ * VEÍCULOS "DO OUTRO LADO", por país, para "Para equilibrar sua leitura".
+ * Quando o texto pende para a esquerda, a busca precisa trazer pelo menos um
+ * veículo de "forLeftLeaning" (centro-direita/direita); quando pende para a
+ * direita, um de "forRightLeaning" (centro-esquerda/esquerda). Todos estão na
+ * lista acima, com fonte. Se a primeira busca não trouxer nenhum, o site faz
+ * uma busca restrita a estes sites.
+ */
+export const COUNTERPARTS: Record<string, { forLeftLeaning: string[]; forRightLeaning: string[] }> = {
+  US: {
+    forLeftLeaning: ["wsj.com", "nationalreview.com", "thedispatch.com", "washingtonexaminer.com"],
+    forRightLeaning: ["theatlantic.com", "npr.org", "nytimes.com"],
+  },
+  GB: {
+    forLeftLeaning: ["thetimes.com", "telegraph.co.uk", "spectator.co.uk"],
+    forRightLeaning: ["theguardian.com", "newstatesman.com", "inews.co.uk"],
+  },
+  BR: {
+    forLeftLeaning: ["estadao.com.br", "oglobo.globo.com"],
+    forRightLeaning: ["folha.uol.com.br", "cartacapital.com.br"],
+  },
+};
+
+/** Para que lado o texto pende, pelos eixos ideológicos (undefined = nenhum ou misturado). */
+export function leaningOf(economic: string, social: string): "left" | "right" | undefined {
+  const sides = new Set([economic, social].filter((p) => p === "left" || p === "right"));
+  return sides.size === 1 ? ([...sides][0] as "left" | "right") : undefined;
+}
+
+/** Veículos do outro lado para um texto (nomes e domínios), se houver lista para o país. */
+export function counterpartsFor(countryCode: string | undefined, leaning: "left" | "right" | undefined) {
+  const c = leaning && countryCode ? COUNTERPARTS[countryCode.toUpperCase()] : undefined;
+  if (!c) return undefined;
+  const domains = leaning === "left" ? c.forLeftLeaning : c.forRightLeaning;
+  return {
+    domains,
+    names: domains.map((d) => OUTLETS[d]?.name ?? d),
+    /** Linhas editoriais que contam como "do outro lado". */
+    lines: (leaning === "left" ? ["right", "center_right"] : ["left", "center_left"]) as EditorialLine[],
+  };
+}

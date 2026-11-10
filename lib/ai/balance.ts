@@ -23,6 +23,7 @@ import type { BalanceDiagnostics } from "@/lib/analysis/types";
 import { callStructured, getClient, mapApiError, type UsageTracker } from "./client";
 import { addGeminiUsage, geminiModel, getGemini, isBlocked, withRetry } from "./gemini";
 import { lookupOutlet } from "@/lib/veiculos";
+import type { EditorialLine } from "@/lib/analysis/schemas";
 
 type Found = Map<string, { url: string; title: string }>;
 
@@ -34,6 +35,11 @@ interface SearchOptions {
   countryCode?: string;
   /** Endereço do texto original (o veículo dele fica de fora). */
   originalUrl?: string;
+  /**
+   * Veículos do outro lado (o texto pende para um lado). Se nenhum resultado
+   * for de uma dessas linhas editoriais, faz uma rodada restrita a esses sites.
+   */
+  counterpart?: { domains: string[]; lines: EditorialLine[]; task: string };
   usage: UsageTracker;
   signal?: AbortSignal;
 }
@@ -96,6 +102,7 @@ async function anthropicRound(
   opts: SearchOptions,
   blockedHost: string | null,
   found: Found,
+  allowedDomains?: string[],
 ): Promise<RoundResult> {
   const anthropic = getClient();
   const country = /^[A-Za-z]{2}$/.test(opts.countryCode ?? "") ? opts.countryCode!.toUpperCase() : undefined;
@@ -105,7 +112,8 @@ async function anthropicRound(
     type: isLight ? ("web_search_20250305" as const) : ("web_search_20260209" as const),
     name: "web_search" as const,
     max_uses: config.balance.maxSearches,
-    ...(blockedHost ? { blocked_domains: [blockedHost] } : {}),
+    // A ferramenta aceita lista de sites permitidos OU bloqueados (não as duas).
+    ...(allowedDomains?.length ? { allowed_domains: allowedDomains } : blockedHost ? { blocked_domains: [blockedHost] } : {}),
     ...(country ? { user_location: { type: "approximate" as const, country } } : {}),
   } as Anthropic.Beta.BetaWebSearchTool20250305 | Anthropic.Beta.BetaWebSearchTool20260209;
 
@@ -169,10 +177,11 @@ async function searchWithAnthropic(
   blockedHost: string | null,
   found: Found,
   diag: BalanceDiagnostics,
+  allowedDomains?: string[],
 ): Promise<RoundResult> {
   if (config.balance.useLightModel) {
     try {
-      return await anthropicRound(task, config.ai.lightModel, opts, blockedHost, found);
+      return await anthropicRound(task, config.ai.lightModel, opts, blockedHost, found, allowedDomains);
     } catch (err) {
       // Só voltamos ao modelo principal em erros de configuração (não em cancelamento ou falta de crédito).
       if (!(err instanceof AppError) || err.code !== "AI_ERROR" || opts.signal?.aborted) throw err;
@@ -180,7 +189,7 @@ async function searchWithAnthropic(
       console.warn("[unslant] busca: modelo leve recusado, usando o principal:", err.detail);
     }
   }
-  return anthropicRound(task, config.ai.models.anthropic, opts, blockedHost, found);
+  return anthropicRound(task, config.ai.models.anthropic, opts, blockedHost, found, allowedDomains);
 }
 
 /* --------------------------------------------------------------- Gemini */
@@ -321,12 +330,12 @@ export async function searchBalance(
   const seen = new Set<string>();
   const diag: BalanceDiagnostics = { rounds: 0, queries: [], resultsFound: 0, proposed: 0, discarded: [], models: [], notes: [] };
 
-  const runRound = async (task: string) => {
+  const runRound = async (task: string, allowedDomains?: string[]) => {
     diag.rounds++;
     const r =
       config.ai.provider === "gemini"
         ? await searchWithGemini(task, opts, found)
-        : await searchWithAnthropic(task, opts, blockedHost, found, diag);
+        : await searchWithAnthropic(task, opts, blockedHost, found, diag, allowedDomains);
     diag.queries.push(...r.queries);
     if (!diag.models.includes(r.model)) diag.models.push(r.model);
     return r;
@@ -345,6 +354,26 @@ export async function searchBalance(
     const proposal2 = await parseProposal(second.text, found, opts);
     articles = [...articles, ...verifyArticles(proposal2, found, blockedHost, seen, diag)];
     if (suggestions.length === 0) suggestions = proposal2.suggestions;
+  }
+
+  // Pelo menos um veículo do outro lado: se não veio, uma rodada só nesses sites.
+  const lineOf = (a: (typeof articles)[number]) => lookupOutlet(hostOf(a.url) ?? "")?.line ?? a.editorialLine;
+  const cp = opts.counterpart;
+  if (cp && !articles.slice(0, config.balance.maxArticles).some((a) => cp.lines.includes(lineOf(a)))) {
+    diag.notes.push("nenhum veículo do outro lado; fazendo busca restrita a eles");
+    try {
+      const extra = await runRound(cp.task, cp.domains);
+      const proposal3 = await parseProposal(extra.text, found, opts);
+      const other = verifyArticles(proposal3, found, blockedHost, seen, diag).find((a) => cp.lines.includes(lineOf(a)));
+      if (other) {
+        // Entra em 2º lugar, para aparecer também no modo simples (que mostra 2 textos).
+        articles = [...articles.slice(0, 1), other, ...articles.slice(1)].slice(0, config.balance.maxArticles);
+      } else diag.notes.push("a busca restrita não achou texto desses veículos");
+    } catch (err) {
+      if (opts.signal?.aborted) throw err;
+      diag.notes.push("a busca restrita falhou (detalhes no terminal do servidor)");
+      console.warn("[unslant] busca restrita ao outro lado falhou:", err instanceof AppError ? err.code : err);
+    }
   }
 
   diag.resultsFound = found.size;

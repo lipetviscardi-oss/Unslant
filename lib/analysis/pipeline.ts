@@ -29,6 +29,7 @@ import { balancePrompt } from "@/lib/prompts/balance";
 import { visualPrompt } from "@/lib/prompts/visual";
 import { figureLabel, toCallImages, visualContext, type VisualInput } from "./visuals";
 import { searchBalance } from "@/lib/ai/balance";
+import { counterpartsFor, leaningOf } from "@/lib/veiculos";
 import { promptVersion } from "@/lib/prompts/version";
 import {
   ClaimCheckSchema,
@@ -337,9 +338,13 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
         title: source.title || triage.title,
         lang,
       };
+      // Para que lado o texto pende e quais veículos são "do outro lado" (lib/veiculos.ts).
+      const cp = counterpartsFor(triage.countryCode, leaningOf(findings.political.economic.position, findings.political.social.position));
+      const params = { ...promptParams, counterparts: cp?.names };
       const { data, diagnostics, lineSource } = await searchBalance({
-        task: balancePrompt(promptParams),
-        retryTask: balancePrompt({ ...promptParams, retry: true }),
+        task: balancePrompt(params),
+        retryTask: balancePrompt({ ...params, retry: true }),
+        counterpart: cp ? { domains: cp.domains, lines: cp.lines, task: balancePrompt({ ...params, targeted: true }) } : undefined,
         countryCode: triage.countryCode,
         originalUrl: source.url,
         usage,

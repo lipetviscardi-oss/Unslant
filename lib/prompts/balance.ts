@@ -24,6 +24,10 @@ export function balancePrompt(params: {
   title?: string;
   /** true = segunda rodada, com termos mais objetivos. */
   retry?: boolean;
+  /** Veículos do outro lado (quando o texto pende para um lado e há lista para o país). */
+  counterparts?: string[];
+  /** true = rodada extra só nesses veículos (as anteriores não trouxeram nenhum do outro lado). */
+  targeted?: boolean;
   lang: "pt" | "en";
 }) {
   const { triage, economic, social, dispute, omissions, originalOutlet, lang } = params;
@@ -35,12 +39,17 @@ export function balancePrompt(params: {
     ? `O usuário enviou uma AFIRMAÇÃO curta. Encontre fontes confiáveis que ajudem a conferir essa afirmação: dados oficiais, checagens de agências de fact-checking, reportagens explicativas ou estudos de instituições reconhecidas, preferencialmente com perspectivas diferentes.`
     : `Encontre outras coberturas do MESMO assunto ou acontecimento, de outros veículos, que ajudem o leitor a equilibrar o que leu: textos com perspectivas diferentes, com o contexto que faltou ou com dados de fontes primárias.`;
 
+  const counterpartNote = params.counterparts?.length
+    ? params.targeted
+      ? `\nATENÇÃO: as buscas anteriores não trouxeram nenhum veículo do outro lado. Agora busque SOMENTE a cobertura do mesmo fato nestes veículos: ${params.counterparts.join(", ")}. Traga pelo menos um resultado de um deles (de preferência sobre o mesmo acontecimento; se não houver, sobre o mesmo tema).\n`
+      : `\nOBRIGATÓRIO: o texto pende para um lado. Inclua pelo menos UM veículo confiável do outro lado. Bons exemplos para este país: ${params.counterparts.join(", ")}.\n`
+    : "";
   const retryNote = params.retry
     ? `\nATENÇÃO: uma primeira rodada de buscas não encontrou textos suficientes. Agora faça buscas com termos OBJETIVOS e FACTUAIS: nomes das pessoas e instituições envolvidas + o fato principal (e a data aproximada, se souber), sem adjetivos e sem o enquadramento do texto original. Aceite qualquer veículo confiável, de qualquer linha editorial, que noticie o mesmo fato.\n`
     : "";
 
   return `TAREFA: ${goal}
-${retryNote}
+${retryNote}${counterpartNote}
 ${contextBlock({
     "Tipo de texto": triage.contentType,
     Tema: triage.topic,

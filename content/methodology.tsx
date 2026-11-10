@@ -226,7 +226,10 @@ export function MethodologyPt() {
         </li>
         <li>
           <strong>Perspectivas diferentes.</strong> A IA é instruída a nunca recomendar só veículos do mesmo lado e a
-          priorizar fontes confiáveis. O veículo do texto original fica de fora.
+          priorizar fontes confiáveis. O veículo do texto original fica de fora. Quando o texto pende para um lado, o site
+          exige pelo menos um veículo confiável do outro: se a busca não trouxer nenhum, ele faz uma busca a mais só em
+          veículos do outro lado (nos EUA, por exemplo, Wall Street Journal ou National Review para textos de esquerda;
+          The Atlantic ou NPR para textos de direita).
         </li>
         <li>
           <strong>Linha editorial.</strong> Cada sugestão mostra a linha editorial do veículo (esquerda, centro-esquerda,
@@ -496,7 +499,10 @@ export function MethodologyEn() {
         </li>
         <li>
           <strong>Different perspectives.</strong> The AI is instructed never to recommend outlets from a single side and
-          to prioritize reliable sources. The original text&rsquo;s outlet is excluded.
+          to prioritize reliable sources. The original text&rsquo;s outlet is excluded. When the text leans one way, the
+          site requires at least one reliable outlet from the other side: if the search finds none, it runs one more search
+          limited to outlets from the other side (in the US, for example, the Wall Street Journal or National Review for
+          left-leaning texts; The Atlantic or NPR for right-leaning ones).
         </li>
         <li>
           <strong>Editorial line.</strong> Each suggestion shows the outlet&rsquo;s editorial line (left, center-left,
