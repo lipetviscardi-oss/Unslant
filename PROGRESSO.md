@@ -151,3 +151,7 @@ Decisões do usuário (10/11/2026): botão de sugestões sim; 5 análises por di
 8. E-mail de contato → config.privacy.contactEmail.
 9. Teste final (login com Gmail/Outlook/iCloud, celular, sugestões).
 10. Convite para os testadores (Claude escreve em pt e en).
+
+### Lembretes
+- Conta da Vercel criada com o e-mail da faculdade (a antiga foi apagada e prendia o GitHub/Apple). **Antes da formatura**, trocar o e-mail da conta da Vercel por um pessoal (Account Settings → General → Email).
+- Anthropic: US$ 15 de créditos para a semana de testes (esperado ~US$ 10).
