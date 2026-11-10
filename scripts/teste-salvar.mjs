@@ -6,7 +6,8 @@
  * Procura, entre as análises guardadas em .cache/analyses (no seu
  * computador), as dos artigos listados em testes/casos.json e guarda o texto
  * de cada um em testes/textos/ (pasta que NÃO vai para o GitHub). Também
- * anota o título e o link de cada artigo em testes/casos.json.
+ * guarda junto o título e o link de cada artigo. O arquivo testes/casos.json
+ * não é alterado (assim ele nunca entra em conflito com o GitHub).
  *
  * Antes, analise cada artigo uma vez no site (npm run dev).
  */
@@ -78,19 +79,17 @@ for (const c of manifest.casos) {
     mode,
     lang: r.language ?? "pt",
     url: r.source.url ?? "",
+    title: r.source.title ?? "",
     text: r.text,
     meta: mode === "pdf" ? { title: r.source.title ?? "", author: r.source.author ?? "" } : undefined,
     contentType: r.source.declaredType,
     salvoEm: new Date().toISOString(),
   };
   writeFileSync(path.join(outDir, `${c.id}.json`), JSON.stringify(saved, null, 2));
-  c.titulo = r.source.title ?? c.titulo ?? "";
-  c.link = r.source.url ?? c.link ?? "";
   const how = { url: "link", text: "texto colado", pdf: "PDF" }[mode] ?? mode;
-  console.log(`✅ ${c.nome}: guardado (${how}, ${r.source.wordCount ?? "?"} palavras) — "${(c.titulo || r.text.slice(0, 60)).split("\n")[0].slice(0, 80)}"`);
+  console.log(`✅ ${c.nome}: guardado (${how}, ${r.source.wordCount ?? "?"} palavras) — "${(r.source.title || r.text.slice(0, 60)).split("\n")[0].slice(0, 80)}"`);
 }
 
-writeFileSync(casesPath, JSON.stringify(manifest, null, 2) + "\n");
 console.log(
   missing
     ? `\nFaltam ${missing} artigo(s). Os que foram achados já estão guardados.`
