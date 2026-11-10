@@ -153,8 +153,8 @@ export const ERROR_MESSAGES: Record<ErrorCode, Record<Lang, string>> = {
     en: "You've used today's detailed analysis. Choose \"Simple\" or try again tomorrow (at midnight your time).",
   },
   LIMIT_ANON: {
-    pt: "Você já usou a análise grátis de hoje sem conta. Entre com seu e-mail (sem senha) para ter 3 análises simples e 1 detalhada por dia.",
-    en: "You've used today's free analysis without an account. Sign in with your email (no password) to get 3 simple analyses and 1 detailed analysis per day.",
+    pt: "Você já usou a análise grátis das últimas 24 horas sem conta. Entre com seu e-mail (sem senha) para ter 3 análises simples e 1 detalhada por dia.",
+    en: "You've used your free analysis for the last 24 hours without an account. Sign in with your email (no password) to get 3 simple analyses and 1 detailed analysis per day.",
   },
   LOGIN_REQUIRED: {
     pt: "A análise detalhada é para quem tem conta. Entre com seu e-mail (sem senha): é grátis e dá 3 análises simples e 1 detalhada por dia.",

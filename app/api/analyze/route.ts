@@ -21,7 +21,7 @@ import { promptVersion } from "@/lib/prompts/version";
 import { runDemo } from "@/lib/demo";
 import type { AnalysisResult, ResultAccess, SourceInfo, StreamEvent } from "@/lib/analysis/types";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { identifyViewer, limitsFor, linkUsage, recordUsage, refundUsage, remainingToday, siteUsageLast24h, type Kind } from "@/lib/analysis/usage";
+import { identifyViewer, limitsFor, linkUsage, refundUsage, remainingToday, reserveUsage, siteUsageLast24h, type Kind } from "@/lib/analysis/usage";
 import { saveAnalysis } from "@/lib/analysis/store";
 import { toSimplePayload } from "@/lib/analysis/access";
 
@@ -201,7 +201,9 @@ export async function POST(request: Request) {
           if (site !== null && site >= config.limits.globalDailyAnalyses) {
             throw new AppError("DAILY_LIMIT", `${site}/${config.limits.globalDailyAnalyses} nas últimas 24 h`);
           }
-          usageId = await recordUsage(viewer, kind);
+          const slot = await reserveUsage(viewer, kind);
+          if (slot === "limit") throw new AppError(kind === "detailed" ? "LIMIT_DETAILED" : viewer.userId ? "LIMIT_SIMPLE" : "LIMIT_ANON");
+          usageId = slot;
         } else {
           reserveDailySlot();
           reserved = true;

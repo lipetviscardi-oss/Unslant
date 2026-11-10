@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useMemo, useState } from "react";
-import type { AnalysisResult } from "@/lib/analysis/types";
+import type { AnalysisResult, ResultAccess } from "@/lib/analysis/types";
 import { buildEvidenceIndex } from "@/lib/client/evidence";
 import { Figures } from "./Figures";
 import { formatDate } from "@/lib/client/format";
@@ -18,6 +18,8 @@ import { ClaimCheck } from "./ClaimCheck";
 import { Balance } from "./Balance";
 import { ModeToggle, PoliticalLine, TopProblems } from "./SimpleView";
 import { readMode, saveMode, type ResultMode } from "@/lib/client/mode";
+import { browserTimeZone } from "@/lib/client/analyze";
+import { UnlockPanel } from "./UnlockPanel";
 import { CategoryDetails, FactOpinion, Omissions, Rewrite } from "./Sections";
 
 function Chip({ children, tone = "plain" }: { children: React.ReactNode; tone?: "plain" | "teal" }) {
@@ -94,12 +96,15 @@ function Stats({ result }: { result: AnalysisResult }) {
 }
 
 export function ResultView({
-  result,
+  result: initialResult,
   onReset,
   onReanalyze,
   initialMode,
+  access: initialAccess,
 }: {
   result: AnalysisResult;
+  /** O que a pessoa pode ver (limites da Fase 4). Sem isto, pode ver tudo. */
+  access?: ResultAccess;
   /** Tipo de análise escolhido no formulário. */
   initialMode?: ResultMode;
   onReset: () => void;
@@ -108,16 +113,61 @@ export function ResultView({
 }) {
   const t = useDict();
   const lang = useLang();
+  // O resultado pode ser trocado pela versão completa quando a pessoa usa a detalhada do dia.
+  const [result, setResult] = useState(initialResult);
+  const [access, setAccess] = useState(initialAccess);
+  /** Análise simples ainda não liberada: o modo detalhado está bloqueado. */
+  const locked = Boolean(access?.limitsOn && access.kind === "simple" && !access.unlocked);
+  const [unlockState, setUnlockState] = useState<"idle" | "working" | "error">("idle");
+  const [unlockError, setUnlockError] = useState("");
   const index = useMemo(() => buildEvidenceIndex(result), [result]);
   const [selected, setSelected] = useState<string[]>([]);
   const [showAll, setShowAll] = useState(false);
   // Modo simples primeiro; o site lembra a última escolha do leitor (só neste navegador).
   // Abre no tipo de análise escolhido no formulário (ou na última escolha do leitor).
-  const [mode, setModeState] = useState<ResultMode>(() => initialMode ?? readMode());
+  const [mode, setModeState] = useState<ResultMode>(() => (locked ? "simple" : (initialMode ?? readMode())));
   const setMode = useCallback((m: ResultMode) => {
     setModeState(m);
     saveMode(m);
   }, []);
+
+  /** Pede o modo detalhado: se a análise simples ainda não foi liberada, leva até o aviso de liberação. */
+  const requestMode = useCallback(
+    (m: ResultMode) => {
+      if (m === "detailed" && locked) {
+        document.getElementById("unlock")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+      setMode(m);
+    },
+    [locked, setMode],
+  );
+
+  /** "Usar minha análise detalhada de hoje": libera a análise completa (sem chamar a IA de novo). */
+  const unlock = useCallback(async () => {
+    if (!access?.analysisId) return;
+    setUnlockState("working");
+    try {
+      const res = await fetch(`/api/analyses/${access.analysisId}/unlock`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tz: browserTimeZone(), lang }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setUnlockError(data?.message ?? "");
+        setUnlockState("error");
+        return;
+      }
+      setResult(data.result);
+      setAccess({ ...access, unlocked: true, remaining: data.remaining ?? access.remaining });
+      setUnlockState("idle");
+      setMode("detailed");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch {
+      setUnlockState("error");
+    }
+  }, [access, lang, setMode]);
 
   /** Rola até um trecho no texto e o seleciona. Devolve false se ele não estiver visível. */
   const scrollToEvidence = useCallback((evidenceId: string) => {
@@ -156,10 +206,14 @@ export function ResultView({
   /** No modo simples, "Ver no texto" abre o modo detalhado e vai até o trecho. */
   const showInDetailed = useCallback(
     (evidenceId: string) => {
+      if (locked) {
+        requestMode("detailed");
+        return;
+      }
       setMode("detailed");
       setTimeout(() => showEvidence(evidenceId), 80);
     },
-    [setMode, showEvidence],
+    [locked, requestMode, setMode, showEvidence],
   );
 
   const showGroup = useCallback((groupId: string) => {
@@ -253,7 +307,7 @@ export function ResultView({
           )}
         </header>
 
-        <ModeToggle mode={mode} onChange={setMode} />
+        <ModeToggle mode={mode} onChange={requestMode} />
 
         {mode === "simple" ? (
           <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
@@ -269,19 +323,23 @@ export function ResultView({
           <TopProblems result={result} onShow={showInDetailed} />
           {!isClaim && <Rewrite result={result} onShow={showInDetailed} />}
           <Balance result={result} limit={2} compact />
-          <div className="flex flex-col items-start gap-2 border-t border-line pt-8">
-            <button
-              type="button"
-              onClick={() => {
-                setMode("detailed");
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className="rounded-full bg-ink px-5 py-2.5 font-display text-[16px] font-medium text-paper hover:bg-teal-deep"
-            >
-              {t.result.simple.seeAll}
-            </button>
-            <p className="text-sm text-muted">{t.result.simple.seeAllHelp}</p>
-          </div>
+          {locked ? (
+            <UnlockPanel access={access!} state={unlockState} error={unlockError} onUnlock={unlock} />
+          ) : (
+            <div className="flex flex-col items-start gap-2 border-t border-line pt-8">
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("detailed");
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className="rounded-full bg-ink px-5 py-2.5 font-display text-[16px] font-medium text-paper hover:bg-teal-deep"
+              >
+                {t.result.simple.seeAll}
+              </button>
+              <p className="text-sm text-muted">{t.result.simple.seeAllHelp}</p>
+            </div>
+          )}
         </>
       ) : (
         <>

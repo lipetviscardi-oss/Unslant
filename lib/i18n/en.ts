@@ -93,6 +93,9 @@ export const en: Dict = {
       simple: { title: "Simple", desc: "The essentials: score, leaning and the 3 main problems, in everyday language." },
       detailed: { title: "Detailed", desc: "Everything: all categories, the text with highlighted passages, images and sources." },
       help: "Both use the same full analysis; only what you see changes.",
+      needsLogin: "For the detailed analysis, sign in with your email (no password).",
+      remaining: (s: number, d: number) => `Today you still have ${s} simple ${s === 1 ? "analysis" : "analyses"} and ${d} detailed.`,
+      remainingAnon: (s: number) => (s > 0 ? "Without an account: 1 simple analysis every 24 hours. Sign in (no password) to get 3 simple and 1 detailed per day." : "You've used your free analysis for the last 24 hours. Sign in (no password) to get 3 simple and 1 detailed per day."),
     },
     genre: {
       label: "Type of text",
@@ -161,6 +164,14 @@ export const en: Dict = {
     },
 
     mode: { label: "Display mode", simple: "Simple", detailed: "Detailed" },
+    unlock: {
+      use: "Use today's detailed analysis",
+      working: "Unlocking…",
+      useHelp: (n: number) => `The full analysis is already done: this doesn't call the AI again. ${n === 1 ? "1 detailed analysis" : `${n} detailed analyses`} left today.`,
+      usedUp: "You've used today's detailed analysis. It comes back tomorrow, at midnight your time.",
+      signIn: "Sign in to see the full analysis",
+      signInWhy: "No password, just your email. With an account you get 3 simple analyses and 1 detailed analysis per day.",
+    },
     simple: {
       politicalTitle: "Political leaning",
       favors: (side: string, how: string) => `${how.charAt(0).toUpperCase() + how.slice(1)} favors ${side}`,

@@ -93,6 +93,9 @@ export const pt = {
       simple: { title: "Simples", desc: "O essencial: nota, inclinação e os 3 principais problemas, em linguagem do dia a dia." },
       detailed: { title: "Detalhada", desc: "Tudo: todas as categorias, o texto com os trechos destacados, imagens e fontes." },
       help: "As duas usam a mesma análise completa; muda o que você vê.",
+      needsLogin: "Para a detalhada, entre com seu e-mail (sem senha).",
+      remaining: (s: number, d: number) => `Hoje você ainda tem ${s} ${s === 1 ? "análise simples" : "análises simples"} e ${d} ${d === 1 ? "detalhada" : "detalhadas"}.`,
+      remainingAnon: (s: number): string => (s > 0 ? "Sem conta: 1 análise simples a cada 24 horas. Entre (sem senha) para ter 3 simples e 1 detalhada por dia." : "Você já usou a análise grátis das últimas 24 horas. Entre (sem senha) para ter 3 simples e 1 detalhada por dia."),
     },
     genre: {
       label: "Tipo de texto",
@@ -161,6 +164,14 @@ export const pt = {
     },
 
     mode: { label: "Modo de exibição", simple: "Simples", detailed: "Detalhado" },
+    unlock: {
+      use: "Usar minha análise detalhada de hoje",
+      working: "Liberando…",
+      useHelp: (n: number) => `A análise completa já foi feita: não chama a IA de novo. ${n === 1 ? "Resta 1 análise detalhada" : `Restam ${n} análises detalhadas`} hoje.`,
+      usedUp: "Você já usou a análise detalhada de hoje. Ela volta amanhã, à meia-noite no seu horário.",
+      signIn: "Entrar para ver a análise completa",
+      signInWhy: "Sem senha: é só o seu e-mail. Com conta, você tem 3 análises simples e 1 detalhada por dia.",
+    },
     simple: {
       politicalTitle: "Inclinação política",
       favors: (side: string, how: string) => `Favorece ${how} ${side}`,

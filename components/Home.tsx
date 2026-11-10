@@ -12,13 +12,13 @@ import { AnalyzeForm } from "@/components/AnalyzeForm";
 import { ProgressPanel, type ProgressState } from "@/components/ProgressPanel";
 import { ResultView } from "@/components/result/ResultView";
 import { AnalyzeError, requestAnalysis, type AnalyzeRequest } from "@/lib/client/analyze";
-import type { AnalysisResult } from "@/lib/analysis/types";
+import type { AnalysisResult, ResultAccess } from "@/lib/analysis/types";
 import { useDict } from "@/lib/i18n";
 
 type View =
   | { kind: "form"; error?: string }
   | { kind: "running"; progress: ProgressState }
-  | { kind: "result"; result: AnalysisResult; request: AnalyzeRequest };
+  | { kind: "result"; result: AnalysisResult; request: AnalyzeRequest; access?: ResultAccess };
 
 export function Home() {
   const t = useDict();
@@ -31,7 +31,7 @@ export function Home() {
     setView({ kind: "running", progress: { stage: req.mode === "url" ? "extracting" : "context" } });
     window.scrollTo({ top: 0 });
     try {
-      const result = await requestAnalysis(
+      const { result, access } = await requestAnalysis(
         req,
         (event) => {
           if (event.type === "stage") {
@@ -40,7 +40,7 @@ export function Home() {
         },
         controller.signal,
       );
-      setView({ kind: "result", result, request: req });
+      setView({ kind: "result", result, request: req, access });
       window.scrollTo({ top: 0 });
     } catch (err) {
       if (controller.signal.aborted) {
@@ -65,13 +65,14 @@ export function Home() {
   }
 
   if (view.kind === "result") {
-    const { result, request } = view;
+    const { result, request, access } = view;
     return (
       <ResultView
         result={result}
         onReset={reset}
         onReanalyze={result.stats.fromCache ? () => start({ ...request, fresh: true }) : undefined}
         initialMode={request.view}
+        access={access}
       />
     );
   }

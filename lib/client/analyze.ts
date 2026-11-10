@@ -3,7 +3,7 @@
  * (roda no navegador).
  */
 
-import type { AnalysisResult, StreamEvent } from "@/lib/analysis/types";
+import type { AnalysisResult, ResultAccess, StreamEvent } from "@/lib/analysis/types";
 import { errorMessage } from "@/lib/errors";
 import type { Lang } from "@/lib/taxonomy";
 
@@ -36,9 +36,18 @@ export type AnalyzeRequest = (
 ) & {
   /** true = ignora o resultado guardado e analisa de novo. */
   fresh?: boolean;
-  /** Como o resultado abre: "simple" ou "detailed" (só na tela; o servidor ignora). */
+  /** Tipo de análise: "simple" ou "detailed" (decide o limite do dia e como o resultado abre). */
   view?: "simple" | "detailed";
 };
+
+/** Fuso horário do navegador: o limite diário zera à meia-noite dele. */
+export function browserTimeZone(): string | undefined {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch {
+    return undefined;
+  }
+}
 
 export class AnalyzeError extends Error {
   constructor(
@@ -53,13 +62,13 @@ export async function requestAnalysis(
   req: AnalyzeRequest,
   onEvent: (e: StreamEvent) => void,
   signal?: AbortSignal,
-): Promise<AnalysisResult> {
+): Promise<{ result: AnalysisResult; access?: ResultAccess }> {
   let res: Response;
   try {
     res = await fetch("/api/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(req),
+      body: JSON.stringify({ ...req, tz: browserTimeZone() }),
       signal,
     });
   } catch {
@@ -74,6 +83,7 @@ export async function requestAnalysis(
   const decoder = new TextDecoder();
   let buffer = "";
   let result: AnalysisResult | null = null;
+  let access: ResultAccess | undefined;
 
   for (;;) {
     const { done, value } = await reader.read();
@@ -85,12 +95,15 @@ export async function requestAnalysis(
       if (!line) continue;
       const event = JSON.parse(line) as StreamEvent;
       if (event.type === "error") throw new AnalyzeError(event.code, event.message);
-      if (event.type === "result") result = event.result;
+      if (event.type === "result") {
+        result = event.result;
+        access = event.access;
+      }
       onEvent(event);
     }
     if (done) break;
   }
 
   if (!result) throw new AnalyzeError("UNKNOWN", errorMessage("UNKNOWN", req.lang));
-  return result;
+  return { result, access };
 }

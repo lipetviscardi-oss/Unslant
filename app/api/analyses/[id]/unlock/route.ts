@@ -11,7 +11,7 @@ import { z } from "zod";
 import { errorMessage } from "@/lib/errors";
 import { readCache } from "@/lib/analysis/cache";
 import { loadAnalysis, unlockAnalysis } from "@/lib/analysis/store";
-import { identifyViewer, recordUsage, refundUsage, remainingToday } from "@/lib/analysis/usage";
+import { identifyViewer, refundUsage, remainingToday, reserveUsage } from "@/lib/analysis/usage";
 
 const Body = z.object({ tz: z.string().max(64).optional(), lang: z.enum(["pt", "en"]).default("pt") });
 
@@ -37,7 +37,9 @@ export async function POST(request: NextRequest, ctx: RouteContext<"/api/analyse
   const full = row.cache_key ? await readCache(row.cache_key) : null;
   if (!full) return fail("NOT_FOUND", 404);
 
-  const usageId = await recordUsage(viewer, "detailed", row.id);
+  // Reserva a detalhada do dia (grava e reconta: dois pedidos ao mesmo tempo não passam do limite).
+  const usageId = await reserveUsage(viewer, "detailed", row.id);
+  if (usageId === "limit") return fail("LIMIT_DETAILED", 429);
   try {
     await unlockAnalysis(row.id, full);
   } catch (err) {

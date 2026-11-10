@@ -5,8 +5,8 @@
  * exemplos para testar. O relatório sai no idioma do site.
  */
 
-import { useId, useRef, useState, useSyncExternalStore } from "react";
-import type { AnalyzeRequest, DeclaredType } from "@/lib/client/analyze";
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
+import { browserTimeZone, type AnalyzeRequest, type DeclaredType } from "@/lib/client/analyze";
 import type { PdfPageImage } from "@/lib/extract/pdf-client";
 import { readMode, saveMode, subscribeMode, type ResultMode } from "@/lib/client/mode";
 import { CLAIM_EXAMPLES, EXAMPLES } from "@/lib/examples";
@@ -46,7 +46,18 @@ export function AnalyzeForm({ onSubmit }: { onSubmit: (req: AnalyzeRequest) => v
   // Tipo de análise: a última escolha do leitor (no servidor, "simples").
   const storedMode = useSyncExternalStore(subscribeMode, readMode, () => "simple" as ResultMode);
   const [chosenMode, setChosenMode] = useState<ResultMode | null>(null);
-  const view = chosenMode ?? storedMode;
+  // Limites do dia (Fase 4): quantas restam e se a pessoa está logada.
+  const [usage, setUsage] = useState<{ limitsOn: boolean; loggedIn?: boolean; remaining?: { simple: number; detailed: number } | null } | null>(null);
+  useEffect(() => {
+    const tz = browserTimeZone();
+    fetch(`/api/usage${tz ? `?tz=${encodeURIComponent(tz)}` : ""}`)
+      .then((r) => r.json())
+      .then(setUsage)
+      .catch(() => setUsage(null));
+  }, []);
+  const detailedNeedsLogin = Boolean(usage?.limitsOn && !usage.loggedIn);
+  const chosen = chosenMode ?? storedMode;
+  const view = detailedNeedsLogin ? "simple" : chosen;
   const send = (req: AnalyzeRequest) => {
     saveMode(view);
     onSubmit({ ...req, view });
@@ -318,17 +329,24 @@ export function AnalyzeForm({ onSubmit }: { onSubmit: (req: AnalyzeRequest) => v
                   name={`${baseId}-view`}
                   value={m}
                   checked={view === m}
+                  disabled={m === "detailed" && detailedNeedsLogin}
                   onChange={() => setChosenMode(m)}
                   className="mt-1 accent-[var(--color-teal)]"
                 />
                 <span>
                   <span className="block font-medium">{t.home.view[m].title}</span>
                   <span className="block text-sm text-muted">{t.home.view[m].desc}</span>
+                  {m === "detailed" && detailedNeedsLogin && <span className="mt-1 block text-sm text-teal-deep">{t.home.view.needsLogin}</span>}
                 </span>
               </label>
             ))}
           </div>
           <p className="text-sm text-muted">{t.home.view.help}</p>
+          {usage?.limitsOn && usage.remaining && (
+            <p className="text-sm font-medium text-ink">
+              {usage.loggedIn ? t.home.view.remaining(usage.remaining.simple, usage.remaining.detailed) : t.home.view.remainingAnon(usage.remaining.simple)}
+            </p>
+          )}
         </fieldset>
 
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4">

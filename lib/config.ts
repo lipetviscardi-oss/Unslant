@@ -187,7 +187,7 @@ export const config = {
      * Resultados reaproveitados (texto já analisado) e exemplos prontos não contam.
      */
     perDay: {
-      /** Visitante sem conta. */
+      /** Visitante sem conta (janela de 24 horas, não depende do fuso). */
       anonymous: { simple: 1, detailed: 0 },
       /** Conta grátis. */
       free: { simple: 3, detailed: 1 },

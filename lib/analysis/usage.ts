@@ -4,8 +4,10 @@
  * Quem está analisando, quantas análises já fez hoje e quantas restam.
  *  - Conta grátis: config.limits.perDay.free (3 simples + 1 detalhada).
  *  - Visitante sem conta: config.limits.perDay.anonymous (1 simples).
- *  - O "dia" é o da própria pessoa: zera à meia-noite no fuso horário dela,
- *    informado pelo navegador.
+ *  - Conta: o "dia" é o da própria pessoa (zera à meia-noite no fuso dela).
+ *    O fuso fica FIXO na conta a partir da primeira análise, para ninguém
+ *    trocar de fuso de propósito e ganhar análises extras.
+ *  - Visitante: vale uma janela de 24 horas (sem depender do fuso).
  *  - Visitantes são reconhecidos por dois códigos anônimos (um cookie e o
  *    endereço de internet), guardados só como resumo irreversível (HMAC):
  *    o banco nunca recebe o endereço em si.
@@ -33,6 +35,17 @@ export interface Viewer {
   day: string;
 }
 
+/** Fuso horário válido? (ex.: "America/Sao_Paulo") */
+function validTz(tz: string | undefined): tz is string {
+  if (!tz || tz.length > 64) return false;
+  try {
+    new Intl.DateTimeFormat("en-CA", { timeZone: tz });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 const ANON_COOKIE = "unslant-anon";
 const FALLBACK_TZ = "America/Sao_Paulo";
 
@@ -55,9 +68,17 @@ function anonymize(value: string): string {
 
 /** Quem está pedindo a análise. Cria o cookie anônimo do visitante, se ainda não existir. */
 export async function identifyViewer(tz: string | undefined): Promise<Viewer> {
-  const day = localDay(tz);
   const user = await currentUser();
-  if (user) return { userId: user.id, email: user.email ?? null, anonKey: null, ipKey: null, day };
+  if (user) {
+    // Fuso fixo na conta: o primeiro informado fica guardado; os seguintes são ignorados.
+    let pinned = typeof user.user_metadata?.tz === "string" ? (user.user_metadata.tz as string) : undefined;
+    if (!validTz(pinned) && validTz(tz)) {
+      pinned = tz;
+      await supabaseAdmin()?.auth.admin.updateUserById(user.id, { user_metadata: { ...user.user_metadata, tz } });
+    }
+    return { userId: user.id, email: user.email ?? null, anonKey: null, ipKey: null, day: localDay(pinned) };
+  }
+  const day = localDay(tz);
 
   const jar = await cookies();
   let anonId = jar.get(ANON_COOKIE)?.value;
@@ -78,12 +99,13 @@ export function limitsFor(v: Viewer) {
 export async function usedToday(v: Viewer): Promise<Record<Kind, number> | null> {
   const db = supabaseAdmin();
   if (!db) return null;
-  let q = db.from("usage_events").select("kind").eq("local_day", v.day);
-  if (v.userId) q = q.eq("user_id", v.userId);
+  // Usos devolvidos (análise que falhou) não contam para a pessoa.
+  let q = db.from("usage_events").select("kind").eq("refunded", false);
+  if (v.userId) q = q.eq("user_id", v.userId).eq("local_day", v.day);
   else {
-    // Visitante: conta pelo cookie OU pelo endereço (apagar o cookie não zera o limite).
+    // Visitante: últimas 24 horas, pelo cookie OU pelo endereço (apagar o cookie não zera o limite).
     const keys = [v.anonKey && `anon_key.eq.${v.anonKey}`, v.ipKey && `ip_key.eq.${v.ipKey}`].filter(Boolean).join(",");
-    q = q.is("user_id", null).or(keys);
+    q = q.is("user_id", null).gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()).or(keys);
   }
   const { data, error } = await q;
   if (error) throw new Error(`uso diário: ${error.message}`);
@@ -100,8 +122,23 @@ export async function remainingToday(v: Viewer): Promise<Record<Kind, number> | 
   return { simple: Math.max(0, lim.simple - used.simple), detailed: Math.max(0, lim.detailed - used.detailed) };
 }
 
-/** Registra um uso (antes de chamar a IA, para dois pedidos ao mesmo tempo não passarem do limite). */
-export async function recordUsage(v: Viewer, kind: Kind, analysisId?: string): Promise<number | null> {
+/**
+ * Reserva um uso ANTES de chamar a IA: grava primeiro e reconta em seguida.
+ * Se dois pedidos chegarem ao mesmo tempo e passarem do limite, o registro é
+ * desfeito e a função devolve "limit". Sem banco configurado, devolve null.
+ */
+export async function reserveUsage(v: Viewer, kind: Kind, analysisId?: string): Promise<number | "limit" | null> {
+  const id = await recordUsage(v, kind, analysisId);
+  if (id === null) return null;
+  const used = await usedToday(v);
+  if (used && used[kind] > limitsFor(v)[kind]) {
+    await supabaseAdmin()?.from("usage_events").delete().eq("id", id);
+    return "limit";
+  }
+  return id;
+}
+
+async function recordUsage(v: Viewer, kind: Kind, analysisId?: string): Promise<number | null> {
   const db = supabaseAdmin();
   if (!db) return null;
   const { data, error } = await db
@@ -113,11 +150,15 @@ export async function recordUsage(v: Viewer, kind: Kind, analysisId?: string): P
   return data.id as number;
 }
 
-/** Devolve um uso (a análise falhou por um problema nosso ou da IA, não da pessoa). */
+/**
+ * Devolve um uso para a pessoa (a análise falhou por um problema nosso ou da IA).
+ * O registro continua no banco, marcado como devolvido: ele ainda conta no
+ * limite geral do site (proteção contra gastos), mas não no limite da pessoa.
+ */
 export async function refundUsage(eventId: number | null) {
   const db = supabaseAdmin();
   if (!db || eventId == null) return;
-  await db.from("usage_events").delete().eq("id", eventId);
+  await db.from("usage_events").update({ refunded: true }).eq("id", eventId);
 }
 
 /** Liga um uso já registrado à análise salva. */

@@ -92,8 +92,8 @@ pode instalar @supabase/supabase-js e @supabase/ssr.
 | P2 | Clientes do Supabase (navegador, servidor, admin) + sessão no proxy.ts | feito |
 | P3 | Tabelas e regras de acesso (supabase/migrations) | feito (usuário roda o SQL no Supabase) |
 | P4 | Login por link no e-mail: página Entrar, /auth/callback, menu da conta | feito |
-| P5 | Limites: visitante 1 simples; grátis 3 simples + 1 detalhada por dia (meia-noite local); cache não conta | em andamento |
-| P6 | Minhas análises (histórico, abrir, apagar) + página da análise salva | a fazer |
+| P5 | Limites: visitante 1 simples; grátis 3 simples + 1 detalhada por dia (meia-noite local); cache não conta | feito (falta teste do usuário) |
+| P6 | Minhas análises (histórico, abrir, apagar) + página da análise salva | em andamento |
 | P7 | Análise em segundo plano (etapas salvas no banco) | a fazer |
 | P8 | Privacidade, README, testes | a fazer |
 
@@ -118,3 +118,4 @@ Decisões: 1b (5 faixas nos dois idiomas: 0–2 leve/Mild, 2–4 moderado/Modera
 Depois: Fase 4 (P2 em diante). Retomada automática: tarefa "Retomar unslant".
 - R4: 55 páginas reconferidas (todas iguais à lista; CBS = RIGHT-CENTER, atualizada em 04/2026). Novos: National Review (right), The Dispatch e Washington Examiner (center_right).
 - Teste da rodada 8 (10/11/2026): APROVADO — 7 artigos; simetria BR 0,9 e EUA 0,3 (lados opostos); custo médio US$ 0,148.
+- Fase 4/P5: limites com revisão de segurança aplicada (fuso fixo na conta; visitante = janela de 24 h; uso devolvido marcado "refunded" e ainda conta no limite geral; registro + recontagem contra pedidos simultâneos). Decisão 3a mantida: resultado reaproveitado (inclusive detalhado) não conta — avisar o usuário desse efeito.

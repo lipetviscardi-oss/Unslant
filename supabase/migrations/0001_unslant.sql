@@ -66,6 +66,9 @@ create table if not exists public.usage_events (
 -- Visitante sem conta: segundo código anônimo, derivado do endereço de internet
 -- (também um resumo irreversível, nunca o endereço em si).
 alter table public.usage_events add column if not exists ip_key text;
+-- Uso devolvido (a análise falhou): não conta no limite da pessoa, mas continua
+-- contando no limite geral do site (proteção contra gastos).
+alter table public.usage_events add column if not exists refunded boolean not null default false;
 create index if not exists usage_user_day on public.usage_events (user_id, local_day);
 create index if not exists usage_anon_day on public.usage_events (anon_key, local_day);
 create index if not exists usage_ip_day on public.usage_events (ip_key, local_day);
