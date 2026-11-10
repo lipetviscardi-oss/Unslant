@@ -90,7 +90,10 @@ export async function identifyViewer(tz: string | undefined): Promise<Viewer> {
     jar.set(ANON_COOKIE, anonId, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 60 * 60 * 24 * 365, path: "/" });
   }
   const h = await headers();
-  const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "";
+  // Na Vercel, x-vercel-forwarded-for e x-real-ip são definidos pela própria plataforma
+  // (quem acessa não consegue inventar). x-forwarded-for fica só como reserva.
+  const ip =
+    h.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip")?.trim() || h.get("x-forwarded-for")?.split(",")[0]?.trim() || "";
   return { userId: null, email: null, anonKey: anonymize(`c:${anonId}`), ipKey: ip ? anonymize(`i:${ip}`) : null, day };
 }
 
