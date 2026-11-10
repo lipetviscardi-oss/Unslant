@@ -58,4 +58,4 @@ Faixas da nota, dados/estatística, versão neutra no estilo de notícia, bug vi
 Retomada automática: tarefa "Retomar unslant" apagada (rodada concluída). Próximo: Fase 3.
 - Teste do paper com gráfico (10/11/2026): APROVADO — gráfico enganoso apontado com nota 8,0; etapa de imagens custou US$ 0,018. A falha anterior (AI_ERROR) foi passageira.
 
-## Fase 3 — modo simples e detalhado (plano enviado; aguardando aprovação)
+## Fase 3 — modo simples e detalhado (aprovada: simples primeiro; nomes simples em docs/nomes-simples-rascunho.md aguardando revisão do usuário)
