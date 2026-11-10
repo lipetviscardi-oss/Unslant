@@ -81,4 +81,6 @@ pode instalar @supabase/supabase-js e @supabase/ssr.
 |---|---|---|
 | I1 | Mais veículos britânicos (e americanos) na lista, com fonte MBFC conferida | feito |
 | I2 | Exemplo pronto em inglês | feito |
-| I3 | Teste automático com pares EUA e Reino Unido (simetria em vários pares) | em andamento |
+| I3 | Teste automático com pares EUA e Reino Unido (simetria em vários pares) | feito (falta o usuário salvar os artigos EUA/Reino Unido) |
+- Próximo: Fase 4. O usuário vai criar a conta no Supabase (Leste dos EUA) e pôr as chaves no .env.local:
+  NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, SUPABASE_SECRET_KEY.

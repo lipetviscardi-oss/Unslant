@@ -1,5 +1,5 @@
 {
-  "sobre": "Casos do teste automático (npm run teste). Os textos ficam só no seu computador, em testes/textos/ (fora do GitHub, por direitos autorais). Aqui ficam só o nome, o link e as faixas esperadas. 'procurar' = palavras usadas pelo npm run teste:salvar para achar a análise certa entre as guardadas.",
+  "sobre": "Casos do teste automático (npm run teste). Os textos ficam só no seu computador, em testes/textos/ (fora do GitHub, por direitos autorais). Aqui ficam só o nome, o link e as faixas esperadas. 'procurar' = palavras usadas pelo npm run teste:salvar para achar a análise certa entre as guardadas. Casos 'opcional': o teste roda sem eles até você salvá-los. Para cada país, analise DUAS matérias sobre o MESMO acontecimento, uma de um veículo de cada lado (lista em 'procurar').",
   "casos": [
     {
       "id": "brasil-de-fato",
@@ -50,15 +50,87 @@
       "graficoEnganoso": true,
       "titulo": "Efeito do Programa Renda Local sobre a renda familiar (sintético)",
       "link": ""
+    },
+    {
+      "id": "eua-direita",
+      "nome": "EUA — veículo de direita",
+      "opcional": true,
+      "procurar": [
+        "foxnews",
+        "newsmax",
+        "breitbart",
+        "dailywire",
+        "nypost"
+      ],
+      "titulo": "",
+      "link": ""
+    },
+    {
+      "id": "eua-esquerda",
+      "nome": "EUA — veículo de esquerda",
+      "opcional": true,
+      "procurar": [
+        "msnbc",
+        "ms.now",
+        "huffpost",
+        "motherjones",
+        "theatlantic"
+      ],
+      "titulo": "",
+      "link": ""
+    },
+    {
+      "id": "uk-direita",
+      "nome": "Reino Unido — veículo de direita",
+      "opcional": true,
+      "procurar": [
+        "telegraph.co.uk",
+        "dailymail",
+        "express.co.uk",
+        "gbnews",
+        "thesun.co.uk"
+      ],
+      "titulo": "",
+      "link": ""
+    },
+    {
+      "id": "uk-esquerda",
+      "nome": "Reino Unido — veículo de esquerda",
+      "opcional": true,
+      "procurar": [
+        "theguardian",
+        "mirror.co.uk",
+        "newstatesman"
+      ],
+      "titulo": "",
+      "link": ""
     }
   ],
-  "simetria": {
-    "entre": [
-      "brasil-de-fato",
-      "terra-brasil"
-    ],
-    "diferencaMaxima": 1.5,
-    "ladosOpostos": true
-  },
+  "simetria": [
+    {
+      "entre": [
+        "brasil-de-fato",
+        "terra-brasil"
+      ],
+      "diferencaMaxima": 1.5,
+      "ladosOpostos": true
+    },
+    {
+      "entre": [
+        "eua-direita",
+        "eua-esquerda"
+      ],
+      "diferencaMaxima": 1.5,
+      "ladosOpostos": true
+    },
+    {
+      "entre": [
+        "uk-direita",
+        "uk-esquerda"
+      ],
+      "diferencaMaxima": 1.5,
+      "ladosOpostos": true
+    }
+  ],
   "custoAlvoUsd": 0.1
 }

@@ -68,6 +68,10 @@ for (const c of manifest.casos) {
   const best =
     candidates.find((a) => match(a.r, c.procurar) === 2) ?? candidates.find((a) => match(a.r, c.procurar) === 1);
   if (!best) {
+    if (c.opcional) {
+      console.log(`➖ ${c.nome}: ainda não analisado (opcional). Veículos aceitos: ${c.procurar.join(", ")}.`);
+      continue;
+    }
     console.log(`❌ ${c.nome}: não achei uma análise deste artigo. Analise-o no site e rode o comando de novo.`);
     missing++;
     continue;

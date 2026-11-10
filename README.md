@@ -231,6 +231,8 @@ npm run teste -- --baixo
 
 4. Experimentos com o modelo mais barato (Claude Haiku) nos especialistas: `npm run teste -- --haiku` (todos) ou `npm run teste -- --misto` (todos menos o que avalia a inclinação política).
 
+**Pares internacionais (opcionais):** para conferir a mesma régua nos EUA e no Reino Unido, analise no site DUAS matérias sobre o MESMO acontecimento em cada país, uma de cada lado (EUA: Fox News, Newsmax, Breitbart, Daily Wire ou New York Post × MSNBC/MS NOW, HuffPost, Mother Jones ou The Atlantic; Reino Unido: Telegraph, Daily Mail, Express, GB News ou The Sun × Guardian, Mirror ou New Statesman). Depois rode `npm run teste:salvar`. Enquanto não forem salvos, o teste roda sem eles.
+
 O teste mostra ✅ ou ❌ para cada regra, o custo de cada etapa, o gênero identificado e a comparação com a rodada anterior.
 
 **Cache:** analisar o mesmo texto de novo é instantâneo e grátis, porque o resultado fica guardado na pasta `.cache/`. Se você editar a taxonomia ou os prompts, o cache antigo é ignorado sozinho.

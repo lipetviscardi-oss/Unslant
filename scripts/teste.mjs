@@ -126,6 +126,12 @@ try {
 }
 
 // 1. Os textos estão guardados?
+// Casos opcionais (ex.: EUA e Reino Unido) ainda não salvos ficam de fora, com aviso.
+const skipped = manifest.casos.filter((c) => c.opcional && !existsSync(caseFile(c)));
+if (skipped.length) {
+  console.log(`Fora desta rodada (ainda não salvos com npm run teste:salvar): ${skipped.map((c) => c.nome).join(", ")}.\n`);
+  manifest.casos = manifest.casos.filter((c) => !skipped.includes(c));
+}
 const missing = manifest.casos.filter((c) => !existsSync(caseFile(c)));
 if (missing.length) {
   console.log(`Faltam os textos de: ${missing.map((c) => c.nome).join(", ")}.`);
@@ -200,9 +206,11 @@ for (const c of manifest.casos) {
   }
 }
 
-const sim = manifest.simetria;
-if (sim) {
+// Simetria: um par (formato antigo) ou vários pares (Brasil, EUA, Reino Unido...).
+const pairs = [manifest.simetria ?? []].flat();
+for (const sim of pairs) {
   const [a, b] = sim.entre.map((id) => ({ c: manifest.casos.find((x) => x.id === id), r: runs[id] }));
+  if (!a.c || !b.c) continue; // par com caso opcional ainda não salvo
   if (a.r && b.r) {
     const diff = Math.abs(a.r.overall.score - b.r.overall.score);
     check(
