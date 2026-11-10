@@ -71,6 +71,12 @@ export const pt = {
       count: (n: number) => `${num(n)} ${plural(n, "palavra", "palavras")} (de 3 a 300)`,
     },
     submit: "Analisar",
+    view: {
+      label: "Tipo de análise",
+      simple: { title: "Simples", desc: "O essencial: nota, inclinação e os 3 principais problemas, em linguagem do dia a dia." },
+      detailed: { title: "Detalhada", desc: "Tudo: todas as categorias, o texto com os trechos destacados, imagens e fontes." },
+      help: "As duas usam a mesma análise completa; muda o que você vê.",
+    },
     genre: {
       label: "Tipo de texto",
       auto: "Detectar automaticamente",

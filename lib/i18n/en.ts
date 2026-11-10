@@ -71,6 +71,12 @@ export const en: Dict = {
       count: (n: number) => `${num(n)} ${plural(n, "word", "words")} (3 to 300)`,
     },
     submit: "Analyze",
+    view: {
+      label: "Type of analysis",
+      simple: { title: "Simple", desc: "The essentials: score, leaning and the 3 main problems, in everyday language." },
+      detailed: { title: "Detailed", desc: "Everything: all categories, the text with highlighted passages, images and sources." },
+      help: "Both use the same full analysis; only what you see changes.",
+    },
     genre: {
       label: "Type of text",
       auto: "Detect automatically",

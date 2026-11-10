@@ -71,6 +71,7 @@ export function Home() {
         result={result}
         onReset={reset}
         onReanalyze={result.stats.fromCache ? () => start({ ...request, fresh: true }) : undefined}
+        initialMode={request.view}
       />
     );
   }

@@ -61,4 +61,6 @@ Retomada automática: tarefa "Retomar unslant" apagada (rodada concluída). Pró
 ## Fase 3 — modo simples e detalhado: FEITA
 - Nomes simples aprovados pelo usuário (lib/taxonomy.ts, campo simpleName; rascunho em docs/nomes-simples-rascunho.md).
 - Modo simples primeiro; escolha lembrada no navegador; "Ver no texto" abre o detalhado no trecho.
-- Próximo: Fase 4 (login Supabase, histórico, limite diário, análise em segundo plano). Pedir aprovação e avisar custos antes.
+- Escolha "Tipo de análise" (Simples/Detalhada) no formulário — Opção A aprovada: as duas fazem a mesma análise completa (mesma nota); muda o que é mostrado.
+- Para a Fase 4 (decidido): usuário grátis = 3 análises simples + 1 detalhada por dia; numa simples, o botão "Ver análise completa" vira "usar minha detalhada do dia" (não chama a IA de novo). Limites do plano pago ficam para a Fase 5.
+- Próximo: Fase 4 (login Supabase, histórico, limites por usuário, análise em segundo plano). Pedir aprovação e avisar custos antes.

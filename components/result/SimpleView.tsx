@@ -11,7 +11,7 @@ import { formatScore, severity, SEVERITY_SOFT, SEVERITY_TEXT } from "@/lib/clien
 import { getCategory } from "@/lib/taxonomy";
 import { useDict, useLang } from "@/lib/i18n";
 
-export type ResultMode = "simple" | "detailed";
+import type { ResultMode } from "@/lib/client/mode";
 
 /** Seletor "Simples | Detalhado". */
 export function ModeToggle({ mode, onChange }: { mode: ResultMode; onChange: (m: ResultMode) => void }) {

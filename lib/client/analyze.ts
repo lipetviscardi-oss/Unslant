@@ -36,6 +36,8 @@ export type AnalyzeRequest = (
 ) & {
   /** true = ignora o resultado guardado e analisa de novo. */
   fresh?: boolean;
+  /** Como o resultado abre: "simple" ou "detailed" (só na tela; o servidor ignora). */
+  view?: "simple" | "detailed";
 };
 
 export class AnalyzeError extends Error {

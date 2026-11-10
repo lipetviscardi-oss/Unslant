@@ -5,9 +5,10 @@
  * exemplos para testar. O relatório sai no idioma do site.
  */
 
-import { useId, useRef, useState } from "react";
+import { useId, useRef, useState, useSyncExternalStore } from "react";
 import type { AnalyzeRequest, DeclaredType } from "@/lib/client/analyze";
 import type { PdfPageImage } from "@/lib/extract/pdf-client";
+import { readMode, saveMode, subscribeMode, type ResultMode } from "@/lib/client/mode";
 import { CLAIM_EXAMPLES, EXAMPLES } from "@/lib/examples";
 import { AppError, errorMessage } from "@/lib/errors";
 import { countWords } from "@/lib/text";
@@ -42,6 +43,14 @@ export function AnalyzeForm({ onSubmit }: { onSubmit: (req: AnalyzeRequest) => v
   const [pdf, setPdf] = useState<PdfState>({ status: "idle" });
   const [dragging, setDragging] = useState(false);
   const [genre, setGenre] = useState<DeclaredType | "">("");
+  // Tipo de análise: a última escolha do leitor (no servidor, "simples").
+  const storedMode = useSyncExternalStore(subscribeMode, readMode, () => "simple" as ResultMode);
+  const [chosenMode, setChosenMode] = useState<ResultMode | null>(null);
+  const view = chosenMode ?? storedMode;
+  const send = (req: AnalyzeRequest) => {
+    saveMode(view);
+    onSubmit({ ...req, view });
+  };
   const fileInput = useRef<HTMLInputElement>(null);
   const baseId = useId();
 
@@ -74,11 +83,11 @@ export function AnalyzeForm({ onSubmit }: { onSubmit: (req: AnalyzeRequest) => v
     e.preventDefault();
     if (!canSubmit) return;
     const contentType = genre || undefined;
-    if (tab === "url") onSubmit({ mode: "url", url: url.trim(), lang, contentType });
-    else if (tab === "text") onSubmit({ mode: "text", text, lang, contentType });
-    else if (tab === "claim") onSubmit({ mode: "claim", text: claim, meta: { context: claimContext.trim() || undefined }, lang });
+    if (tab === "url") send({ mode: "url", url: url.trim(), lang, contentType });
+    else if (tab === "text") send({ mode: "text", text, lang, contentType });
+    else if (tab === "claim") send({ mode: "claim", text: claim, meta: { context: claimContext.trim() || undefined }, lang });
     else if (pdf.text)
-      onSubmit({
+      send({
         mode: "pdf",
         text: pdf.text,
         meta: { title: pdf.title, author: pdf.author },
@@ -296,6 +305,32 @@ export function AnalyzeForm({ onSubmit }: { onSubmit: (req: AnalyzeRequest) => v
           </div>
         )}
 
+        <fieldset className="mt-5 grid gap-2">
+          <legend className="mb-1.5 text-[15px] font-medium">{t.home.view.label}</legend>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {(["simple", "detailed"] as const).map((m) => (
+              <label
+                key={m}
+                className={`flex cursor-pointer gap-3 rounded-xl border px-4 py-3 ${view === m ? "border-teal bg-teal-soft/50" : "border-line hover:border-teal"}`}
+              >
+                <input
+                  type="radio"
+                  name={`${baseId}-view`}
+                  value={m}
+                  checked={view === m}
+                  onChange={() => setChosenMode(m)}
+                  className="mt-1 accent-[var(--color-teal)]"
+                />
+                <span>
+                  <span className="block font-medium">{t.home.view[m].title}</span>
+                  <span className="block text-sm text-muted">{t.home.view[m].desc}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+          <p className="text-sm text-muted">{t.home.view.help}</p>
+        </fieldset>
+
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
           <p className="max-w-[44ch] text-sm text-muted">{t.home.reportLanguage}</p>
           <button
@@ -320,7 +355,7 @@ export function AnalyzeForm({ onSubmit }: { onSubmit: (req: AnalyzeRequest) => v
             <button
               key={d.id}
               type="button"
-              onClick={() => onSubmit({ mode: "demo", demoId: d.id, lang })}
+              onClick={() => send({ mode: "demo", demoId: d.id, lang })}
               className="rounded-2xl border border-teal bg-teal-soft/60 px-5 py-4 text-left hover:bg-teal-soft"
             >
               <span className="block font-display font-medium text-teal-deep">{d.title}</span>

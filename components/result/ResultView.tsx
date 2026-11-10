@@ -16,7 +16,8 @@ import { GroupOverview } from "./GroupOverview";
 import { HighlightedText } from "./HighlightedText";
 import { ClaimCheck } from "./ClaimCheck";
 import { Balance } from "./Balance";
-import { ModeToggle, PoliticalLine, TopProblems, type ResultMode } from "./SimpleView";
+import { ModeToggle, PoliticalLine, TopProblems } from "./SimpleView";
+import { readMode, saveMode, type ResultMode } from "@/lib/client/mode";
 import { CategoryDetails, FactOpinion, Omissions, Rewrite } from "./Sections";
 
 function Chip({ children, tone = "plain" }: { children: React.ReactNode; tone?: "plain" | "teal" }) {
@@ -90,14 +91,15 @@ function Stats({ result }: { result: AnalysisResult }) {
   );
 }
 
-const MODE_KEY = "unslant-result-mode";
-
 export function ResultView({
   result,
   onReset,
   onReanalyze,
+  initialMode,
 }: {
   result: AnalysisResult;
+  /** Tipo de análise escolhido no formulário. */
+  initialMode?: ResultMode;
   onReset: () => void;
   /** Só aparece quando o resultado veio do cache: refaz a análise do zero. */
   onReanalyze?: () => void;
@@ -108,20 +110,11 @@ export function ResultView({
   const [selected, setSelected] = useState<string[]>([]);
   const [showAll, setShowAll] = useState(false);
   // Modo simples primeiro; o site lembra a última escolha do leitor (só neste navegador).
-  const [mode, setModeState] = useState<ResultMode>(() => {
-    try {
-      return window.localStorage.getItem(MODE_KEY) === "detailed" ? "detailed" : "simple";
-    } catch {
-      return "simple";
-    }
-  });
+  // Abre no tipo de análise escolhido no formulário (ou na última escolha do leitor).
+  const [mode, setModeState] = useState<ResultMode>(() => initialMode ?? readMode());
   const setMode = useCallback((m: ResultMode) => {
     setModeState(m);
-    try {
-      window.localStorage.setItem(MODE_KEY, m);
-    } catch {
-      /* navegador sem armazenamento: só não lembra a escolha */
-    }
+    saveMode(m);
   }, []);
 
   /** Rola até um trecho no texto e o seleciona. Devolve false se ele não estiver visível. */
