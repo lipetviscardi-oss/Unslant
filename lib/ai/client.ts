@@ -17,9 +17,22 @@ import { config, type Effort } from "@/lib/config";
 import { AppError } from "@/lib/errors";
 import { SYSTEM_PROMPT } from "@/lib/prompts/system";
 import { callStructuredGemini } from "./gemini";
+import { acquire, estimateTokens, learnLimit, sleep } from "./ratelimit";
 import type { StageCost } from "@/lib/analysis/types";
 
 let client: Anthropic | null = null;
+
+/** Lê o limite por minuto informado pela Anthropic em cada resposta. */
+const fetchWithLimits: typeof fetch = async (input, init) => {
+  const res = await fetch(input, init);
+  try {
+    const model = typeof init?.body === "string" ? (JSON.parse(init.body) as { model?: string }).model : undefined;
+    if (model) learnLimit(model, res.headers);
+  } catch {
+    /* corpo não é JSON: ignora */
+  }
+  return res;
+};
 
 
 /** Maior limite de resposta aceito pela biblioteca sem streaming (128.000 ÷ 6, arredondado para baixo). */
@@ -28,7 +41,7 @@ export function getClient() {
   if (!process.env.ANTHROPIC_API_KEY) throw new AppError("MISSING_API_KEY");
   // maxRetries: a própria biblioteca repete automaticamente erros temporários
   // (sobrecarga, limite de velocidade, falha de conexão).
-  client ??= new Anthropic({ maxRetries: 3 });
+  client ??= new Anthropic({ maxRetries: 3, fetch: fetchWithLimits });
   return client;
 }
 
@@ -128,6 +141,8 @@ export interface StructuredCallOptions<T extends z.ZodType> {
   maxTokens: number;
   usage: UsageTracker;
   signal?: AbortSignal;
+  /** Avisado quando a chamada precisa esperar o limite por minuto da IA. */
+  onWait?: () => void;
 }
 
 /** Chamada estruturada: vai para a IA escolhida em config.ai.provider. */
@@ -162,9 +177,14 @@ async function callStructuredAnthropic<T extends z.ZodType>(opts: StructuredCall
   const maxAttempts = 2; // a tentativa original + 1 nova tentativa
   let lastProblem = "";
 
+  const estimated = estimateTokens(SYSTEM_PROMPT, opts.documentBlock, opts.task);
+  let rateRetries = 0;
+
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     let response;
     try {
+      // Fila: respeita o limite de tokens por minuto da conta.
+      await acquire(model, estimated, { signal: opts.signal, onWait: opts.onWait });
       response = await anthropic.beta.messages.parse(
         {
           model,
@@ -192,6 +212,17 @@ async function callStructuredAnthropic<T extends z.ZodType>(opts: StructuredCall
       ) {
         lastProblem = `formato inválido: ${err.message.slice(0, 300)}`;
         console.warn(`[unslant] ${opts.label}: tentativa ${attempt} — ${lastProblem}`);
+        continue;
+      }
+      // A Anthropic pediu para esperar (limite por minuto): espera o tempo indicado e tenta de novo.
+      if (err instanceof Anthropic.RateLimitError && rateRetries < config.ai.rateLimitRetries) {
+        rateRetries++;
+        const retryAfter = Number(err.headers?.get("retry-after"));
+        const waitS = Number.isFinite(retryAfter) && retryAfter > 0 ? Math.min(retryAfter, 90) : 20 * rateRetries;
+        console.warn(`[unslant] ${opts.label}: limite por minuto da IA; esperando ${waitS} s (vez ${rateRetries})`);
+        opts.onWait?.();
+        await sleep(waitS * 1000, opts.signal);
+        attempt--; // esperar o limite não conta como tentativa
         continue;
       }
       throw mapApiError(err);

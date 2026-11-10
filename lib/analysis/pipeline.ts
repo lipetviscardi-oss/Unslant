@@ -126,10 +126,18 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
   const perPart = bundles.length + (overviewHost === -1 ? 1 : 0);
   const total = parts.length * perPart + (isClaim ? 1 : 0);
   let done = 0;
-  onProgress({ type: "stage", stage: "analyzing", done, total });
+  // Texto longo: as chamadas passam do limite por minuto da IA e vão em fila (mais lento, mas não falha).
+  let note: "long" | "waiting" | undefined =
+    countWords(text) > config.text.longTextWords ? "long" : undefined;
+  onProgress({ type: "stage", stage: "analyzing", done, total, note });
   const tick = () => {
     done++;
-    onProgress({ type: "stage", stage: "analyzing", done, total });
+    onProgress({ type: "stage", stage: "analyzing", done, total, note });
+  };
+  const onWait = () => {
+    if (note === "waiting") return;
+    note = note ?? "waiting";
+    onProgress({ type: "stage", stage: "analyzing", done, total, note });
   };
 
   const tasks: (() => Promise<{ part: number; groupId: string | null; output: unknown }>)[] = [];
@@ -150,6 +158,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
           maxTokens: config.ai.maxTokens.specialist + (withOverview ? config.ai.maxTokens.overview : 0), // limitado a 21.000 em client.ts
           usage,
           signal,
+          onWait,
         });
         tick();
         return { part: partIndex, groupId: "__bundle__", output };

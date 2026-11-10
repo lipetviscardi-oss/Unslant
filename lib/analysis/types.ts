@@ -188,6 +188,13 @@ export interface AnalysisResult {
 export type ProgressStage = "extracting" | "context" | "analyzing" | "synthesizing" | "balancing";
 
 export type StreamEvent =
-  | { type: "stage"; stage: ProgressStage; done?: number; total?: number }
+  | {
+      type: "stage";
+      stage: ProgressStage;
+      done?: number;
+      total?: number;
+      /** "long" = texto longo, analisado em etapas; "waiting" = esperando o limite por minuto da IA. */
+      note?: "long" | "waiting";
+    }
   | { type: "result"; result: AnalysisResult }
   | { type: "error"; code: string; message: string };

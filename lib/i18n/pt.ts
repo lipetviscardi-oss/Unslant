@@ -103,6 +103,10 @@ export const pt = {
       },
     },
     doneCount: (done: number, total: number) => `${done} de ${total} aspectos concluídos`,
+    note: {
+      long: "Texto longo: a análise é feita em etapas para respeitar o limite de uso da IA. Pode levar alguns minutos.",
+      waiting: "Aguardando o limite de uso por minuto da IA liberar. A análise continua sozinha em instantes.",
+    },
     state: { done: "concluído", active: "em andamento", pending: "aguardando" },
     cancel: "Cancelar análise",
   },

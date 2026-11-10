@@ -49,8 +49,8 @@ Faixas da nota, dados/estatística, versão neutra no estilo de notícia, bug vi
 ## Rodada 6 — textos longos, imagens, gráficos e tabelas (aprovada; depois começa a Fase 3)
 | Item | O quê | Status |
 |---|---|---|
-| 1 | Limite por minuto: fila de chamadas por estimativa de tokens + espera quando a Anthropic pedir | em andamento |
-| 3 | Tabelas da web em linhas legíveis; PDF sem cabeçalho/rodapé repetido; PDF em duas colunas | a fazer |
+| 1 | Limite por minuto: fila de chamadas por estimativa de tokens + espera quando a Anthropic pedir | feito |
+| 3 | Tabelas da web em linhas legíveis; PDF sem cabeçalho/rodapé repetido; PDF em duas colunas | em andamento |
 | 2 | Etapa "Imagens e gráficos" (PDF: páginas com figura/tabela, até 20; link: até 6 imagens), 2 categorias novas, seção no resultado | a fazer |
 | 5 | Metodologia/README: limitações (gráficos interativos, PDF escaneado) | a fazer |
 | T | Teste automático com um paper com gráficos (aprovado) | a fazer |

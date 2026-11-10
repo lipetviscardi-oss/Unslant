@@ -84,6 +84,17 @@ export const config = {
     maxParallelRequests: { anthropic: 8, gemini: 1 },
 
     /**
+     * Limite de "tokens de entrada por minuto" da sua conta na Anthropic.
+     * O site lê o limite real das respostas da Anthropic; estes valores só
+     * valem até a primeira resposta. Contas novas (nível 1) têm limites baixos;
+     * o limite sobe sozinho conforme a conta é usada e recarregada.
+     * Textos longos são mandados em fila para não passar dele.
+     */
+    rateLimit: { main: 30_000, light: 50_000 },
+    /** Quantas vezes esperar e tentar de novo quando a Anthropic pedir para esperar. */
+    rateLimitRetries: 4,
+
+    /**
      * Só Anthropic: se a IA recusar um texto por motivo de segurança, tenta
      * automaticamente com outro modelo (recurso "fallback"). Recomendado: true.
      */
@@ -111,6 +122,8 @@ export const config = {
      * Textos maiores que isso são divididos em partes, analisados parte a
      * parte e depois consolidados. Quase todo artigo e paper cabe em uma parte.
      */
+    /** A partir de quantas palavras a tela avisa "texto longo: análise em etapas". */
+    longTextWords: 6_000,
     maxWordsPerPart: 30_000,
     /** Limites para a aba "Afirmação" (frases curtas). */
     claimMinWords: 3,

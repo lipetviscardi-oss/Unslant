@@ -35,7 +35,7 @@ export function Home() {
         req,
         (event) => {
           if (event.type === "stage") {
-            setView({ kind: "running", progress: { stage: event.stage, done: event.done, total: event.total } });
+            setView({ kind: "running", progress: { stage: event.stage, done: event.done, total: event.total, note: event.note } });
           }
         },
         controller.signal,

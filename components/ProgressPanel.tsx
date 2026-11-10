@@ -9,6 +9,7 @@ export interface ProgressState {
   stage: ProgressStage;
   done?: number;
   total?: number;
+  note?: "long" | "waiting";
 }
 
 export function ProgressPanel({ progress, onCancel }: { progress: ProgressState; onCancel: () => void }) {
@@ -58,6 +59,9 @@ export function ProgressPanel({ progress, onCancel }: { progress: ProgressState;
                     </div>
                     <p className="mt-1 text-sm text-muted">{t.progress.doneCount(progress.done ?? 0, progress.total)}</p>
                   </div>
+                ) : null}
+                {state === "active" && id === "analyzing" && progress.note ? (
+                  <p className="mt-2 rounded-lg bg-mist px-3 py-2 text-sm text-ink">{t.progress.note[progress.note]}</p>
                 ) : null}
               </div>
             </li>

@@ -103,6 +103,10 @@ export const en: Dict = {
       },
     },
     doneCount: (done: number, total: number) => `${done} of ${total} aspects done`,
+    note: {
+      long: "Long text: the analysis runs in stages to respect the AI's usage limit. It may take a few minutes.",
+      waiting: "Waiting for the AI's per-minute usage limit to free up. The analysis will continue on its own shortly.",
+    },
     state: { done: "done", active: "in progress", pending: "waiting" },
     cancel: "Cancel analysis",
   },
