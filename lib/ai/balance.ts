@@ -356,7 +356,7 @@ export async function searchBalance(
   const lineSource: ("table" | "ai")[] = [];
   for (const a of finalArticles) {
     const fromTable = lookupOutlet(hostOf(a.url) ?? "");
-    if (fromTable) a.editorialLine = fromTable;
+    if (fromTable) a.editorialLine = fromTable.line;
     lineSource.push(fromTable ? "table" : "ai");
   }
   return {

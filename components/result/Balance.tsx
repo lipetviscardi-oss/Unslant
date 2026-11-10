@@ -6,6 +6,7 @@
  */
 
 import type { AnalysisResult } from "@/lib/analysis/types";
+import { lookupOutlet } from "@/lib/veiculos";
 import { useDict } from "@/lib/i18n";
 
 export function Balance({ result }: { result: AnalysisResult }) {
@@ -45,6 +46,7 @@ export function Balance({ result }: { result: AnalysisResult }) {
                         {b.lineSource?.[i] !== "table" && a.editorialLine !== "unknown" ? ` (${tb.estimated})` : ""}
                       </span>
                     )}
+                    {b.lineSource?.[i] === "table" && <LineSource url={a.url} label={tb.lineSource} />}
                   </p>
                   <a
                     href={a.url}
@@ -86,5 +88,27 @@ export function Balance({ result }: { result: AnalysisResult }) {
         </>
       )}
     </section>
+  );
+}
+
+/** Link "fonte" da classificação, quando o veículo está na lista lib/veiculos.ts. */
+function LineSource({ url, label }: { url: string; label: string }) {
+  let host = "";
+  try {
+    host = new URL(url).hostname;
+  } catch {
+    return null;
+  }
+  const info = lookupOutlet(host);
+  if (!info) return null;
+  const title = [info.source.label, info.source.note].filter(Boolean).join(": ");
+  return info.source.url ? (
+    <a href={info.source.url} target="_blank" rel="noopener noreferrer nofollow" title={title} className="text-xs underline underline-offset-2">
+      {label}: {info.source.label}
+    </a>
+  ) : (
+    <span className="text-xs" title={title}>
+      {label}: {title}
+    </span>
   );
 }

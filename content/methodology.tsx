@@ -222,10 +222,12 @@ export function MethodologyPt() {
           priorizar fontes confiáveis. O veículo do texto original fica de fora.
         </li>
         <li>
-          <strong>Linha editorial.</strong> Cada sugestão mostra a linha editorial do veículo (esquerda, centro, direita,
-          institucional, jurídico, checagem, acadêmico, agência de notícias…). Órgãos oficiais, tribunais, agências de
-          checagem e agências de notícias vêm de uma lista fixa do site. Os demais são uma estimativa da IA, baseada na
-          percepção pública mais aceita, e aparecem marcados como &ldquo;estimativa&rdquo;.
+          <strong>Linha editorial.</strong> Cada sugestão mostra a linha editorial do veículo (esquerda, centro-esquerda,
+          centro, centro-direita, direita, oficial, jurídico, checagem, acadêmico, agência de notícias). Cerca de 60
+          veículos e órgãos vêm de uma lista fixa do site, e cada classificação tem uma fonte pública com link: a avaliação
+          do Media Bias/Fact Check ou, para veículos brasileiros que ele não avalia, a descrição da linha editorial na
+          Wikipédia. Órgãos públicos (governo, Congresso, STF, TSE) aparecem como &ldquo;oficial&rdquo;. Veículos sem
+          fonte clara ficam fora da lista: para eles, a IA faz uma estimativa, marcada como &ldquo;estimativa&rdquo;.
         </li>
         <li>
           <strong>Não é endosso.</strong> Recomendar um texto não significa que ele seja neutro ou correto: ele ajuda a ver o
@@ -473,10 +475,12 @@ export function MethodologyEn() {
           to prioritize reliable sources. The original text&rsquo;s outlet is excluded.
         </li>
         <li>
-          <strong>Editorial line.</strong> Each suggestion shows the outlet&rsquo;s editorial line (left, center, right,
-          institutional, legal, fact-checking, academic, news agency…). Official bodies, courts, fact-checkers and news
-          agencies come from a fixed list kept by the site. The others are an AI estimate, based on the most widely accepted
-          public perception, and are marked as &ldquo;estimate&rdquo;.
+          <strong>Editorial line.</strong> Each suggestion shows the outlet&rsquo;s editorial line (left, center-left,
+          center, center-right, right, official, legal, fact-checking, academic, news agency). About 60 outlets and
+          bodies come from a fixed list kept by the site, and each classification has a public source with a link: the
+          Media Bias/Fact Check rating or, for Brazilian outlets it does not rate, the description of the editorial line on
+          Portuguese Wikipedia. Public bodies (government, Congress, courts) appear as &ldquo;official&rdquo;. Outlets
+          without a clear source are left off the list: for them the AI makes an estimate, marked as &ldquo;estimate&rdquo;.
         </li>
         <li>
           <strong>Not an endorsement.</strong> Recommending a text does not mean it is neutral or correct: it helps you see

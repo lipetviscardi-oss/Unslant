@@ -41,4 +41,7 @@ Faixas da nota, dados/estatística, versão neutra no estilo de notícia, bug vi
 | 1 | Cache: versão da análise, custo original, botão "Analisar de novo" | feito |
 | 2 | Versão neutra: só trechos elegíveis (fora das aspas, sem atribuição, ≥ moderado) | feito |
 | 4 | Escala única leve/moderado/forte (0–3,4 / 3,5–6,4 / 6,5–10) + resumo natural | feito |
-| 3 | 50 veículos com fonte conferida; órgãos públicos = "Oficial" | em andamento |
+| 3 | 50 veículos com fonte conferida; órgãos públicos = "Oficial" | feito |
+- Item 3: fontes conferidas em 10/11/2026 (MBFC e Wikipédia pt). Sem fonte clara (ficam para a IA estimar): UOL, CNN Brasil, Veja, Gazeta do Povo, Jovem Pan, Metrópoles, Poder360, Revista Fórum, Intercept Brasil, Terra Brasil Notícias, Valor, Exame, R7, IstoÉ, Crusoé, Correio Braziliense, Nexo, Piauí.
+- Rede: criado o ambiente "Unslant" (sites liberados: mediabiasfactcheck.com, www.allsides.com, pt.wikipedia.org). AllSides recusa acesso automático (403).
+- Próximo: Fase 3 (modo simples e detalhado).
