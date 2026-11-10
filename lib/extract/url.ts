@@ -14,12 +14,27 @@ import { lookup as dnsLookup } from "node:dns/promises";
 import type { LookupAddress, LookupOptions } from "node:dns";
 import net from "node:net";
 import { Agent, fetch as undiciFetch, type Response as UndiciResponse } from "undici";
-import { JSDOM, VirtualConsole } from "jsdom";
+import type * as JsdomLib from "jsdom";
 import { Readability } from "@mozilla/readability";
 import { config } from "@/lib/config";
 import { AppError } from "@/lib/errors";
 import { countWords, normalizeText } from "@/lib/text";
 import type { SourceInfo } from "@/lib/analysis/types";
+
+/**
+ * O jsdom é carregado só quando um link é lido, com import(): na Vercel,
+ * carregá-lo do jeito normal falhava (ERR_REQUIRE_ESM), porque algumas
+ * partes dele são de um formato mais novo (ESM).
+ */
+let jsdomLib: typeof JsdomLib | null = null;
+async function loadJsdom(): Promise<typeof JsdomLib> {
+  jsdomLib ??= await import("jsdom");
+  return jsdomLib;
+}
+function jsdom(): typeof JsdomLib {
+  if (!jsdomLib) throw new Error("jsdom ainda não foi carregado (chame loadJsdom antes)");
+  return jsdomLib;
+}
 
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36 unslant/0.1";
@@ -257,7 +272,7 @@ export interface ArticleImage {
  * não lê (ex.: SVG). Gráficos interativos (iframes) não são imagens e ficam de fora.
  */
 export function collectArticleImages(articleHtml: string, baseUrl: string, max: number): ArticleImage[] {
-  const dom = new JSDOM(`<body>${articleHtml}</body>`);
+  const dom = new (jsdom().JSDOM)(`<body>${articleHtml}</body>`);
   const out: ArticleImage[] = [];
   const seen = new Set<string>();
   for (const img of Array.from(dom.window.document.querySelectorAll("img"))) {
@@ -334,7 +349,7 @@ function tableToParagraphs(table: Element): string[] {
 
 /** Converte o HTML do artigo em texto, mantendo a separação de parágrafos e as linhas de tabela. */
 export function htmlToParagraphs(html: string): string {
-  const dom = new JSDOM(`<body>${html}</body>`);
+  const dom = new (jsdom().JSDOM)(`<body>${html}</body>`);
   const body = dom.window.document.body;
   const paragraphs: string[] = [];
   const walk = (el: Element) => {
@@ -426,6 +441,7 @@ export async function extractFromUrl(rawUrl: string): Promise<{ text: string; so
   const { html, finalUrl } = await fetchPage(rawUrl);
 
   // Scripts e recursos externos ficam desligados (padrão do jsdom): só lemos o HTML.
+  const { JSDOM, VirtualConsole } = await loadJsdom();
   const virtualConsole = new VirtualConsole(); // silencia avisos de CSS inválido
   const dom = new JSDOM(html, { url: finalUrl, virtualConsole });
   const doc = dom.window.document;
