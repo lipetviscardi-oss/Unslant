@@ -129,13 +129,25 @@ Depois: Fase 4 (P2 em diante). Retomada automática: tarefa "Retomar unslant".
 **Em espera** (decisão do usuário em 10/11/2026): primeiro publicar o site e testar com conhecidos no Brasil e no Reino Unido; cobrança depois.
 
 ## Fase 6 (adiantada): publicar para testes
-Decisões do usuário (10/11/2026): botão de sugestões sim; 5 análises por dia (simples ou detalhadas) na fase de testes; e-mail de contato ainda será criado; domínio em análise (unslant.me na GoDaddy).
+Decisões do usuário (10/11/2026): botão de sugestões sim; 5 análises por dia (simples ou detalhadas) na fase de testes; e-mail de contato ainda será criado; domínio unslant.world (GoDaddy).
 
 | # | Item | Status |
 |---|---|---|
 | D1 | Limites da fase de testes: 5 por dia somando simples e detalhadas (config.limits.perDay.free.total); frases geradas da config (lib/plans.ts) | feito |
 | D2 | Botão "Enviar sugestão" (tabela feedback no SQL, /api/feedback com limite de 5 por hora, apagadas em 12 meses; Privacidade e README atualizados) | feito |
-| D3 | Domínio (decisão do usuário) | esperando |
+| D3 | Domínio: unslant.world, comprado na GoDaddy em 10/11/2026 | feito |
 | D4 | Publicar na Vercel (contas do usuário: Vercel; chaves nas configurações da Vercel) | a fazer |
 | D5 | E-mails de login pelo Resend (precisa do domínio) | a fazer |
 | D6 | URLs de produção no Supabase; e-mail de contato em config.privacy | a fazer |
+
+### Ordem combinada com o usuário (publicação)
+1. GoDaddy: conferir privacidade, renovação automática e preço da renovação.
+2. Anthropic: limite mensal de gastos (US$ 30–50).
+3. Vercel: criar conta, importar o repositório, colocar as 4 chaves, Deploy → usuário manda o endereço .vercel.app.
+4. Claude confere o site no ar.
+5. Ligar unslant.world à Vercel (Vercel → Domains; registros DNS na GoDaddy).
+6. Supabase: Site URL e Redirect URLs com o domínio.
+7. Resend: conta, domínio verificado (DNS na GoDaddy), chave no SMTP do Supabase.
+8. E-mail de contato → config.privacy.contactEmail.
+9. Teste final (login com Gmail/Outlook/iCloud, celular, sugestões).
+10. Convite para os testadores (Claude escreve em pt e en).
