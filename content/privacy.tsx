@@ -44,8 +44,9 @@ export function PrivacyPt() {
           com o contexto opcional que você informar.
         </li>
         <li>
-          <strong>PDFs:</strong> o arquivo é lido no seu próprio navegador e não é enviado ao nosso servidor. Apenas o
-          texto extraído segue para análise.
+          <strong>PDFs:</strong> o arquivo é lido no seu próprio navegador e não é enviado inteiro ao nosso servidor.
+          Seguem para análise o texto extraído e imagens das páginas que têm figuras, gráficos ou tabelas (no máximo{" "}
+          {config.visual.maxPdfPages}), para que a IA possa examiná-los.
         </li>
       </ul>
       <p>
@@ -125,8 +126,9 @@ export function PrivacyEn() {
           optional context you provide.
         </li>
         <li>
-          <strong>PDFs:</strong> the file is read in your own browser and is not sent to our server. Only the extracted text
-          is sent for analysis.
+          <strong>PDFs:</strong> the file is read in your own browser and is not sent to our server in full. What is sent
+          for analysis is the extracted text and images of the pages that contain figures, charts or tables (at most{" "}
+          {config.visual.maxPdfPages}), so the AI can examine them.
         </li>
       </ul>
       <p>

@@ -261,6 +261,8 @@ Cada arquivo tem comentários explicando o que pode ser mudado. Depois de salvar
 ## Quanto custa
 
 - **Com o Gemini grátis, o custo é zero.** Com a Anthropic, **cada análise de matéria deve custar cerca de US$ 0,10 a 0,15** (estimativa após a otimização: 4 chamadas de especialistas, com o Claude Haiku na identificação, na síntese e na busca; confira o valor real no fim de cada análise ou com `npm run comparar`), já incluindo até 3 buscas na web (US$ 0,01 cada; ajuste em `lib/config.ts`, seção `balance`). Papers longos ficam entre US$ 0,50 e 1,50. O custo estimado de cada análise aparece no fim da página de resultado.
+- **Imagens e gráficos** somam cerca de US$ 0,02–0,04 numa matéria com imagens e US$ 0,05–0,15 num paper com gráficos (só quando há imagens).
+- **Textos longos:** um paper de 10 mil palavras deve custar US$ 0,25–0,35; de 30 mil, US$ 0,60–0,90 (estimativas). Eles são analisados em fila para respeitar o limite por minuto da conta (`lib/config.ts`, `rateLimit`); a tela avisa quando isso acontece.
 - O exemplo pronto e as análises repetidas (cache) são grátis.
 - **Proteção:** o site recusa novas análises depois de 30 por dia (ajuste em `lib/config.ts`, `globalDailyAnalyses`). Configure também o limite mensal na conta da Anthropic, como explicado acima.
 
@@ -305,6 +307,8 @@ lib/
   ai/client.ts             conversa com a IA (Anthropic) e escolhe qual IA usar
   ai/gemini.ts             conversa com o Google Gemini (testes grátis)
   ai/balance.ts            busca na web e conferência dos links
+  ai/ratelimit.ts          fila que respeita o limite de uso por minuto da IA
+  analysis/visuals.ts      preparação das imagens (etapa "Imagens e gráficos")
   veiculos.ts              linha editorial fixa de alguns veículos  ← editável
   demo/                    resultado do exemplo pronto
 scripts/                   comandos npm run comparar, teste e teste:salvar
@@ -315,6 +319,7 @@ public/exemplos/           PDF de exemplo
 **Como uma análise acontece:**
 1. **Identificação:** a IA descobre o tipo de texto, o país e o contexto político.
 2. **Especialistas:** 4 chamadas ao mesmo tempo, cada uma com alguns grupos de viés; uma delas também faz a visão geral (inclinação, disputa, fato e opinião, omissões).
+   **Imagens e gráficos** (ao mesmo tempo, só quando há imagens): a IA vê as páginas do PDF com figuras/tabelas (até 20) ou as imagens da matéria (até 6), descreve cada uma e procura gráficos enganosos e enquadramento por imagem. Configuração em `lib/config.ts`, seção `visual`.
 3. **Conferência:** cada citação é procurada no texto, as que não existem são descartadas e as notas são calculadas.
 4. **Síntese:** resumo e sugestão de reescrita.
 

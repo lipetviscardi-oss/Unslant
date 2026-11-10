@@ -59,8 +59,9 @@ export function MethodologyPt() {
       <h2>Como uma análise acontece</h2>
       <ol>
         <li>
-          <strong>Extração.</strong> Separamos o texto principal de menus, anúncios e rodapés. PDFs são lidos no seu
-          próprio navegador.
+          <strong>Extração.</strong> Separamos o texto principal de menus, anúncios e rodapés. Tabelas viram linhas
+          legíveis. PDFs são lidos no seu próprio navegador, na ordem certa mesmo em duas colunas, sem os cabeçalhos e
+          rodapés repetidos em cada página.
         </li>
         <li>
           <strong>Identificação.</strong> A IA identifica o tipo de texto (notícia, reportagem, análise, opinião,
@@ -73,6 +74,12 @@ export function MethodologyPt() {
           <strong>Especialistas.</strong> O texto é examinado ao mesmo tempo por vários &ldquo;especialistas&rdquo;, cada um
           olhando só para alguns grupos de vieses (linguagem, fontes, dados, falácias…). Um deles também avalia a inclinação
           política, a proporção de fato e opinião e possíveis omissões.
+        </li>
+        <li>
+          <strong>Imagens e gráficos.</strong> Ao mesmo tempo, a IA examina as imagens do conteúdo: descreve cada
+          gráfico, tabela ou foto, compara com o que o texto diz e procura gráficos enganosos (eixo que não começa no
+          zero, recorte escolhido a dedo, escala distorcida) e enquadramento por imagem. Ela só pode apontar figuras que
+          de fato recebeu.
         </li>
         <li>
           <strong>Conferência.</strong> Cada trecho citado como evidência é procurado no texto original. O que não for
@@ -252,6 +259,16 @@ export function MethodologyPt() {
       <h2>Limitações que você deve conhecer</h2>
       <ul>
         <li>
+          <strong>Imagens: só o que é imagem.</strong> A IA examina as imagens dentro da matéria (até{" "}
+          {config.visual.maxUrlImages}) e, em PDFs, as páginas com figuras, gráficos ou tabelas (até{" "}
+          {config.visual.maxPdfPages}). Gráficos interativos embutidos (como Datawrapper ou Flourish), vídeos e textos
+          colados na aba Texto não têm imagens para analisar. PDFs escaneados (só imagem, sem texto) não são aceitos.
+        </li>
+        <li>
+          <strong>Textos longos levam mais tempo.</strong> Para respeitar o limite de uso por minuto da IA, textos
+          longos são analisados em etapas, e a tela avisa quando isso acontece.
+        </li>
+        <li>
           <strong>A IA também pode errar e ter vieses.</strong> Os modelos de linguagem aprendem com textos humanos e
           carregam vieses deles. As regras acima reduzem esse risco, mas não o eliminam.
         </li>
@@ -312,8 +329,9 @@ export function MethodologyEn() {
       <h2>How an analysis works</h2>
       <ol>
         <li>
-          <strong>Extraction.</strong> We separate the main text from menus, ads and footers. PDFs are read in your own
-          browser.
+          <strong>Extraction.</strong> We separate the main text from menus, ads and footers. Tables become readable rows.
+          PDFs are read in your own browser, in the right order even in two columns, without the headers and footers
+          repeated on every page.
         </li>
         <li>
           <strong>Identification.</strong> The AI identifies the type of text (news, feature, analysis, opinion,
@@ -326,6 +344,12 @@ export function MethodologyEn() {
           <strong>Specialists.</strong> The text is examined at the same time by several &ldquo;specialists&rdquo;, each
           looking at a few groups of biases only (language, sources, data, fallacies…). One of them also assesses political
           leaning, the share of fact and opinion, and possible omissions.
+        </li>
+        <li>
+          <strong>Images and charts.</strong> At the same time, the AI examines the content&rsquo;s images: it describes
+          each chart, table or photo, compares it with what the text says, and looks for misleading charts (an axis that
+          does not start at zero, a cherry-picked time window, a distorted scale) and visual framing. It can only point to
+          figures it actually received.
         </li>
         <li>
           <strong>Verification.</strong> Every passage quoted as evidence is searched for in the original text. Anything
@@ -504,6 +528,16 @@ export function MethodologyEn() {
 
       <h2>Limitations you should know about</h2>
       <ul>
+        <li>
+          <strong>Images: only what is an image.</strong> The AI examines the images inside the article (up to{" "}
+          {config.visual.maxUrlImages}) and, in PDFs, the pages with figures, charts or tables (up to{" "}
+          {config.visual.maxPdfPages}). Embedded interactive charts (such as Datawrapper or Flourish), videos and text
+          pasted in the Text tab have no images to analyze. Scanned PDFs (images only, no text) are not accepted.
+        </li>
+        <li>
+          <strong>Long texts take longer.</strong> To respect the AI&rsquo;s per-minute usage limit, long texts are
+          analyzed in stages, and the screen says so when that happens.
+        </li>
         <li>
           <strong>The AI can be wrong and biased too.</strong> Language models learn from human writing and carry its
           biases. The rules above reduce this risk but do not remove it.
