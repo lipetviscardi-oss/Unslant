@@ -308,7 +308,8 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
     if (rw) problems.push({ kind: "rewrite", note: `a versão neutra ${rw}. Isso é proibido: reescreva usando só o que está no trecho original.` });
     const sm = summaryProblem(findings, out);
     if (sm) problems.push({ kind: "summary", note: `o resumo ${sm}.` });
-    for (const c of findContradictions(contradictionInput(out))) problems.push({ kind: "summary", note: `o resumo ${c.note} (frase: "${c.sentence}").`, sentence: c.sentence });
+    for (const c of findContradictions(contradictionInput(out)))
+      problems.push({ kind: "summary", note: `o resumo ${c.note} (frase: "${c.sentence.replace(/[<>`"]/g, " ").slice(0, 160)}").`, sentence: c.sentence });
     return problems;
   };
   let rewriteDiscarded = false;
