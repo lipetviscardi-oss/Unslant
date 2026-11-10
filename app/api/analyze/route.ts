@@ -49,6 +49,8 @@ const RequestSchema = z.object({
       noCache: z.boolean().optional(),
       /** Experimenta outro "esforço" nos especialistas (o resultado não vai para o cache). */
       specialistEffort: z.enum(["low", "medium", "high"]).optional(),
+      /** Experimenta o modelo leve (Haiku) nos especialistas: todos ("haiku") ou todos menos o da visão geral ("mixed"). */
+      specialistModel: z.enum(["haiku", "mixed"]).optional(),
     })
     .optional(),
 });
@@ -129,9 +131,10 @@ export async function POST(request: Request) {
           signal: request.signal,
           onProgress: send,
           specialistEffort: dev?.specialistEffort,
+          specialistModel: dev?.specialistModel,
         });
         // Resultado de experimento não entra no cache (para não se misturar com as análises normais).
-        if (!dev?.specialistEffort) await writeCache(key, result);
+        if (!dev?.specialistEffort && !dev?.specialistModel) await writeCache(key, result);
         send({ type: "result", result });
       } catch (err) {
         const code = err instanceof AppError ? err.code : "UNKNOWN";

@@ -59,6 +59,8 @@ export interface PipelineInput {
   onProgress: (event: StreamEvent) => void;
   /** Só para testes: troca o "esforço" dos especialistas (ver npm run teste -- --baixo). */
   specialistEffort?: "low" | "medium" | "high";
+  /** Só para testes: especialistas no modelo leve — todos ("haiku") ou menos o da visão geral ("mixed"). */
+  specialistModel?: "haiku" | "mixed";
 }
 
 /**
@@ -142,6 +144,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
           documentBlock,
           task: specialistPrompt(bundle, triage, lang, withOverview),
           effort: specialistEffort,
+          light: input.specialistModel === "haiku" || (input.specialistModel === "mixed" && !withOverview),
           maxTokens: config.ai.maxTokens.specialist + (withOverview ? config.ai.maxTokens.overview : 0), // limitado a 21.000 em client.ts
           usage,
           signal,
@@ -324,6 +327,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
       webSearches: usage.webSearches,
       stages: usage.report(),
       ...(input.specialistEffort ? { specialistEffort: input.specialistEffort } : {}),
+      ...(input.specialistModel ? { specialistModel: input.specialistModel } : {}),
       fromCache: false,
     },
   });

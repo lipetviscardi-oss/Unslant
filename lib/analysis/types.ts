@@ -176,6 +176,8 @@ export interface AnalysisResult {
     discardedEvidence: number;
     /** Só em testes: "esforço" usado nos especialistas, se diferente do padrão. */
     specialistEffort?: string;
+    /** Só em testes: modelo leve nos especialistas ("haiku" ou "mixed"). */
+    specialistModel?: string;
     fromCache: boolean;
   };
 }

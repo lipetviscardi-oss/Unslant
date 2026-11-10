@@ -227,7 +227,9 @@ npm run teste
 npm run teste -- --baixo
 ```
 
-O teste mostra ✅ ou ❌ para cada regra, o gênero identificado, o custo e a comparação com a rodada anterior.
+4. Experimentos com o modelo mais barato (Claude Haiku) nos especialistas: `npm run teste -- --haiku` (todos) ou `npm run teste -- --misto` (todos menos o que avalia a inclinação política).
+
+O teste mostra ✅ ou ❌ para cada regra, o custo de cada etapa, o gênero identificado e a comparação com a rodada anterior.
 
 **Cache:** analisar o mesmo texto de novo é instantâneo e grátis, porque o resultado fica guardado na pasta `.cache/`. Se você editar a taxonomia ou os prompts, o cache antigo é ignorado sozinho.
 

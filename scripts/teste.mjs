@@ -4,6 +4,9 @@
  * Uso (com o site ligado em outra janela do Terminal: npm run dev):
  *   npm run teste              → analisa os artigos de testes/casos.json do zero
  *   npm run teste -- --baixo   → o mesmo, com "esforço baixo" nos especialistas
+ *   npm run teste -- --haiku   → especialistas no Claude Haiku (mais barato)
+ *   npm run teste -- --misto   → Haiku nos especialistas, menos no que avalia
+ *                                a inclinação política (continua no Sonnet)
  *                                (experimento para baratear; não muda o site)
  *   npm run teste -- --porta 3001   → se o site estiver em outra porta
  *
@@ -19,6 +22,11 @@ import path from "node:path";
 
 const args = process.argv.slice(2);
 const low = args.includes("--baixo");
+const specialistModel = args.includes("--haiku") ? "haiku" : args.includes("--misto") ? "mixed" : undefined;
+const experiment =
+  [low ? 'esforço "baixo"' : "", specialistModel === "haiku" ? "Haiku nos especialistas" : "", specialistModel === "mixed" ? "misto (Haiku + Sonnet na inclinação)" : ""]
+    .filter(Boolean)
+    .join(" + ") || "padrão";
 const portIndex = args.indexOf("--porta");
 const port = portIndex !== -1 ? Number(args[portIndex + 1]) : 3000;
 const base = `http://localhost:${port}`;
@@ -56,7 +64,7 @@ async function analyze(body) {
   const res = await fetch(`${base}/api/analyze`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...body, devOptions: { noCache: true, ...(low ? { specialistEffort: "low" } : {}) } }),
+    body: JSON.stringify({ ...body, devOptions: { noCache: true, ...(low ? { specialistEffort: "low" } : {}), ...(specialistModel ? { specialistModel } : {}) } }),
   });
   if (!res.ok || !res.body) {
     const data = await res.json().catch(() => null);
@@ -110,8 +118,8 @@ if (missing.length) {
   process.exit(1);
 }
 
-console.log(`Teste automático — ${manifest.casos.length} artigos${low ? ' — EXPERIMENTO: esforço "baixo" nos especialistas' : ""}`);
-console.log("Cada análise leva cerca de 30 segundos. Custo estimado: US$ 0,40 no total.\n");
+console.log(`Teste automático — ${manifest.casos.length} artigos${experiment !== "padrão" ? ` — EXPERIMENTO: ${experiment}` : ""}`);
+console.log("Cada análise leva cerca de 30 segundos. Custo estimado: até US$ 0,40 no total.\n");
 
 // 2. Analisa cada artigo do zero (um de cada vez, para não estourar o limite da IA)
 const runs = {};
@@ -158,6 +166,10 @@ for (const c of manifest.casos) {
   console.log(`  Gênero: ${genre}${r.context.contentTypeReason ? ` — ${r.context.contentTypeReason}` : ""}`);
   console.log(`  Disputa: ${disputeText(r.political.dispute)}`);
   console.log(`  Custo: US$ ${n(r.stats.estimatedCostUsd, 3)} · ${Math.round(r.stats.durationMs / 1000)} s`);
+  const stages = Object.entries(r.stats.stages ?? {});
+  if (stages.length) {
+    console.log(`  Por etapa: ${stages.map(([k, v]) => `${k} ${n(v.costUsd, 3)}${/ \+ /.test(v.model) ? ` (${v.model.replace(/claude-|-5-5/g, "")})` : /haiku/.test(v.model) ? " (Haiku)" : ""}`).join(" · ")}`);
+  }
   check(score >= min && score <= max, `${c.nome}: nota ${n(score, 1)} dentro da faixa ${min}–${max}`);
 }
 
@@ -198,7 +210,7 @@ if (done.length) {
 mkdirSync(resultsDir, { recursive: true });
 const summary = {
   data: new Date().toISOString(),
-  esforcoEspecialistas: low ? "baixo" : "padrão",
+  esforcoEspecialistas: experiment,
   casos: Object.fromEntries(
     manifest.casos.map((c) => {
       const r = runs[c.id];
@@ -224,7 +236,7 @@ const previous = readdirSync(resultsDir)
   .pop();
 if (previous) {
   const prev = JSON.parse(readFileSync(path.join(resultsDir, previous), "utf8"));
-  console.log(`\nCOMPARAÇÃO com a rodada anterior (${new Date(prev.data).toLocaleString("pt-BR")}, esforço ${prev.esforcoEspecialistas})`);
+  console.log(`\nCOMPARAÇÃO com a rodada anterior (${new Date(prev.data).toLocaleString("pt-BR")}, ${prev.esforcoEspecialistas})`);
   for (const c of manifest.casos) {
     const p = prev.casos[c.id];
     const cur = summary.casos[c.id];

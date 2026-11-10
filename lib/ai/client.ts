@@ -53,17 +53,20 @@ export class UsageTracker {
       costUsd: 0,
     });
     s.calls++;
+    // Uma etapa pode usar mais de um modelo (ex.: busca que cai do Haiku para o Sonnet).
+    if (!s.model.split(" + ").includes(model)) s.model += ` + ${model}`;
     s.inputTokens += u.input ?? 0;
     s.outputTokens += u.output ?? 0;
     s.cacheReadTokens += u.cacheRead ?? 0;
     s.cacheWriteTokens += u.cacheWrite ?? 0;
     s.webSearches += u.webSearches ?? 0;
+    // Custo somado chamada a chamada, cada uma com o preço do seu modelo.
     const p = config.pricing[model];
-    s.costUsd = p
-      ? (s.inputTokens * p.input + s.outputTokens * p.output + s.cacheReadTokens * p.cacheRead + s.cacheWriteTokens * p.cacheWrite) /
-          1_000_000 +
-        s.webSearches * config.webSearchPrice
-      : 0;
+    s.costUsd +=
+      (p
+        ? ((u.input ?? 0) * p.input + (u.output ?? 0) * p.output + (u.cacheRead ?? 0) * p.cacheRead + (u.cacheWrite ?? 0) * p.cacheWrite) /
+          1_000_000
+        : 0) + (u.webSearches ?? 0) * config.webSearchPrice;
   }
 
   /** Registra o uso devolvido pela API da Anthropic. */

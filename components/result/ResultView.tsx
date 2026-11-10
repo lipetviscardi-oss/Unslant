@@ -35,7 +35,9 @@ const MODEL_LABEL: Record<string, string> = {
 function modelsUsed(s: AnalysisResult["stats"]): string {
   if (!s.stages) return MODEL_LABEL[s.model] ?? s.model;
   const byModel = new Map<string, string[]>();
-  for (const [stage, v] of Object.entries(s.stages)) byModel.set(v.model, [...(byModel.get(v.model) ?? []), stage]);
+  for (const [stage, v] of Object.entries(s.stages)) {
+    for (const m of v.model.split(" + ")) byModel.set(m, [...(byModel.get(m) ?? []), stage]);
+  }
   return [...byModel.entries()].map(([m, stages]) => `${MODEL_LABEL[m] ?? m} (${stages.join(", ")})`).join(" · ");
 }
 
