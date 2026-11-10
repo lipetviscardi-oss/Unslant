@@ -8,6 +8,7 @@
  */
 
 import type { Dict } from "./pt";
+import { FREE_PLAN } from "@/lib/plans";
 
 const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
 const num = (n: number) => n.toLocaleString("en-US");
@@ -32,6 +33,21 @@ export const en: Dict = {
     account: "My account",
     myAnalyses: "My analyses",
     logout: "Sign out",
+  },
+
+  feedback: {
+    button: "Send feedback",
+    title: "Send feedback",
+    lede: "unslant is in testing. Tell us what you think: something confusing, a bug, an analysis that felt unfair, an idea.",
+    message: "Your feedback",
+    contact: "Your name or email (optional)",
+    contactHelp: "Only if you'd like a reply.",
+    send: "Send",
+    sending: "Sending…",
+    thanks: "Thank you! Your feedback was sent.",
+    error: "Couldn't send it right now. Please try again in a moment.",
+    rateLimited: "You've sent several messages in a row. Please try again in a little while.",
+    close: "Close",
   },
 
   myAnalyses: {
@@ -68,7 +84,7 @@ export const en: Dict = {
     error: "We couldn't send the link right now. Check the email address and try again in a few minutes.",
     linkError: "The sign-in link is invalid, has expired or was opened in a different browser. Request a new one below and open it in this same browser.",
     unavailable: "Sign-in is not available on this site yet.",
-    why: "With an account you get 3 simple analyses and 1 detailed analysis per day, and your analyses are saved under \"My analyses\".",
+    why: `With an account you get ${FREE_PLAN.en}, and your analyses are saved under "My analyses".`,
   },
 
   footer: {
@@ -119,7 +135,8 @@ export const en: Dict = {
       help: "Both use the same full analysis; only what you see changes.",
       needsLogin: "For the detailed analysis, sign in with your email (no password).",
       remaining: (s: number, d: number) => `Today you still have ${s} simple ${s === 1 ? "analysis" : "analyses"} and ${d} detailed.`,
-      remainingAnon: (s: number) => (s > 0 ? "Without an account: 1 simple analysis every 24 hours. Sign in (no password) to get 3 simple and 1 detailed per day." : "You've used your free analysis for the last 24 hours. Sign in (no password) to get 3 simple and 1 detailed per day."),
+      remainingTotal: (n: number) => `You have ${n} ${n === 1 ? "analysis" : "analyses"} left today (simple or detailed).`,
+      remainingAnon: (s: number) => (s > 0 ? `Without an account: 1 simple analysis every 24 hours. Sign in (no password) to get ${FREE_PLAN.en}.` : `You've used your free analysis for the last 24 hours. Sign in (no password) to get ${FREE_PLAN.en}.`),
     },
     genre: {
       label: "Type of text",
@@ -196,7 +213,7 @@ export const en: Dict = {
       useHelp: (n: number) => `The full analysis is already done: this doesn't call the AI again. ${n === 1 ? "1 detailed analysis" : `${n} detailed analyses`} left today.`,
       usedUp: "You've used today's detailed analysis. It comes back tomorrow, at midnight your time.",
       signIn: "Sign in to see the full analysis",
-      signInWhy: "No password, just your email. With an account you get 3 simple analyses and 1 detailed analysis per day.",
+      signInWhy: `No password, just your email. With an account you get ${FREE_PLAN.en}.`,
     },
     simple: {
       politicalTitle: "Political leaning",

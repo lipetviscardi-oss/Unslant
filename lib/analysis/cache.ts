@@ -77,9 +77,11 @@ export async function cleanupOldData() {
   if (!db || Date.now() - lastCleanup < 60 * 60 * 1000) return;
   lastCleanup = Date.now();
   const before = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
-  const [cache, usage] = await Promise.all([
+  const [cache, usage, feedback] = await Promise.all([
     db.from("results_cache").delete().lt("created_at", before(config.privacy.cacheDays)),
     db.from("usage_events").delete().lt("created_at", before(config.privacy.usageDays)),
+    db.from("feedback").delete().lt("created_at", before(config.privacy.feedbackDays)),
   ]);
-  if (cache.error || usage.error) console.warn("[unslant] limpeza de dados antigos falhou:", cache.error?.message ?? usage.error?.message);
+  const failed = [cache, usage, feedback].find((r) => r.error);
+  if (failed) console.warn("[unslant] limpeza de dados antigos falhou:", failed.error?.message);
 }

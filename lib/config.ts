@@ -188,9 +188,13 @@ export const config = {
      */
     perDay: {
       /** Visitante sem conta (janela de 24 horas, não depende do fuso). */
-      anonymous: { simple: 1, detailed: 0 },
-      /** Conta grátis. */
-      free: { simple: 3, detailed: 1 },
+      anonymous: { simple: 1, detailed: 0 } as DayLimits,
+      /**
+       * Conta grátis. total (opcional) = máximo somando simples e detalhadas.
+       * FASE DE TESTES (amigos testando): 5 por dia, simples ou detalhadas.
+       * Plano normal, depois dos testes: { simple: 3, detailed: 1 } (sem total).
+       */
+      free: { simple: 5, detailed: 5, total: 5 } as DayLimits,
     },
   },
 
@@ -211,6 +215,8 @@ export const config = {
     cacheDays: 30,
     /** Registros de uso diário (servem para os limites), em dias. */
     usageDays: 30,
+    /** Sugestões enviadas pelo botão "Enviar sugestão", em dias. */
+    feedbackDays: 365,
     /**
      * E-mail de contato para pedidos de privacidade (ver, corrigir ou apagar dados).
      * PREENCHER antes de publicar o site. Vazio = a página diz que será informado.
@@ -246,4 +252,12 @@ export function activeModelName(): string {
     "gemini-3.8-flash": "Gemini 3.8 Flash (Google)",
   };
   return names[activeModel()] ?? activeModel();
+}
+
+/** Limite de análises por dia de um tipo de usuário. */
+export interface DayLimits {
+  simple: number;
+  detailed: number;
+  /** Máximo somando os dois tipos (opcional). */
+  total?: number;
 }

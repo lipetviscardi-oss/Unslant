@@ -4,6 +4,7 @@
  */
 
 import type { Lang } from "@/lib/taxonomy";
+import { FREE_PLAN, FREE_TOTAL } from "@/lib/plans";
 
 export type ErrorCode =
   | "INVALID_INPUT"
@@ -145,20 +146,26 @@ export const ERROR_MESSAGES: Record<ErrorCode, Record<Lang, string>> = {
     en: "The site's daily analysis limit was reached. Try again tomorrow.",
   },
   LIMIT_SIMPLE: {
-    pt: "Você já usou as 3 análises simples de hoje. Amanhã (à meia-noite no seu horário) elas voltam. Textos que alguém já analisou continuam saindo na hora.",
-    en: "You've used today's 3 simple analyses. They come back tomorrow (at midnight your time). Texts someone has already analyzed still come out instantly.",
+    pt: `Você já usou ${FREE_TOTAL != null ? "as análises" : "as análises simples"} de hoje. Amanhã (à meia-noite no seu horário) elas voltam. Textos que alguém já analisou continuam saindo na hora.`,
+    en: `You've used today's ${FREE_TOTAL != null ? "analyses" : "simple analyses"}. They come back tomorrow (at midnight your time). Texts someone has already analyzed still come out instantly.`,
   },
   LIMIT_DETAILED: {
-    pt: "Você já usou a análise detalhada de hoje. Escolha \"Simples\" ou tente amanhã (à meia-noite no seu horário).",
-    en: "You've used today's detailed analysis. Choose \"Simple\" or try again tomorrow (at midnight your time).",
+    pt:
+      FREE_TOTAL != null
+        ? "Você já usou as análises de hoje. Amanhã (à meia-noite no seu horário) elas voltam."
+        : "Você já usou a análise detalhada de hoje. Escolha \"Simples\" ou tente amanhã (à meia-noite no seu horário).",
+    en:
+      FREE_TOTAL != null
+        ? "You've used today's analyses. They come back tomorrow (at midnight your time)."
+        : "You've used today's detailed analysis. Choose \"Simple\" or try again tomorrow (at midnight your time).",
   },
   LIMIT_ANON: {
-    pt: "Você já usou a análise grátis das últimas 24 horas sem conta. Entre com seu e-mail (sem senha) para ter 3 análises simples e 1 detalhada por dia.",
-    en: "You've used your free analysis for the last 24 hours without an account. Sign in with your email (no password) to get 3 simple analyses and 1 detailed analysis per day.",
+    pt: `Você já usou a análise grátis das últimas 24 horas sem conta. Entre com seu e-mail (sem senha) para ter ${FREE_PLAN.pt}.`,
+    en: `You've used your free analysis for the last 24 hours without an account. Sign in with your email (no password) to get ${FREE_PLAN.en}.`,
   },
   LOGIN_REQUIRED: {
-    pt: "A análise detalhada é para quem tem conta. Entre com seu e-mail (sem senha): é grátis e dá 3 análises simples e 1 detalhada por dia.",
-    en: "Detailed analysis requires an account. Sign in with your email (no password): it's free and gives you 3 simple analyses and 1 detailed analysis per day.",
+    pt: `A análise detalhada é para quem tem conta. Entre com seu e-mail (sem senha): é grátis e dá ${FREE_PLAN.pt}.`,
+    en: `Detailed analysis requires an account. Sign in with your email (no password): it's free and gives you ${FREE_PLAN.en}.`,
   },
   NOT_FOUND: {
     pt: "Não encontramos esta análise. Ela pode ter sido apagada.",

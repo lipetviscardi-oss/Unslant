@@ -9,6 +9,8 @@
  * ============================================================================
  */
 
+import { FREE_PLAN } from "@/lib/plans";
+
 const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
 const num = (n: number) => n.toLocaleString("pt-BR");
 
@@ -32,6 +34,21 @@ export const pt = {
     account: "Minha conta",
     myAnalyses: "Minhas análises",
     logout: "Sair",
+  },
+
+  feedback: {
+    button: "Enviar sugestão",
+    title: "Enviar sugestão",
+    lede: "O unslant está em fase de testes. Conte o que achou: algo confuso, um erro, uma análise que pareceu injusta, uma ideia.",
+    message: "Sua sugestão",
+    contact: "Seu nome ou e-mail (opcional)",
+    contactHelp: "Só se quiser uma resposta.",
+    send: "Enviar",
+    sending: "Enviando…",
+    thanks: "Obrigado! Sua sugestão foi enviada.",
+    error: "Não foi possível enviar agora. Tente de novo em instantes.",
+    rateLimited: "Você enviou várias sugestões seguidas. Tente de novo daqui a pouco.",
+    close: "Fechar",
   },
 
   myAnalyses: {
@@ -68,7 +85,7 @@ export const pt = {
     error: "Não foi possível enviar o link agora. Confira o e-mail digitado e tente de novo em alguns minutos.",
     linkError: "O link de acesso é inválido, já expirou ou foi aberto em outro navegador. Peça um novo abaixo e abra o link neste mesmo navegador.",
     unavailable: "O login ainda não está disponível neste site.",
-    why: "Com uma conta, você tem 3 análises simples e 1 detalhada por dia, e suas análises ficam guardadas em \"Minhas análises\".",
+    why: `Com uma conta, você tem ${FREE_PLAN.pt}, e suas análises ficam guardadas em "Minhas análises".`,
   },
 
   footer: {
@@ -119,7 +136,8 @@ export const pt = {
       help: "As duas usam a mesma análise completa; muda o que você vê.",
       needsLogin: "Para a detalhada, entre com seu e-mail (sem senha).",
       remaining: (s: number, d: number) => `Hoje você ainda tem ${s} ${s === 1 ? "análise simples" : "análises simples"} e ${d} ${d === 1 ? "detalhada" : "detalhadas"}.`,
-      remainingAnon: (s: number): string => (s > 0 ? "Sem conta: 1 análise simples a cada 24 horas. Entre (sem senha) para ter 3 simples e 1 detalhada por dia." : "Você já usou a análise grátis das últimas 24 horas. Entre (sem senha) para ter 3 simples e 1 detalhada por dia."),
+      remainingTotal: (n: number) => `Hoje você ainda tem ${n} ${n === 1 ? "análise" : "análises"} (simples ou detalhadas).`,
+      remainingAnon: (s: number): string => (s > 0 ? `Sem conta: 1 análise simples a cada 24 horas. Entre (sem senha) para ter ${FREE_PLAN.pt}.` : `Você já usou a análise grátis das últimas 24 horas. Entre (sem senha) para ter ${FREE_PLAN.pt}.`),
     },
     genre: {
       label: "Tipo de texto",
@@ -196,7 +214,7 @@ export const pt = {
       useHelp: (n: number) => `A análise completa já foi feita: não chama a IA de novo. ${n === 1 ? "Resta 1 análise detalhada" : `Restam ${n} análises detalhadas`} hoje.`,
       usedUp: "Você já usou a análise detalhada de hoje. Ela volta amanhã, à meia-noite no seu horário.",
       signIn: "Entrar para ver a análise completa",
-      signInWhy: "Sem senha: é só o seu e-mail. Com conta, você tem 3 análises simples e 1 detalhada por dia.",
+      signInWhy: `Sem senha: é só o seu e-mail. Com conta, você tem ${FREE_PLAN.pt}.`,
     },
     simple: {
       politicalTitle: "Inclinação política",

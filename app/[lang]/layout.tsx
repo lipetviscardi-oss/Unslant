@@ -13,6 +13,7 @@ import { getDict } from "@/lib/i18n/server";
 import { LangProvider } from "@/lib/i18n";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { FeedbackButton } from "@/components/FeedbackButton";
 
 /** Gera as páginas nos dois idiomas: /pt e /en. */
 export function generateStaticParams() {
@@ -41,6 +42,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
           <SiteHeader />
           <main className="flex-1 px-4 pb-16 sm:px-6">{children}</main>
           <SiteFooter />
+          <FeedbackButton />
         </LangProvider>
       </body>
     </html>

@@ -15,7 +15,7 @@ import { config } from "@/lib/config";
 /** Aviso mostrado enquanto o site usa o Gemini grátis (fase de testes). */
 const TESTING_WITH_GEMINI = config.ai.provider === "gemini";
 
-const { cacheDays, usageDays, contactEmail } = config.privacy;
+const { cacheDays, usageDays, feedbackDays, contactEmail } = config.privacy;
 
 export const PRIVACY_UPDATED = { pt: "novembro de 2026", en: "November 2026" };
 
@@ -99,6 +99,11 @@ export function PrivacyPt() {
           quem enviar o mesmo texto de novo, sem custo e sem gastar o limite. Para isso, guardamos o resultado (com o
           texto analisado) por até {cacheDays} dias, <strong>sem nenhuma ligação com quem enviou</strong>. Por isso, apagar
           uma análise da sua conta não apaga essa cópia anônima, que some sozinha no fim do prazo.
+        </li>
+        <li>
+          <strong>Sugestões:</strong> o que você escreve no botão &ldquo;Enviar sugestão&rdquo;, a página em que estava
+          e, se você informar, o seu nome ou e-mail. Servem só para melhorar o site e são apagadas depois de{" "}
+          {Math.round(feedbackDays / 30)} meses.
         </li>
         <li>
           <strong>Registros técnicos:</strong> registros de funcionamento (por exemplo, o tipo de erro quando uma análise
@@ -231,6 +236,11 @@ export function PrivacyEn() {
           anyone who sends the same text again, at no cost and without using up the limit. For that, we keep the result
           (with the analyzed text) for up to {cacheDays} days, <strong>with no link to whoever sent it</strong>. So
           deleting an analysis from your account does not delete this anonymous copy, which expires on its own.
+        </li>
+        <li>
+          <strong>Feedback:</strong> what you write in the &ldquo;Send feedback&rdquo; button, the page you were on and,
+          if you provide it, your name or email. It is used only to improve the site and is deleted after{" "}
+          {Math.round(feedbackDays / 30)} months.
         </li>
         <li>
           <strong>Technical logs:</strong> operation logs (for example, the type of error when an analysis fails) do not

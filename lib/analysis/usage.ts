@@ -2,7 +2,8 @@
  * LIMITES POR PESSOA (Fase 4)
  *
  * Quem está analisando, quantas análises já fez hoje e quantas restam.
- *  - Conta grátis: config.limits.perDay.free (3 simples + 1 detalhada).
+ *  - Conta grátis: config.limits.perDay.free (ex.: 3 simples + 1 detalhada;
+ *    na fase de testes, 5 por dia somando os dois tipos).
  *  - Visitante sem conta: config.limits.perDay.anonymous (1 simples).
  *  - Conta: o "dia" é o da própria pessoa (zera à meia-noite no fuso dela).
  *    O fuso fica FIXO na conta a partir da primeira análise, para ninguém
@@ -18,7 +19,7 @@
 import "server-only";
 import { createHmac, randomUUID } from "node:crypto";
 import { cookies, headers } from "next/headers";
-import { config } from "@/lib/config";
+import { config, type DayLimits } from "@/lib/config";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { currentUser } from "@/lib/supabase/server";
 
@@ -93,7 +94,7 @@ export async function identifyViewer(tz: string | undefined): Promise<Viewer> {
   return { userId: null, email: null, anonKey: anonymize(`c:${anonId}`), ipKey: ip ? anonymize(`i:${ip}`) : null, day };
 }
 
-export function limitsFor(v: Viewer) {
+export function limitsFor(v: Viewer): DayLimits {
   return v.userId ? config.limits.perDay.free : config.limits.perDay.anonymous;
 }
 
@@ -125,7 +126,12 @@ export async function remainingToday(v: Viewer): Promise<Record<Kind, number> | 
   const used = await usedToday(v);
   if (!used) return null;
   const lim = limitsFor(v);
-  return { simple: Math.max(0, lim.simple - used.simple), detailed: Math.max(0, lim.detailed - used.detailed) };
+  // Com limite total, o que sobra de cada tipo também não passa do que sobra no total.
+  const totalLeft = lim.total != null ? lim.total - used.simple - used.detailed : Infinity;
+  return {
+    simple: Math.max(0, Math.min(lim.simple - used.simple, totalLeft)),
+    detailed: Math.max(0, Math.min(lim.detailed - used.detailed, totalLeft)),
+  };
 }
 
 /**
@@ -137,7 +143,8 @@ export async function reserveUsage(v: Viewer, kind: Kind, analysisId?: string): 
   const id = await recordUsage(v, kind, analysisId);
   if (id === null) return null;
   const used = await usedToday(v);
-  if (used && used[kind] > limitsFor(v)[kind]) {
+  const lim = limitsFor(v);
+  if (used && (used[kind] > lim[kind] || (lim.total != null && used.simple + used.detailed > lim.total))) {
     await supabaseAdmin()?.from("usage_events").delete().eq("id", id);
     return "limit";
   }

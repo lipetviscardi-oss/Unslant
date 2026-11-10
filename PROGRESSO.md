@@ -129,4 +129,13 @@ Depois: Fase 4 (P2 em diante). Retomada automática: tarefa "Retomar unslant".
 **Em espera** (decisão do usuário em 10/11/2026): primeiro publicar o site e testar com conhecidos no Brasil e no Reino Unido; cobrança depois.
 
 ## Fase 6 (adiantada): publicar para testes
-Plano enviado ao usuário em 10/11/2026; esperando as decisões (domínio, botão de sugestões, limites dos testadores, e-mail de contato).
+Decisões do usuário (10/11/2026): botão de sugestões sim; 5 análises por dia (simples ou detalhadas) na fase de testes; e-mail de contato ainda será criado; domínio em análise (unslant.me na GoDaddy).
+
+| # | Item | Status |
+|---|---|---|
+| D1 | Limites da fase de testes: 5 por dia somando simples e detalhadas (config.limits.perDay.free.total); frases geradas da config (lib/plans.ts) | feito |
+| D2 | Botão "Enviar sugestão" (tabela feedback no SQL, /api/feedback com limite de 5 por hora, apagadas em 12 meses; Privacidade e README atualizados) | feito |
+| D3 | Domínio (decisão do usuário) | esperando |
+| D4 | Publicar na Vercel (contas do usuário: Vercel; chaves nas configurações da Vercel) | a fazer |
+| D5 | E-mails de login pelo Resend (precisa do domínio) | a fazer |
+| D6 | URLs de produção no Supabase; e-mail de contato em config.privacy | a fazer |

@@ -47,7 +47,7 @@ export function AnalyzeForm({ onSubmit }: { onSubmit: (req: AnalyzeRequest) => v
   const storedMode = useSyncExternalStore(subscribeMode, readMode, () => "simple" as ResultMode);
   const [chosenMode, setChosenMode] = useState<ResultMode | null>(null);
   // Limites do dia (Fase 4): quantas restam e se a pessoa está logada.
-  const [usage, setUsage] = useState<{ limitsOn: boolean; loggedIn?: boolean; remaining?: { simple: number; detailed: number } | null } | null>(null);
+  const [usage, setUsage] = useState<{ limitsOn: boolean; loggedIn?: boolean; limits?: { total?: number }; remaining?: { simple: number; detailed: number } | null } | null>(null);
   useEffect(() => {
     const tz = browserTimeZone();
     fetch(`/api/usage${tz ? `?tz=${encodeURIComponent(tz)}` : ""}`)
@@ -344,7 +344,11 @@ export function AnalyzeForm({ onSubmit }: { onSubmit: (req: AnalyzeRequest) => v
           <p className="text-sm text-muted">{t.home.view.help}</p>
           {usage?.limitsOn && usage.remaining && (
             <p className="text-sm font-medium text-ink">
-              {usage.loggedIn ? t.home.view.remaining(usage.remaining.simple, usage.remaining.detailed) : t.home.view.remainingAnon(usage.remaining.simple)}
+              {usage.loggedIn
+                ? usage.limits?.total != null
+                  ? t.home.view.remainingTotal(Math.max(usage.remaining.simple, usage.remaining.detailed))
+                  : t.home.view.remaining(usage.remaining.simple, usage.remaining.detailed)
+                : t.home.view.remainingAnon(usage.remaining.simple)}
             </p>
           )}
         </fieldset>

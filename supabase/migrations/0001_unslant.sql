@@ -87,3 +87,25 @@ create table if not exists public.results_cache (
 
 alter table public.results_cache enable row level security;
 -- (sem políticas: só o servidor lê e grava)
+
+-- Sugestões enviadas pelo botão "Enviar sugestão" (fase de testes).
+-- Para ler: no painel do Supabase, abra "Table Editor" e clique em "feedback".
+create table if not exists public.feedback (
+  id bigint generated always as identity primary key,
+  created_at timestamptz not null default now(),
+  -- Quem tem conta: a conta (some se a conta for apagada).
+  user_id uuid references auth.users (id) on delete set null,
+  -- Visitante: códigos anônimos (resumo do cookie e do endereço), só para evitar envio em massa.
+  sender_key text,
+  ip_key text,
+  -- Nome ou e-mail, só se a pessoa quiser resposta.
+  contact text,
+  -- Página em que a pessoa estava e idioma do site.
+  page text,
+  lang text,
+  message text not null
+);
+create index if not exists feedback_created on public.feedback (created_at);
+
+alter table public.feedback enable row level security;
+-- (sem políticas: só o servidor lê e grava)
