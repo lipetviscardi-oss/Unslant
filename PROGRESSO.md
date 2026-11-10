@@ -121,6 +121,9 @@ Depois: Fase 4 (P2 em diante). Retomada automática: tarefa "Retomar unslant".
 - Fase 4/P5: limites com revisão de segurança aplicada (fuso fixo na conta; visitante = janela de 24 h; uso devolvido marcado "refunded" e ainda conta no limite geral; registro + recontagem contra pedidos simultâneos). Decisão 3a mantida: resultado reaproveitado (inclusive detalhado) não conta — avisar o usuário desse efeito.
 
 ### Fase 4: pendências do usuário (antes de publicar)
-- Testar no computador: login, limites, Minhas análises, segundo plano e "Apagar minha conta" (passo a passo no README, "Como testar").
+- ~~Testar no computador~~: testado pelo usuário em 10/11/2026, tudo funcionou. **Fase 4 concluída.**
 - Preencher `contactEmail` em lib/config.ts (seção privacy) com um e-mail para pedidos de privacidade.
 - Configurar um serviço de e-mail próprio no Supabase (o envio grátis é limitado) — junto com a Fase 6.
+
+## Fase 5: plano pago (Stripe)
+Esperando o usuário decidir preços e limites do plano pago (explicação enviada em 10/11/2026). Nada foi feito ainda.
