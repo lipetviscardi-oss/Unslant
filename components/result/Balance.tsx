@@ -7,7 +7,7 @@
 
 import type { AnalysisResult } from "@/lib/analysis/types";
 import { lookupOutlet } from "@/lib/veiculos";
-import { useDict } from "@/lib/i18n";
+import { useDict, useLang } from "@/lib/i18n";
 
 /** limit = quantos textos mostrar (modo simples); compact = sem "Outras sugestões". */
 export function Balance({ result, limit, compact }: { result: AnalysisResult; limit?: number; compact?: boolean }) {
@@ -94,6 +94,7 @@ export function Balance({ result, limit, compact }: { result: AnalysisResult; li
 
 /** Link "fonte" da classificação, quando o veículo está na lista lib/veiculos.ts. */
 function LineSource({ url, label }: { url: string; label: string }) {
+  const lang = useLang();
   let host = "";
   try {
     host = new URL(url).hostname;
@@ -102,10 +103,15 @@ function LineSource({ url, label }: { url: string; label: string }) {
   }
   const info = lookupOutlet(host);
   if (!info) return null;
-  const title = [info.source.label, info.source.note].filter(Boolean).join(": ");
+  // Mês da avaliação na fonte (ex.: "abr. de 2026"), para o leitor saber de quando é.
+  const when = info.source.updated
+    ? new Date(`${info.source.updated}-15T12:00:00Z`).toLocaleDateString(lang === "pt" ? "pt-BR" : "en-US", { month: "short", year: "numeric" })
+    : "";
+  const title = [info.source.label, info.source.note, when].filter(Boolean).join(" · ");
   return info.source.url ? (
     <a href={info.source.url} target="_blank" rel="noopener noreferrer nofollow" title={title} className="text-xs underline underline-offset-2">
       {label}: {info.source.label}
+      {when ? `, ${when}` : ""}
     </a>
   ) : (
     <span className="text-xs" title={title}>

@@ -8,8 +8,8 @@
  *  "estimativa".
  *
  *  REGRA: toda classificação política precisa de uma fonte pública conferida.
- *  Fontes usadas (conferidas em 10/11/2026; veículos britânicos e mais
- *  americanos acrescentados em 10/11/2026, com o país conferido na página):
+ *  Fontes usadas (todas as páginas reconferidas em 10/11/2026: avaliação, país
+ *  e site avaliado; o mês da última atualização da fonte fica em "updated"):
  *   - Media Bias/Fact Check (MBFC), escala: LEFT → "left", LEFT-CENTER →
  *     "center_left", LEAST BIASED → "center", RIGHT-CENTER → "center_right",
  *     RIGHT → "right". A mesma régua para todos os veículos avaliados por ela.
@@ -37,13 +37,15 @@ export interface OutletInfo {
   name: string;
   line: EditorialLine;
   /** De onde veio a classificação. */
-  source: { label: string; url?: string; note?: string };
+  source: { label: string; url?: string; note?: string; updated?: string };
 }
 
-const MBFC = (slug: string, rating: string) => ({
+/** updated = mês da última atualização da avaliação na fonte ("AAAA-MM"), conferido na página. */
+const MBFC = (slug: string, rating: string, updated: string) => ({
   label: "Media Bias/Fact Check",
   url: `https://mediabiasfactcheck.com/${slug}`,
   note: `Avaliação: ${rating}`,
+  updated,
 });
 const WIKI = (article: string, quote: string) => ({
   label: "Wikipédia",
@@ -54,15 +56,15 @@ const OFFICIAL = (what: string) => ({ label: "Domínio oficial", note: what });
 
 export const OUTLETS: Record<string, OutletInfo> = {
   /* ----------------------------- Brasil ----------------------------- */
-  "folha.uol.com.br": { name: "Folha de S.Paulo", line: "center_left", source: MBFC("folha-de-s-paulo-bias-and-credibility/", "LEFT-CENTER") },
-  "oglobo.globo.com": { name: "O Globo", line: "center_right", source: MBFC("globo-bias-and-credibility/", "RIGHT-CENTER (Globo)") },
-  "g1.globo.com": { name: "g1", line: "center_right", source: MBFC("globo-bias-and-credibility/", "RIGHT-CENTER (Globo)") },
+  "folha.uol.com.br": { name: "Folha de S.Paulo", line: "center_left", source: MBFC("folha-de-s-paulo-bias-and-credibility/", "LEFT-CENTER", "2026-08") },
+  "oglobo.globo.com": { name: "O Globo", line: "center_right", source: MBFC("globo-bias-and-credibility/", "RIGHT-CENTER (Globo)", "2026-01") },
+  "g1.globo.com": { name: "g1", line: "center_right", source: MBFC("globo-bias-and-credibility/", "RIGHT-CENTER (Globo)", "2026-01") },
   "estadao.com.br": {
     name: "O Estado de S. Paulo",
     line: "center_right",
     source: WIKI("O_Estado_de_S._Paulo", "editoriais que unem \"conservadorismo político e liberalismo econômico\""),
   },
-  "cartacapital.com.br": { name: "CartaCapital", line: "left", source: MBFC("cartacapital-bias-and-credibility/", "LEFT") },
+  "cartacapital.com.br": { name: "CartaCapital", line: "left", source: MBFC("cartacapital-bias-and-credibility/", "LEFT", "2026-01") },
   "brasildefato.com.br": {
     name: "Brasil de Fato",
     line: "left",
@@ -100,64 +102,67 @@ export const OUTLETS: Record<string, OutletInfo> = {
   },
 
   /* -------------------------- Internacionais ------------------------- */
-  "nytimes.com": { name: "The New York Times", line: "center_left", source: MBFC("new-york-times/", "LEFT-CENTER") },
-  "washingtonpost.com": { name: "The Washington Post", line: "center_left", source: MBFC("washington-post/", "LEFT-CENTER") },
-  "wsj.com": { name: "The Wall Street Journal", line: "center_right", source: MBFC("wall-street-journal/", "RIGHT-CENTER") },
-  "foxnews.com": { name: "Fox News", line: "right", source: MBFC("fox-news/", "RIGHT") },
-  "cnn.com": { name: "CNN", line: "center_left", source: MBFC("cnn/", "LEFT-CENTER") },
-  "msnbc.com": { name: "MSNBC", line: "left", source: MBFC("msnbc/", "LEFT") },
-  "npr.org": { name: "NPR", line: "center_left", source: MBFC("npr/", "LEFT-CENTER") },
-  "abcnews.go.com": { name: "ABC News", line: "center_left", source: MBFC("abc-news/", "LEFT-CENTER") },
-  "nbcnews.com": { name: "NBC News", line: "center_left", source: MBFC("nbc-news/", "LEFT-CENTER") },
-  "cbsnews.com": { name: "CBS News", line: "center_right", source: MBFC("cbs-news/", "RIGHT-CENTER") },
-  "politico.com": { name: "Politico", line: "center_left", source: MBFC("politico/", "LEFT-CENTER") },
-  "bloomberg.com": { name: "Bloomberg", line: "center_left", source: MBFC("bloomberg/", "LEFT-CENTER") },
-  "vox.com": { name: "Vox", line: "left", source: MBFC("vox/", "LEFT") },
-  "nypost.com": { name: "New York Post", line: "center_right", source: MBFC("new-york-post/", "RIGHT-CENTER") },
-  "breitbart.com": { name: "Breitbart", line: "right", source: MBFC("breitbart/", "RIGHT") },
-  "newsmax.com": { name: "Newsmax", line: "right", source: MBFC("newsmax/", "RIGHT") },
-  "dailywire.com": { name: "The Daily Wire", line: "right", source: MBFC("the-daily-wire/", "RIGHT") },
-  "foxbusiness.com": { name: "Fox Business", line: "center_right", source: MBFC("fox-business/", "RIGHT-CENTER") },
-  "newsweek.com": { name: "Newsweek", line: "center_right", source: MBFC("newsweek/", "RIGHT-CENTER") },
-  "thehill.com": { name: "The Hill", line: "center", source: MBFC("the-hill/", "LEAST BIASED") },
-  "theatlantic.com": { name: "The Atlantic", line: "center_left", source: MBFC("the-atlantic/", "LEFT-CENTER") },
-  "huffpost.com": { name: "HuffPost", line: "left", source: MBFC("huffington-post/", "LEFT") },
-  "bbc.com": { name: "BBC", line: "center", source: MBFC("bbc/", "LEAST BIASED") },
-  "bbc.co.uk": { name: "BBC", line: "center", source: MBFC("bbc/", "LEAST BIASED") },
-  "theguardian.com": { name: "The Guardian", line: "center_left", source: MBFC("the-guardian/", "LEFT-CENTER") },
-  "independent.co.uk": { name: "The Independent", line: "center_left", source: MBFC("the-independent/", "LEFT-CENTER") },
-  "dailymail.co.uk": { name: "Daily Mail", line: "right", source: MBFC("daily-mail/", "RIGHT") },
-  "telegraph.co.uk": { name: "The Telegraph", line: "right", source: MBFC("daily-telegraph/", "RIGHT") },
-  "thetimes.com": { name: "The Times", line: "center_right", source: MBFC("the-times-of-london/", "RIGHT-CENTER") },
-  "thetimes.co.uk": { name: "The Times", line: "center_right", source: MBFC("the-times-of-london/", "RIGHT-CENTER") },
-  "spectator.co.uk": { name: "The Spectator", line: "center_right", source: MBFC("the-spectator/", "RIGHT-CENTER") },
-  "standard.co.uk": { name: "Evening Standard", line: "center_right", source: MBFC("london-evening-standard/", "RIGHT-CENTER") },
-  "itv.com": { name: "ITV News", line: "center_right", source: MBFC("itv-news/", "RIGHT-CENTER") },
-  "gbnews.com": { name: "GB News", line: "right", source: MBFC("gb-news/", "RIGHT") },
-  "thesun.co.uk": { name: "The Sun", line: "right", source: MBFC("the-sun/", "RIGHT") },
-  "express.co.uk": { name: "Daily Express", line: "right", source: MBFC("daily-express/", "RIGHT") },
-  "newstatesman.com": { name: "New Statesman", line: "center_left", source: MBFC("new-statesman/", "LEFT-CENTER") },
-  "mirror.co.uk": { name: "Daily Mirror", line: "center_left", source: MBFC("daily-mirror/", "LEFT-CENTER") },
-  "inews.co.uk": { name: "The i", line: "center_left", source: MBFC("inews/", "LEFT-CENTER") },
-  "channel4.com": { name: "Channel 4 News", line: "center_left", source: MBFC("channel-4-news/", "LEFT-CENTER") },
-  "news.sky.com": { name: "Sky News", line: "center", source: MBFC("sky-news/", "LEAST BIASED") },
-  "economist.com": { name: "The Economist", line: "center", source: MBFC("the-economist/", "LEAST BIASED") },
-  "ft.com": { name: "Financial Times", line: "center", source: MBFC("financial-times/", "LEAST BIASED") },
-  "aljazeera.com": { name: "Al Jazeera", line: "center_left", source: MBFC("al-jazeera/", "LEFT-CENTER") },
-  "lemonde.fr": { name: "Le Monde", line: "center_left", source: MBFC("le-monde/", "LEFT-CENTER") },
-  "elpais.com": { name: "El País", line: "center_left", source: MBFC("el-pais/", "LEFT-CENTER") },
-  "clarin.com": { name: "Clarín", line: "center_right", source: MBFC("clarin/", "RIGHT-CENTER") },
-  "lanacion.com.ar": { name: "La Nación", line: "center_right", source: MBFC("la-nacion/", "RIGHT-CENTER") },
-  "infobae.com": { name: "Infobae", line: "center_left", source: MBFC("infobae/", "LEFT-CENTER") },
+  "nytimes.com": { name: "The New York Times", line: "center_left", source: MBFC("new-york-times/", "LEFT-CENTER", "2024-12") },
+  "washingtonpost.com": { name: "The Washington Post", line: "center_left", source: MBFC("washington-post/", "LEFT-CENTER", "2024-12") },
+  "wsj.com": { name: "The Wall Street Journal", line: "center_right", source: MBFC("wall-street-journal/", "RIGHT-CENTER", "2025-07") },
+  "foxnews.com": { name: "Fox News", line: "right", source: MBFC("fox-news/", "RIGHT", "2026-10") },
+  "cnn.com": { name: "CNN", line: "center_left", source: MBFC("cnn/", "LEFT-CENTER", "2026-07") },
+  "msnbc.com": { name: "MSNBC", line: "left", source: MBFC("msnbc/", "LEFT", "2025-11") },
+  "npr.org": { name: "NPR", line: "center_left", source: MBFC("npr/", "LEFT-CENTER", "2024-12") },
+  "abcnews.go.com": { name: "ABC News", line: "center_left", source: MBFC("abc-news/", "LEFT-CENTER", "2026-04") },
+  "nbcnews.com": { name: "NBC News", line: "center_left", source: MBFC("nbc-news/", "LEFT-CENTER", "2024-12") },
+  "cbsnews.com": { name: "CBS News", line: "center_right", source: MBFC("cbs-news/", "RIGHT-CENTER", "2026-04") },
+  "politico.com": { name: "Politico", line: "center_left", source: MBFC("politico/", "LEFT-CENTER", "2024-12") },
+  "bloomberg.com": { name: "Bloomberg", line: "center_left", source: MBFC("bloomberg/", "LEFT-CENTER", "2026-04") },
+  "vox.com": { name: "Vox", line: "left", source: MBFC("vox/", "LEFT", "2026-09") },
+  "nypost.com": { name: "New York Post", line: "center_right", source: MBFC("new-york-post/", "RIGHT-CENTER", "2025-09") },
+  "breitbart.com": { name: "Breitbart", line: "right", source: MBFC("breitbart/", "RIGHT", "2026-04") },
+  "newsmax.com": { name: "Newsmax", line: "right", source: MBFC("newsmax/", "RIGHT", "2026-10") },
+  "nationalreview.com": { name: "National Review", line: "right", source: MBFC("national-review/", "RIGHT", "2025-01") },
+  "thedispatch.com": { name: "The Dispatch", line: "center_right", source: MBFC("the-dispatch/", "RIGHT-CENTER", "2026-07") },
+  "washingtonexaminer.com": { name: "Washington Examiner", line: "center_right", source: MBFC("washington-examiner/", "RIGHT-CENTER", "2025-07") },
+  "dailywire.com": { name: "The Daily Wire", line: "right", source: MBFC("the-daily-wire/", "RIGHT", "2026-07") },
+  "foxbusiness.com": { name: "Fox Business", line: "center_right", source: MBFC("fox-business/", "RIGHT-CENTER", "2025-01") },
+  "newsweek.com": { name: "Newsweek", line: "center_right", source: MBFC("newsweek/", "RIGHT-CENTER", "2025-02") },
+  "thehill.com": { name: "The Hill", line: "center", source: MBFC("the-hill/", "LEAST BIASED", "2025-12") },
+  "theatlantic.com": { name: "The Atlantic", line: "center_left", source: MBFC("the-atlantic/", "LEFT-CENTER", "2026-07") },
+  "huffpost.com": { name: "HuffPost", line: "left", source: MBFC("huffington-post/", "LEFT", "2026-01") },
+  "bbc.com": { name: "BBC", line: "center", source: MBFC("bbc/", "LEAST BIASED", "2026-04") },
+  "bbc.co.uk": { name: "BBC", line: "center", source: MBFC("bbc/", "LEAST BIASED", "2026-04") },
+  "theguardian.com": { name: "The Guardian", line: "center_left", source: MBFC("the-guardian/", "LEFT-CENTER", "2025-09") },
+  "independent.co.uk": { name: "The Independent", line: "center_left", source: MBFC("the-independent/", "LEFT-CENTER", "2026-07") },
+  "dailymail.co.uk": { name: "Daily Mail", line: "right", source: MBFC("daily-mail/", "RIGHT", "2026-10") },
+  "telegraph.co.uk": { name: "The Telegraph", line: "right", source: MBFC("daily-telegraph/", "RIGHT", "2024-12") },
+  "thetimes.com": { name: "The Times", line: "center_right", source: MBFC("the-times-of-london/", "RIGHT-CENTER", "2024-12") },
+  "thetimes.co.uk": { name: "The Times", line: "center_right", source: MBFC("the-times-of-london/", "RIGHT-CENTER", "2024-12") },
+  "spectator.co.uk": { name: "The Spectator", line: "center_right", source: MBFC("the-spectator/", "RIGHT-CENTER", "2025-01") },
+  "standard.co.uk": { name: "Evening Standard", line: "center_right", source: MBFC("london-evening-standard/", "RIGHT-CENTER", "2025-03") },
+  "itv.com": { name: "ITV News", line: "center_right", source: MBFC("itv-news/", "RIGHT-CENTER", "2024-02") },
+  "gbnews.com": { name: "GB News", line: "right", source: MBFC("gb-news/", "RIGHT", "2026-08") },
+  "thesun.co.uk": { name: "The Sun", line: "right", source: MBFC("the-sun/", "RIGHT", "2024-11") },
+  "express.co.uk": { name: "Daily Express", line: "right", source: MBFC("daily-express/", "RIGHT", "2025-10") },
+  "newstatesman.com": { name: "New Statesman", line: "center_left", source: MBFC("new-statesman/", "LEFT-CENTER", "2025-01") },
+  "mirror.co.uk": { name: "Daily Mirror", line: "center_left", source: MBFC("daily-mirror/", "LEFT-CENTER", "2024-11") },
+  "inews.co.uk": { name: "The i", line: "center_left", source: MBFC("inews/", "LEFT-CENTER", "2026-07") },
+  "channel4.com": { name: "Channel 4 News", line: "center_left", source: MBFC("channel-4-news/", "LEFT-CENTER", "2024-11") },
+  "news.sky.com": { name: "Sky News", line: "center", source: MBFC("sky-news/", "LEAST BIASED", "2024-12") },
+  "economist.com": { name: "The Economist", line: "center", source: MBFC("the-economist/", "LEAST BIASED", "2024-12") },
+  "ft.com": { name: "Financial Times", line: "center", source: MBFC("financial-times/", "LEAST BIASED", "2024-12") },
+  "aljazeera.com": { name: "Al Jazeera", line: "center_left", source: MBFC("al-jazeera/", "LEFT-CENTER", "2026-04") },
+  "lemonde.fr": { name: "Le Monde", line: "center_left", source: MBFC("le-monde/", "LEFT-CENTER", "2024-11") },
+  "elpais.com": { name: "El País", line: "center_left", source: MBFC("el-pais/", "LEFT-CENTER", "2025-01") },
+  "clarin.com": { name: "Clarín", line: "center_right", source: MBFC("clarin/", "RIGHT-CENTER", "2026-05") },
+  "lanacion.com.ar": { name: "La Nación", line: "center_right", source: MBFC("la-nacion/", "RIGHT-CENTER", "2026-05") },
+  "infobae.com": { name: "Infobae", line: "center_left", source: MBFC("infobae/", "LEFT-CENTER", "2026-05") },
 
   /* ------------------------ Agências de notícias ---------------------- */
-  "reuters.com": { name: "Reuters", line: "wire", source: MBFC("reuters/", "LEAST BIASED (agência de notícias)") },
-  "apnews.com": { name: "Associated Press", line: "wire", source: MBFC("associated-press/", "LEFT-CENTER (agência de notícias)") },
+  "reuters.com": { name: "Reuters", line: "wire", source: MBFC("reuters/", "LEAST BIASED (agência de notícias)", "2026-04") },
+  "apnews.com": { name: "Associated Press", line: "wire", source: MBFC("associated-press/", "LEFT-CENTER (agência de notícias)", "2026-04") },
   "afp.com": { name: "AFP", line: "wire", source: { label: "Tipo de veículo", note: "agência de notícias" } },
   "agenciabrasil.ebc.com.br": { name: "Agência Brasil", line: "wire", source: { label: "Tipo de veículo", note: "agência pública de notícias (EBC)" } },
 
   /* ------------------------- Checagem de fatos ------------------------ */
-  "aosfatos.org": { name: "Aos Fatos", line: "fact_check", source: MBFC("aos-fatos-bias-and-credibility/", "agência de checagem") },
+  "aosfatos.org": { name: "Aos Fatos", line: "fact_check", source: MBFC("aos-fatos-bias-and-credibility/", "agência de checagem", "2025-08") },
   "lupa.uol.com.br": { name: "Agência Lupa", line: "fact_check", source: { label: "Tipo de veículo", note: "agência de checagem" } },
   "lupa.news": { name: "Agência Lupa", line: "fact_check", source: { label: "Tipo de veículo", note: "agência de checagem" } },
   "apublica.org": { name: "Agência Pública", line: "fact_check", source: { label: "Tipo de veículo", note: "jornalismo investigativo e checagem" } },
