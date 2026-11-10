@@ -51,6 +51,11 @@ export const en: Dict = {
     confirmDelete: "Delete this analysis from your account? This can't be undone.",
     deleteError: "We couldn't delete it right now. Please try again.",
     deleteNote: "You can delete any analysis. Deleting doesn't give back the day's usage.",
+    deleteAccountTitle: "Delete my account",
+    deleteAccountText: "Deletes your account, your email and all your analyses. This cannot be undone.",
+    deleteAccount: "Delete my account",
+    confirmDeleteAccount: "Are you sure? Your account and ALL your analyses will be permanently deleted.",
+    deleteAccountError: "Couldn't delete the account right now. Please try again in a moment.",
   },
 
   login: {

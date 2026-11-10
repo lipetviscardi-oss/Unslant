@@ -2,7 +2,7 @@
 
 O unslant analisa um texto (link de matéria, texto colado, PDF ou uma afirmação curta) e mostra os vieses que ele contém, sempre com o **trecho exato do texto** como prova. Ele também mostra a inclinação política em dois eixos e o que o texto pode estar omitindo.
 
-> Projeto em construção. Fases 1 e 2 prontas (análise completa e busca de textos para equilibrar), sem login.
+> Projeto em construção. Fases 1 a 4 prontas: análise completa, busca de textos para equilibrar, site em português e inglês, contas, "Minhas análises" e limites por dia.
 
 ---
 
@@ -11,12 +11,13 @@ O unslant analisa um texto (link de matéria, texto colado, PDF ou uma afirmaç�
 1. [O que já funciona](#o-que-já-funciona)
 2. [Como rodar no seu computador](#como-rodar-no-seu-computador)
 3. [Chave da Anthropic](#chave-da-anthropic)
-4. [Como testar](#como-testar)
-5. [Arquivos que você pode editar](#arquivos-que-você-pode-editar)
-6. [Quanto custa](#quanto-custa)
-7. [Problemas comuns](#problemas-comuns)
-8. [Como o projeto está organizado](#como-o-projeto-está-organizado)
-9. [Próximas fases](#próximas-fases)
+4. [Contas, histórico e limites (Supabase)](#contas-histórico-e-limites-supabase)
+5. [Como testar](#como-testar)
+6. [Arquivos que você pode editar](#arquivos-que-você-pode-editar)
+7. [Quanto custa](#quanto-custa)
+8. [Problemas comuns](#problemas-comuns)
+9. [Como o projeto está organizado](#como-o-projeto-está-organizado)
+10. [Próximas fases](#próximas-fases)
 
 ---
 
@@ -34,6 +35,9 @@ O unslant analisa um texto (link de matéria, texto colado, PDF ou uma afirmaç�
 - **Conferência de citações:** cada trecho citado pela IA é procurado no texto original e descartado se não for encontrado.
 - **Para equilibrar sua leitura:** depois da análise, a IA busca na web outras coberturas do mesmo assunto, de perspectivas diferentes, e explica o que cada uma acrescenta. Só aparecem links que vieram de fato da busca (o site confere).
 - **Dois exemplos prontos** (uma notícia e uma afirmação), que funcionam sem chave e sem custo.
+- **Imagens, gráficos e tabelas:** a IA vê as figuras do PDF e as imagens da matéria e aponta gráficos enganosos.
+- **Contas por e-mail** (link de acesso, sem senha), **Minhas análises** (abrir e apagar) e **limites por dia**: visitante sem conta, 1 análise simples; conta grátis, 3 simples e 1 detalhada. Numa análise simples, "Usar minha análise detalhada do dia" libera tudo sem chamar a IA de novo.
+- **Análise em segundo plano:** com conta, você pode fechar a página; a análise continua e aparece em Minhas análises.
 
 ---
 
@@ -180,6 +184,28 @@ A **chave de API** é uma senha que permite ao site usar a IA e cobrar o uso na 
 
 ---
 
+## Contas, histórico e limites (Supabase)
+
+Sem o Supabase configurado, o site funciona normalmente, só que sem login, sem histórico e sem limites por pessoa. Para ligar:
+
+1. **Criar o projeto:** em [supabase.com](https://supabase.com), crie um projeto no plano grátis (região **East US**).
+2. **Chaves no `.env.local`** (nunca no chat nem no código): copie os nomes do arquivo `.env.example` e preencha com os valores do painel do Supabase:
+   - `NEXT_PUBLIC_SUPABASE_URL`: **Project Settings → Data API → Project URL**;
+   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: **Project Settings → API Keys**, a chave que começa com `sb_publishable_`;
+   - `SUPABASE_SECRET_KEY`: na mesma tela, a chave que começa com `sb_secret_`. Ela dá acesso total ao banco: só o servidor do site a usa.
+3. **Conferir:** no terminal, rode `npm run verificar`. Deve terminar com "Tudo certo!".
+4. **Criar as tabelas:** no painel, abra **SQL Editor → New query**, cole TODO o arquivo `supabase/migrations/0001_unslant.sql` e clique em **Run**. Pode rodar de novo sempre que o arquivo mudar: ele não apaga nada.
+5. **Endereços do login:** em **Authentication → URL Configuration**, coloque `http://localhost:3000` em **Site URL** e adicione `http://localhost:3000/**` em **Redirect URLs**. Quando o site for publicado (Fase 6), adicione também o endereço do site.
+6. Reinicie o site (`Ctrl + C` e `npm run dev`).
+
+**Os limites** ficam em `lib/config.ts`, seção `limits.perDay`. O dia de quem tem conta zera à meia-noite no fuso horário da pessoa (fixado na primeira análise); para visitantes, vale uma janela de 24 horas. Resultados reaproveitados (o mesmo texto já analisado) não contam no limite.
+
+**Prazos de guarda** (cache compartilhado e registros de uso: 30 dias) e o **e-mail de contato** da página Privacidade ficam em `lib/config.ts`, seção `privacy`. **Preencha `contactEmail` antes de publicar o site.**
+
+**Atenção (e-mails de login):** o envio de e-mails do Supabase no plano grátis é limitado (poucos por hora) e serve só para testes. Antes de publicar, é preciso configurar um serviço de e-mail próprio (Authentication → Emails → SMTP).
+
+---
+
 ## Como testar
 
 Com o site ligado em `http://localhost:3000`:
@@ -197,6 +223,11 @@ Com o site ligado em `http://localhost:3000`:
 | **Ver no texto** | Em "Todas as categorias", abra um grupo e clique em **Ver no texto** | A página rola até o trecho, que pisca |
 | **Texto colado** (usa a IA) | Clique em **Notícia em inglês** e depois em **Analisar texto** | Progresso em 4 etapas e resultado em 30 s a 2 min |
 | **PDF** (usa a IA) | Clique em **Baixar o paper em PDF**, vá à aba **PDF** e envie o arquivo | Aparece "Fermented Oat Beverage and Anxiety (471 palavras extraídas)"; a análise deve ativar o grupo "Específicos de artigos acadêmicos" |
+| **Visitante sem conta** (com Supabase) | Sem entrar na conta, faça uma análise simples e depois outra | A primeira funciona; a segunda pede para entrar na conta. A opção "Detalhada" fica bloqueada |
+| **Login** (com Supabase) | Clique em **Entrar**, digite seu e-mail e abra o link recebido, no mesmo navegador | Você volta ao site conectado; o menu da conta aparece no topo |
+| **Limites** (com Supabase) | Com conta, veja o aviso embaixo de "Tipo de análise" | Mostra quantas análises simples e detalhadas restam hoje (3 e 1) |
+| **Minhas análises** (com Supabase) | Menu da conta → **Minhas análises** | Lista com abrir e apagar; abrir não gasta o limite. No fim, "Apagar minha conta" |
+| **Segundo plano** (com Supabase) | Com conta, comece uma análise e feche a página (ou clique em "Voltar ao início") | Em Minhas análises, aparece "em andamento" e, quando termina, o botão **Abrir** |
 | **Simetria** (usa a IA) | Analise o **Par espelhado (A)** e depois o **(B)** | Notas parecidas e inclinação social em lados opostos |
 | **Link** (usa a IA) | Cole o link de uma matéria real | Título, veículo, autor e data aparecem no topo do resultado |
 | **Tipo de texto** (usa a IA) | Antes de analisar, escolha um tipo em **Tipo de texto** (ex.: Opinião). Depois analise de novo deixando **Detectar automaticamente** | Com escolha: aparece "Tipo informado por você."; sem escolha: aparece "Por que …" com o motivo dado pela IA |
@@ -298,8 +329,16 @@ app/
     methodology/           Metodologia
     glossary/              Tipos de viés
     privacy/               Privacidade
+    login/                 Entrar (link no e-mail)
+    my-analyses/           Minhas análises
+    analysis/              abre uma análise salva
   api/analyze/route.ts     servidor: recebe o pedido e executa a análise
-proxy.ts                   envia quem abre "/" para /pt ou /en
+  api/auth/callback/       volta do link de login
+  api/analyses/            abrir e liberar ("detalhada do dia") análises salvas
+  api/account/             apagar a conta
+  api/usage/               quantas análises restam hoje
+supabase/migrations/       tabelas do banco (rodar no SQL Editor do Supabase)
+proxy.ts                   envia quem abre "/" para /pt ou /en e renova a sessão de login
 components/                partes da tela (formulário, nota, destaques...)
 content/                   textos das páginas Metodologia e Privacidade  ← editável
 lib/
@@ -317,6 +356,9 @@ lib/
   analysis/visuals.ts      preparação das imagens (etapa "Imagens e gráficos")
   veiculos.ts              linha editorial fixa de alguns veículos  ← editável
   demo/                    resultado do exemplo pronto
+  supabase/                conexão com o Supabase (navegador, servidor e chave secreta)
+  analysis/usage.ts        limites por pessoa (quem é, quanto usou hoje)
+  analysis/store.ts        Minhas análises (salvar, em andamento, concluída)
 scripts/                   comandos npm run comparar, teste e teste:salvar
 testes/casos.json          artigos e faixas do teste automático  ← editável
 public/exemplos/           PDF de exemplo
@@ -341,7 +383,7 @@ Detalhes técnicos:
 
 - ~~**Fase 2:** busca na web e a seção "Para equilibrar sua leitura".~~ Pronta.
 - ~~**Fase 3:** interface em português e inglês, página de Metodologia e modo simples e detalhado.~~ Pronta.
-- **Fase 4:** login (Supabase), histórico e limite de 3 análises por dia.
+- ~~**Fase 4:** login (Supabase), histórico e limites por dia.~~ Pronta. Depois: login com e-mail e senha e com Google.
 - **Fase 5:** plano pago (Stripe).
 - **Fase 6:** publicação na Vercel com domínio próprio.
 

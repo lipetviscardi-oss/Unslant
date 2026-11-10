@@ -38,7 +38,12 @@ export async function readCache(key: string): Promise<AnalysisResult | null> {
   }
   const db = supabaseAdmin();
   if (!db) return null;
-  const { data, error } = await db.from("results_cache").select("result").eq("cache_key", key).maybeSingle();
+  const { data, error } = await db
+    .from("results_cache")
+    .select("result")
+    .eq("cache_key", key)
+    .gte("created_at", new Date(Date.now() - config.privacy.cacheDays * 24 * 60 * 60 * 1000).toISOString())
+    .maybeSingle();
   if (error) console.warn("[unslant] cache do banco indisponível:", error.message);
   return (data?.result as AnalysisResult | undefined) ?? null;
 }
@@ -56,6 +61,25 @@ export async function writeCache(key: string, result: AnalysisResult) {
   }
   const db = supabaseAdmin();
   if (!db) return;
-  const { error } = await db.from("results_cache").upsert({ cache_key: key, result });
+  const { error } = await db.from("results_cache").upsert({ cache_key: key, result, created_at: new Date().toISOString() });
   if (error) console.warn("[unslant] não foi possível gravar o cache no banco:", error.message);
+  await cleanupOldData();
+}
+
+let lastCleanup = 0;
+
+/**
+ * Apaga o que passou do prazo (config.privacy): resultados guardados e
+ * registros de uso antigos. Roda no máximo uma vez por hora.
+ */
+export async function cleanupOldData() {
+  const db = supabaseAdmin();
+  if (!db || Date.now() - lastCleanup < 60 * 60 * 1000) return;
+  lastCleanup = Date.now();
+  const before = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+  const [cache, usage] = await Promise.all([
+    db.from("results_cache").delete().lt("created_at", before(config.privacy.cacheDays)),
+    db.from("usage_events").delete().lt("created_at", before(config.privacy.usageDays)),
+  ]);
+  if (cache.error || usage.error) console.warn("[unslant] limpeza de dados antigos falhou:", cache.error?.message ?? usage.error?.message);
 }

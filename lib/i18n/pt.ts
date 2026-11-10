@@ -51,6 +51,11 @@ export const pt = {
     confirmDelete: "Apagar esta análise da sua conta? Isso não pode ser desfeito.",
     deleteError: "Não foi possível apagar agora. Tente de novo.",
     deleteNote: "Você pode apagar qualquer análise. O uso do dia não volta ao apagar.",
+    deleteAccountTitle: "Apagar minha conta",
+    deleteAccountText: "Apaga a sua conta, o seu e-mail e todas as suas análises. Não pode ser desfeito.",
+    deleteAccount: "Apagar minha conta",
+    confirmDeleteAccount: "Tem certeza? A sua conta e TODAS as suas análises serão apagadas para sempre.",
+    deleteAccountError: "Não foi possível apagar a conta agora. Tente de novo em instantes.",
   },
 
   login: {

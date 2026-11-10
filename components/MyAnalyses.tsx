@@ -6,6 +6,7 @@
  */
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDict, useLang } from "@/lib/i18n";
 import { supabaseBrowser } from "@/lib/supabase/browser";
@@ -70,6 +71,38 @@ export function MyAnalyses() {
     return () => window.clearTimeout(timer);
   }, [anyRunning, rows]);
 
+  const router = useRouter();
+  const [deleting, setDeleting] = useState(false);
+
+  async function deleteAccount() {
+    if (!window.confirm(tm.confirmDeleteAccount)) return;
+    setDeleting(true);
+    const res = await fetch(`/api/account?lang=${lang}`, { method: "DELETE" }).catch(() => null);
+    if (!res?.ok) {
+      setDeleting(false);
+      window.alert(tm.deleteAccountError);
+      return;
+    }
+    await supabase?.auth.signOut({ scope: "local" }).catch(() => undefined);
+    router.push(`/${lang}`);
+    router.refresh();
+  }
+
+  const accountSection = (
+    <section className="mt-10 border-t border-line pt-6">
+      <h2 className="mb-1 text-lg font-medium">{tm.deleteAccountTitle}</h2>
+      <p className="mb-3 text-sm text-muted">{tm.deleteAccountText}</p>
+      <button
+        type="button"
+        onClick={deleteAccount}
+        disabled={deleting}
+        className="rounded-full border border-ember-ink px-4 py-1.5 text-sm font-medium text-ember-ink hover:bg-ember-soft disabled:opacity-50"
+      >
+        {tm.deleteAccount}
+      </button>
+    </section>
+  );
+
   async function remove(id: string) {
     if (!supabase || !window.confirm(tm.confirmDelete)) return;
     const { error } = await supabase.from("analyses").delete().eq("id", id);
@@ -90,7 +123,13 @@ export function MyAnalyses() {
   }
   if (failed) return <p className="text-ember-ink">{tm.loadError}</p>;
   if (!rows) return <p className="text-muted">{tm.loading}</p>;
-  if (rows.length === 0) return <p className="text-muted">{tm.empty}</p>;
+  if (rows.length === 0)
+    return (
+      <div>
+        <p className="text-muted">{tm.empty}</p>
+        {accountSection}
+      </div>
+    );
 
   const date = (iso: string) =>
     new Date(iso).toLocaleString(lang === "pt" ? "pt-BR" : "en-US", { dateStyle: "medium", timeStyle: "short" });
@@ -130,6 +169,7 @@ export function MyAnalyses() {
           );
         })}
       </ul>
+      {accountSection}
     </div>
   );
 }

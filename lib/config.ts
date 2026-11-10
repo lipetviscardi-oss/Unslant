@@ -203,6 +203,22 @@ export const config = {
   },
 
   /**
+   * PRIVACIDADE: por quanto tempo guardamos os dados que não estão ligados a
+   * uma conta (a página Privacidade usa estes números; mude aqui e lá muda junto).
+   */
+  privacy: {
+    /** Resultados guardados para reaproveitar (cache compartilhado), em dias. */
+    cacheDays: 30,
+    /** Registros de uso diário (servem para os limites), em dias. */
+    usageDays: 30,
+    /**
+     * E-mail de contato para pedidos de privacidade (ver, corrigir ou apagar dados).
+     * PREENCHER antes de publicar o site. Vazio = a página diz que será informado.
+     */
+    contactEmail: "",
+  },
+
+  /**
    * Preços da Anthropic em dólares por 1 milhão de tokens.
    * Usados só para ESTIMAR o custo de cada análise e mostrar na tela.
    * Confira os valores atuais em https://www.anthropic.com/pricing
