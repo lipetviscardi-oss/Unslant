@@ -6,7 +6,6 @@
  */
 
 import { NextResponse, type NextRequest } from "next/server";
-import type { EmailOtpType } from "@supabase/supabase-js";
 import { supabaseServer } from "@/lib/supabase/server";
 
 /**
@@ -34,15 +33,11 @@ export async function GET(request: NextRequest) {
   const supabase = await supabaseServer();
   if (!supabase) return fail;
 
+  // Só o formato PKCE: o código só funciona no mesmo navegador que pediu o link
+  // (ele guarda um segredo em cookie). Isso impede que alguém mande um link que
+  // faça a pessoa entrar na conta de outra pessoa sem perceber.
   const code = searchParams.get("code");
-  const tokenHash = searchParams.get("token_hash");
-  const type = searchParams.get("type") as EmailOtpType | null;
-
-  const { error } = code
-    ? await supabase.auth.exchangeCodeForSession(code)
-    : tokenHash && type
-      ? await supabase.auth.verifyOtp({ type, token_hash: tokenHash })
-      : { error: new Error("link sem código") };
+  const { error } = code ? await supabase.auth.exchangeCodeForSession(code) : { error: new Error("link sem código") };
 
   if (error) {
     console.warn("[unslant] login: link inválido ou expirado:", error.message);
