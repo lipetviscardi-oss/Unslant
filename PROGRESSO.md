@@ -45,3 +45,14 @@ Faixas da nota, dados/estatística, versão neutra no estilo de notícia, bug vi
 - Item 3: fontes conferidas em 10/11/2026 (MBFC e Wikipédia pt). Sem fonte clara (ficam para a IA estimar): UOL, CNN Brasil, Veja, Gazeta do Povo, Jovem Pan, Metrópoles, Poder360, Revista Fórum, Intercept Brasil, Terra Brasil Notícias, Valor, Exame, R7, IstoÉ, Crusoé, Correio Braziliense, Nexo, Piauí.
 - Rede: criado o ambiente "Unslant" (sites liberados: mediabiasfactcheck.com, www.allsides.com, pt.wikipedia.org). AllSides recusa acesso automático (403).
 - Próximo: Fase 3 (modo simples e detalhado).
+
+## Rodada 6 — textos longos, imagens, gráficos e tabelas (aprovada; depois começa a Fase 3)
+| Item | O quê | Status |
+|---|---|---|
+| 1 | Limite por minuto: fila de chamadas por estimativa de tokens + espera quando a Anthropic pedir | em andamento |
+| 3 | Tabelas da web em linhas legíveis; PDF sem cabeçalho/rodapé repetido; PDF em duas colunas | a fazer |
+| 2 | Etapa "Imagens e gráficos" (PDF: páginas com figura/tabela, até 20; link: até 6 imagens), 2 categorias novas, seção no resultado | a fazer |
+| 5 | Metodologia/README: limitações (gráficos interativos, PDF escaneado) | a fazer |
+| T | Teste automático com um paper com gráficos (aprovado) | a fazer |
+| 4 | Análise em segundo plano (tempo limite da Vercel) | fica para a Fase 4 |
+Retomada automática: tarefa agendada "Retomar unslant" (a cada hora). Apagar quando tudo estiver feito.
