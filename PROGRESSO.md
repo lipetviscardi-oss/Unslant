@@ -187,3 +187,21 @@ Lembrete para a fase final: limite de imagens por PDF (priorizar gráficos/fotos
 
 ### Onde paramos (Rodada 9, 10/11/2026 à noite)
 - Itens R9-1 a R9-11 feitos e publicados (a Vercel atualiza sozinha). Falta só a validação com IA de verdade, que o usuário roda no computador dele (instruções enviadas). Depois: analisar os resultados, ajustar se precisar e seguir para o convite (passo 10).
+
+## Rodada 10 — Checklist antes do beta (B) + textos históricos (A) — aprovada em 10/11/2026
+Decisões: chave da IA neste ambiente via formulário seguro (sim); gasto máximo com IA de verdade: **US$ 4** (gasto até agora: US$ 0); CBS: manter como o MBFC (RIGHT-CENTER, abr/2026); textos históricos do Wikisource (Carta-testamento 1954, AI-5 1968, Doutrina Truman 1947, Nabuco 1883); lixo: o usuário roda `npm run checar-lixo`; ordem: B depois A. PDFs extras do usuário: Unslanted_test_pdf_hist.pdf e Unslanted_pdf_test_2.pdf.
+
+| # | Item | Status |
+|---|---|---|
+| B1 | Veículos: reconferir todas as fontes; tabela veículo/classificação/fonte/conferido | a fazer |
+| B2 | Contradições internas (a gênero, b versão neutra, c disputa, d notas) com correção automática; rodar nas 8 análises | a fazer |
+| B3 | Lixo: comando `npm run checar-lixo` (antes/depois por link) | a fazer |
+| B4 | PDFs: título, autores, data e revista (3+ PDFs) | a fazer |
+| A1 | Época (identificação + tela + confiança) | a fazer |
+| A2 | Contexto da época; disputa da época; eixos "não se aplica"; trava de figuras atuais | a fazer |
+| A3 | Linguagem da época (marca por trecho) | a fazer |
+| A4 | Gêneros: discurso, documento oficial, propaganda, carta, jornal histórico | a fazer |
+| A5 | Para equilibrar: historiografia e fontes da época | a fazer |
+| A6 | Metodologia: seção textos históricos | a fazer |
+| A7 | Teste com 4 textos históricos + teste automático | a fazer |
+| F | CHECKLIST-ANTES-DO-BETA.md + verificações no teste automático | a fazer |
