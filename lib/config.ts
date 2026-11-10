@@ -181,7 +181,7 @@ export const config = {
      * somados). Análises repetidas que vêm do cache não contam.
      * Na Fase 4 isso passa a ser controlado pelo banco de dados.
      */
-    globalDailyAnalyses: 30,
+    globalDailyAnalyses: 15,
     /**
      * Análises por dia (zera à meia-noite no horário de cada pessoa).
      * Resultados reaproveitados (texto já analisado) e exemplos prontos não contam.
@@ -191,10 +191,10 @@ export const config = {
       anonymous: { simple: 1, detailed: 0 } as DayLimits,
       /**
        * Conta grátis. total (opcional) = máximo somando simples e detalhadas.
-       * FASE DE TESTES (amigos testando): 5 por dia, simples ou detalhadas.
+       * FASE DE TESTES (amigos testando): 3 por dia, simples ou detalhadas.
        * Plano normal, depois dos testes: { simple: 3, detailed: 1 } (sem total).
        */
-      free: { simple: 5, detailed: 5, total: 5 } as DayLimits,
+      free: { simple: 3, detailed: 3, total: 3 } as DayLimits,
     },
   },
 

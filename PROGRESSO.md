@@ -133,7 +133,7 @@ Decisões do usuário (10/11/2026): botão de sugestões sim; 5 análises por di
 
 | # | Item | Status |
 |---|---|---|
-| D1 | Limites da fase de testes: 5 por dia somando simples e detalhadas (config.limits.perDay.free.total); frases geradas da config (lib/plans.ts) | feito |
+| D1 | Limites da fase de testes: 3 por dia somando simples e detalhadas (era 5; usuário reduziu para caber em US$ 25) e teto do site 15 por dia (config.limits.perDay.free.total); frases geradas da config (lib/plans.ts) | feito |
 | D2 | Botão "Enviar sugestão" (tabela feedback no SQL, /api/feedback com limite de 5 por hora, apagadas em 12 meses; Privacidade e README atualizados) | feito |
 | D3 | Domínio: unslant.world, comprado na GoDaddy em 10/11/2026 | feito |
 | D4 | Publicar na Vercel (contas do usuário: Vercel; chaves nas configurações da Vercel) | a fazer |
@@ -142,7 +142,7 @@ Decisões do usuário (10/11/2026): botão de sugestões sim; 5 análises por di
 
 ### Ordem combinada com o usuário (publicação)
 1. GoDaddy: conferir privacidade, renovação automática e preço da renovação.
-2. Anthropic: limite mensal de gastos (US$ 30–50).
+2. Anthropic: US$ 25 de créditos e limite mensal de US$ 25 (aviso em US$ 15).
 3. Vercel: criar conta, importar o repositório, colocar as 4 chaves, Deploy → usuário manda o endereço .vercel.app.
 4. Claude confere o site no ar.
 5. Ligar unslant.world à Vercel (Vercel → Domains; registros DNS na GoDaddy).
