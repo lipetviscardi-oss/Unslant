@@ -150,6 +150,23 @@ export const ClaimCheckSchema = z.object({
 });
 export type ClaimCheckOutput = z.infer<typeof ClaimCheckSchema>;
 
+/* Linha editorial dos veículos sugeridos */
+export const EditorialLineSchema = z.enum([
+  "left",
+  "center_left",
+  "center",
+  "center_right",
+  "right",
+  "institutional",
+  "legal",
+  "fact_check",
+  "academic",
+  "wire",
+  "international",
+  "unknown",
+]);
+export type EditorialLine = z.infer<typeof EditorialLineSchema>;
+
 /* Busca de textos para equilibrar a leitura (Fase 2) */
 export const BalanceSchema = z.object({
   articles: z.array(
@@ -159,6 +176,8 @@ export const BalanceSchema = z.object({
       outlet: z.string(),
       /** Perspectiva ou tipo de fonte (ex.: "visão de centro-direita", "dados oficiais", "checagem"). */
       perspective: z.string(),
+      /** Linha editorial do veículo (estimativa da IA; a tabela lib/veiculos.ts tem prioridade). */
+      editorialLine: EditorialLineSchema,
       /** Por que este texto equilibra ou complementa o original. */
       why: z.string(),
     }),

@@ -365,7 +365,7 @@ export const TAXONOMY: BiasGroup[] = [
           en: "The reporter inserts opinion into a story meant to inform.",
         },
         aiHint:
-          "Só se aplica a textos noticiosos. Em artigos de opinião, editoriais e colunas, use not_applicable. Procure comentários do autor, ironias, conclusões morais.",
+          "Só se aplica a notícias e reportagens. Em artigos de opinião, editoriais, colunas e análises assinadas, use not_applicable. Procure comentários do autor, ironias, conclusões morais.",
       },
     ],
   },

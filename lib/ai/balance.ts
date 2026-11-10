@@ -22,6 +22,7 @@ import { BalanceSchema, type BalanceOutput } from "@/lib/analysis/schemas";
 import type { BalanceDiagnostics } from "@/lib/analysis/types";
 import { callStructured, getClient, mapApiError, type UsageTracker } from "./client";
 import { addGeminiUsage, geminiModel, getGemini, isBlocked, withRetry } from "./gemini";
+import { lookupOutlet } from "@/lib/veiculos";
 
 type Found = Map<string, { url: string; title: string }>;
 
@@ -312,7 +313,9 @@ function verifyArticles(
   return kept;
 }
 
-export async function searchBalance(opts: SearchOptions): Promise<{ data: BalanceOutput; diagnostics: BalanceDiagnostics }> {
+export async function searchBalance(
+  opts: SearchOptions,
+): Promise<{ data: BalanceOutput; diagnostics: BalanceDiagnostics; lineSource: ("table" | "ai")[] }> {
   const blockedHost = opts.originalUrl ? hostOf(opts.originalUrl) : null;
   const found: Found = new Map();
   const seen = new Set<string>();
@@ -348,8 +351,17 @@ export async function searchBalance(opts: SearchOptions): Promise<{ data: Balanc
   if (diag.discarded.length) {
     console.warn(`[unslant] busca: ${diag.discarded.length} link(s) descartado(s):`, diag.discarded);
   }
+  // Linha editorial: a tabela lib/veiculos.ts tem prioridade sobre a estimativa da IA.
+  const finalArticles = articles.slice(0, config.balance.maxArticles);
+  const lineSource: ("table" | "ai")[] = [];
+  for (const a of finalArticles) {
+    const fromTable = lookupOutlet(hostOf(a.url) ?? "");
+    if (fromTable) a.editorialLine = fromTable;
+    lineSource.push(fromTable ? "table" : "ai");
+  }
   return {
-    data: { articles: articles.slice(0, config.balance.maxArticles), suggestions: suggestions.slice(0, 4) },
+    data: { articles: finalArticles, suggestions: suggestions.slice(0, 4) },
     diagnostics: diag,
+    lineSource,
   };
 }

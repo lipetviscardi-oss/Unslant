@@ -251,7 +251,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
         title: source.title || triage.title,
         lang,
       };
-      const { data, diagnostics } = await searchBalance({
+      const { data, diagnostics, lineSource } = await searchBalance({
         task: balancePrompt(promptParams),
         retryTask: balancePrompt({ ...promptParams, retry: true }),
         countryCode: triage.countryCode,
@@ -259,7 +259,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
         usage,
         signal,
       });
-      return { status: "ok", data, diagnostics };
+      return { status: "ok", data, diagnostics, lineSource };
     } catch (err) {
       // A busca é um complemento: se falhar, o resto da análise continua valendo.
       if (signal?.aborted) throw err;

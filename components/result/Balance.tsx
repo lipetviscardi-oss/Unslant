@@ -35,9 +35,17 @@ export function Balance({ result }: { result: AnalysisResult }) {
             <p className="text-muted">{tb.none}</p>
           ) : (
             <ul className="grid gap-3 md:grid-cols-2">
-              {b.data.articles.map((a) => (
+              {b.data.articles.map((a, i) => (
                 <li key={a.url} className="grid content-start gap-2 rounded-[16px] bg-paper p-5">
-                  <p className="text-sm text-muted">{a.outlet}</p>
+                  <p className="flex flex-wrap items-baseline gap-x-2 text-sm text-muted">
+                    <span>{a.outlet}</span>
+                    {a.editorialLine && (
+                      <span className="rounded-full border border-line px-2 py-0.5 text-xs">
+                        {tb.line}: {t.labels.editorialLine[a.editorialLine]}
+                        {b.lineSource?.[i] !== "table" && a.editorialLine !== "unknown" ? ` (${tb.estimated})` : ""}
+                      </span>
+                    )}
+                  </p>
                   <a
                     href={a.url}
                     target="_blank"

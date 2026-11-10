@@ -155,6 +155,8 @@ export interface AnalysisResult {
   balance?: {
     status: "ok" | "unavailable" | "disabled" | "demo";
     data: BalanceOutput | null;
+    /** De onde veio a linha editorial de cada link (mesma ordem de data.articles). */
+    lineSource?: ("table" | "ai")[];
     /** Detalhes da busca (para entender resultados vazios). */
     diagnostics?: BalanceDiagnostics;
   };
