@@ -30,12 +30,19 @@ export function Home() {
     abortRef.current = controller;
     setView({ kind: "running", progress: { stage: req.mode === "url" ? "extracting" : "context" } });
     window.scrollTo({ top: 0 });
+    let background = false;
     try {
       const { result, access } = await requestAnalysis(
         req,
         (event) => {
-          if (event.type === "stage") {
-            setView({ kind: "running", progress: { stage: event.stage, done: event.done, total: event.total, note: event.note } });
+          if (event.type === "job") background = true;
+          if (event.type === "stage" || event.type === "job") {
+            setView((v) => {
+              const prev = v.kind === "running" ? v.progress : { stage: "context" as const };
+              const progress =
+                event.type === "stage" ? { stage: event.stage, done: event.done, total: event.total, note: event.note } : prev;
+              return { kind: "running", progress: { ...progress, background } };
+            });
           }
         },
         controller.signal,

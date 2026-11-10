@@ -155,6 +155,8 @@ export const pt = {
     },
     state: { done: "concluído", active: "em andamento", pending: "aguardando" },
     cancel: "Cancelar análise",
+    background: "Pode fechar esta página: a análise continua e o resultado aparece em Minhas análises.",
+    leave: "Voltar ao início (a análise continua)",
   },
 
   result: {

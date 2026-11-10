@@ -23,6 +23,19 @@ interface Row {
   status: "running" | "done" | "error";
 }
 
+/**
+ * Uma análise "em andamento" há mais tempo que isto não vai mais terminar
+ * (o servidor tem no máximo 5 minutos por análise): aparece como não concluída.
+ */
+const STALE_MS = 10 * 60 * 1000;
+/** De quanto em quanto tempo a lista se atualiza enquanto há análise em andamento. */
+const POLL_MS = 8000;
+
+function statusOf(r: Row): Row["status"] {
+  if (r.status === "running" && Date.now() - new Date(r.created_at).getTime() > STALE_MS) return "error";
+  return r.status;
+}
+
 export function MyAnalyses() {
   const t = useDict();
   const lang = useLang();
@@ -31,6 +44,8 @@ export function MyAnalyses() {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
   const [failed, setFailed] = useState(false);
+
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     if (!supabase) return;
@@ -45,7 +60,15 @@ export function MyAnalyses() {
       if (error) setFailed(true);
       else setRows(list as Row[]);
     });
-  }, [supabase]);
+  }, [supabase, tick]);
+
+  // Enquanto alguma análise estiver em andamento, a lista se atualiza sozinha.
+  const anyRunning = rows?.some((r) => statusOf(r) === "running") ?? false;
+  useEffect(() => {
+    if (!anyRunning) return;
+    const timer = window.setTimeout(() => setTick((n) => n + 1), POLL_MS);
+    return () => window.clearTimeout(timer);
+  }, [anyRunning, rows]);
 
   async function remove(id: string) {
     if (!supabase || !window.confirm(tm.confirmDelete)) return;
@@ -77,6 +100,7 @@ export function MyAnalyses() {
       <p className="text-sm text-muted">{tm.deleteNote}</p>
       <ul className="flex flex-col gap-3">
         {rows.map((r) => {
+          const status = statusOf(r);
           const sev = r.score != null ? severity(r.score) : null;
           return (
             <li key={r.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[16px] bg-paper p-4">
@@ -89,11 +113,11 @@ export function MyAnalyses() {
                 <span className="truncate font-medium">{r.title || r.source_url || tm.untitled}</span>
                 <span className="text-sm text-muted">
                   {date(r.created_at)} · {r.kind === "detailed" || r.detailed_unlocked ? tm.detailed : tm.simple}
-                  {r.status === "running" ? ` · ${tm.running}` : r.status === "error" ? ` · ${tm.failed}` : ""}
+                  {status === "running" ? ` · ${tm.running}` : status === "error" ? ` · ${tm.failed}` : ""}
                 </span>
               </div>
               <div className="flex gap-2">
-                {r.status === "done" && (
+                {status === "done" && (
                   <Link href={`/${lang}/analysis?id=${r.id}`} className="rounded-full border border-ink px-3 py-1 text-sm font-medium hover:bg-ink hover:text-paper">
                     {tm.open}
                   </Link>

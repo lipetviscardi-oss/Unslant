@@ -155,6 +155,8 @@ export const en: Dict = {
     },
     state: { done: "done", active: "in progress", pending: "waiting" },
     cancel: "Cancel analysis",
+    background: "You can close this page: the analysis keeps running and the result will appear in My analyses.",
+    leave: "Back to start (the analysis keeps running)",
   },
 
   result: {

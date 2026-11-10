@@ -75,3 +75,66 @@ export async function unlockAnalysis(id: string, full: AnalysisResult) {
   const { error } = await db.from("analyses").update({ detailed_unlocked: true, result: full }).eq("id", id);
   if (error) throw new Error(`liberar análise: ${error.message}`);
 }
+
+/**
+ * ANÁLISE EM SEGUNDO PLANO: a linha é criada como "em andamento" antes de a
+ * IA começar. Assim, se a pessoa fechar a página, a análise continua e o
+ * resultado aparece em "Minhas análises" quando ficar pronto.
+ */
+export async function createRunning(params: {
+  viewer: Viewer;
+  kind: Kind;
+  cacheKey: string;
+  title?: string;
+  sourceUrl?: string;
+  language: string;
+}): Promise<string | null> {
+  const db = supabaseAdmin();
+  if (!db || !params.viewer.userId) return null;
+  const { data, error } = await db
+    .from("analyses")
+    .insert({
+      user_id: params.viewer.userId,
+      local_day: params.viewer.day,
+      kind: params.kind,
+      counted: true,
+      status: "running",
+      title: params.title ?? null,
+      source_url: params.sourceUrl ?? null,
+      language: params.language,
+      cache_key: params.cacheKey,
+    })
+    .select("id")
+    .single();
+  if (error) {
+    console.warn("[unslant] não foi possível criar a análise em andamento:", error.message);
+    return null;
+  }
+  return data.id as string;
+}
+
+/** A análise terminou: guarda o resultado (na simples, a versão simples). */
+export async function completeAnalysis(id: string, kind: Kind, result: AnalysisResult) {
+  const db = supabaseAdmin();
+  if (!db) return;
+  const { error } = await db
+    .from("analyses")
+    .update({
+      status: "done",
+      title: result.source.title ?? result.context.topic ?? null,
+      source_url: result.source.url ?? null,
+      content_type: result.context.contentType,
+      score: result.overall.score,
+      language: result.language,
+      result: kind === "simple" ? toSimplePayload(result) : result,
+    })
+    .eq("id", id);
+  if (error) console.warn("[unslant] não foi possível concluir a análise:", error.message);
+}
+
+/** A análise falhou: marca o erro (o uso do dia é devolvido em outro lugar). */
+export async function failAnalysis(id: string, code: string) {
+  const db = supabaseAdmin();
+  if (!db) return;
+  await db.from("analyses").update({ status: "error", error_code: code }).eq("id", id);
+}

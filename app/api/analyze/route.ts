@@ -7,6 +7,7 @@
  */
 
 import { createHash } from "node:crypto";
+import { after } from "next/server";
 import { z } from "zod";
 import { config } from "@/lib/config";
 import { AppError, errorMessage } from "@/lib/errors";
@@ -22,7 +23,7 @@ import { runDemo } from "@/lib/demo";
 import type { AnalysisResult, ResultAccess, SourceInfo, StreamEvent } from "@/lib/analysis/types";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { identifyViewer, limitsFor, linkUsage, refundUsage, remainingToday, reserveUsage, siteUsageLast24h, type Kind } from "@/lib/analysis/usage";
-import { saveAnalysis } from "@/lib/analysis/store";
+import { completeAnalysis, createRunning, failAnalysis, saveAnalysis } from "@/lib/analysis/store";
 import { toSimplePayload } from "@/lib/analysis/access";
 
 // Análises podem levar alguns minutos (limite da Vercel: até 300 s no plano grátis).
@@ -103,11 +104,21 @@ export async function POST(request: Request) {
   if (viewer && limitsFor(viewer)[kind] === 0) {
     return Response.json({ code: "LOGIN_REQUIRED", message: errorMessage("LOGIN_REQUIRED", lang) }, { status: 403 });
   }
+  // ANÁLISE EM SEGUNDO PLANO (quem tem conta): o servidor continua trabalhando
+  // até a análise terminar, mesmo que a pessoa feche a página. O resultado vai
+  // para "Minhas análises". (Limite: a duração máxima da rota, maxDuration.)
+  let markDone: () => void = () => undefined;
+  if (viewer?.userId) {
+    const done = new Promise<void>((resolve) => (markDone = resolve));
+    after(() => done);
+  }
+
   /** Salva em "Minhas análises" (quem tem conta) e diz o que a pessoa pode ver. */
-  const finish = async (result: AnalysisResult, key: string, counted: boolean, usageId: number | null) => {
+  const finish = async (result: AnalysisResult, key: string, counted: boolean, usageId: number | null, runningId: string | null = null) => {
     if (!viewer) return { result, access: undefined };
-    const analysisId = await saveAnalysis({ viewer, kind, result, cacheKey: key, counted });
-    if (analysisId) await linkUsage(usageId, analysisId);
+    // Análise em segundo plano: a linha já existe (e já foi concluída); senão, cria agora.
+    const analysisId = runningId ?? (await saveAnalysis({ viewer, kind, result, cacheKey: key, counted }));
+    if (analysisId && !runningId) await linkUsage(usageId, analysisId);
     const access: ResultAccess = {
       limitsOn: true,
       loggedIn: Boolean(viewer.userId),
@@ -134,6 +145,7 @@ export async function POST(request: Request) {
 
       let reserved = false;
       let usageId: number | null = null;
+      let runningId: string | null = null;
       try {
         if (body.mode === "demo") {
           send({ type: "result", result: await runDemo(body.demoId ?? "", lang, send) });
@@ -218,19 +230,36 @@ export async function POST(request: Request) {
             thumb: img.thumb,
           }));
         }
+        // Quem tem conta: a análise fica salva como "em andamento" desde já.
+        if (viewer?.userId) {
+          runningId = await createRunning({
+            viewer,
+            kind,
+            cacheKey: key,
+            title: source.title ?? (body.mode === "claim" ? text.slice(0, 120) : undefined),
+            sourceUrl: source.url,
+            language: lang,
+          });
+          if (runningId) {
+            await linkUsage(usageId, runningId);
+            send({ type: "job", analysisId: runningId });
+          }
+        }
         const result = await runPipeline({
           visuals,
           text,
           source,
           lang,
-          signal: request.signal,
+          // Em segundo plano, fechar a página NÃO cancela a análise.
+          signal: runningId ? undefined : request.signal,
           onProgress: send,
           specialistEffort: dev?.specialistEffort,
           specialistModel: dev?.specialistModel,
         });
         // Resultado de experimento não entra no cache (para não se misturar com as análises normais).
         if (!dev?.specialistEffort && !dev?.specialistModel) await writeCache(key, result);
-        send({ type: "result", ...(await finish(result, key, true, usageId)) });
+        if (runningId) await completeAnalysis(runningId, kind, result);
+        send({ type: "result", ...(await finish(result, key, true, usageId, runningId)) });
       } catch (err) {
         const code = err instanceof AppError ? err.code : "UNKNOWN";
         // Erros que acontecem antes de qualquer gasto devolvem a vaga do limite diário.
@@ -239,6 +268,7 @@ export async function POST(request: Request) {
         }
         // A análise não saiu: o uso do dia é devolvido.
         if (usageId !== null) await refundUsage(usageId).catch(() => undefined);
+        if (runningId) await failAnalysis(runningId, code).catch(() => undefined);
         console.error(`[unslant] erro ${code}:`, err instanceof AppError ? err.detail ?? "" : err);
         // No computador de desenvolvimento (npm run dev), o detalhe técnico vai junto, para facilitar
         // o diagnóstico. No site publicado, só a mensagem simples (o detalhe fica no registro do servidor).
@@ -246,6 +276,7 @@ export async function POST(request: Request) {
         send({ type: "error", code, message: errorMessage(code, lang) + detail });
       } finally {
         closed = true;
+        markDone();
         try {
           controller.close();
         } catch {

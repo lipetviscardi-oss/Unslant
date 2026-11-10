@@ -229,6 +229,8 @@ export type StreamEvent =
       note?: "long" | "waiting";
     }
   | { type: "result"; result: AnalysisResult; access?: ResultAccess }
+  /** Quem tem conta: a análise foi criada em "Minhas análises" e continua mesmo se a página for fechada. */
+  | { type: "job"; analysisId: string }
   | { type: "error"; code: string; message: string };
 
 /**

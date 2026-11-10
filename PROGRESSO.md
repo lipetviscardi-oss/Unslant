@@ -94,7 +94,7 @@ pode instalar @supabase/supabase-js e @supabase/ssr.
 | P4 | Login por link no e-mail: página Entrar, /auth/callback, menu da conta | feito |
 | P5 | Limites: visitante 1 simples; grátis 3 simples + 1 detalhada por dia (meia-noite local); cache não conta | feito (falta teste do usuário) |
 | P6 | Minhas análises (histórico, abrir, apagar) + página da análise salva | feito (falta teste do usuário) |
-| P7 | Análise em segundo plano (etapas salvas no banco) | a fazer (esperando o usuário testar P3–P6) |
+| P7 | Análise em segundo plano: quem tem conta pode fechar a página; a análise continua no servidor (after()), fica "em andamento" em Minhas análises e aparece quando termina. Testado com servidores falsos: página aberta, página fechada e erro (marca "não concluída" e devolve o uso). Limite: 5 minutos por análise na Vercel; dividir em etapas fica para a Fase 6, depois de medir | feito |
 | P8 | Privacidade, README, testes | a fazer |
 
 ## Rodada 8 — ajustes da versão em inglês: FEITA (usuário vai rodar npm run teste:salvar + npm run teste)

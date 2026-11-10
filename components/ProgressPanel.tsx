@@ -10,6 +10,8 @@ export interface ProgressState {
   done?: number;
   total?: number;
   note?: "long" | "waiting";
+  /** Análise em segundo plano (quem tem conta): continua mesmo se a página fechar. */
+  background?: boolean;
 }
 
 export function ProgressPanel({ progress, onCancel }: { progress: ProgressState; onCancel: () => void }) {
@@ -22,6 +24,9 @@ export function ProgressPanel({ progress, onCancel }: { progress: ProgressState;
         {t.progress.title}
       </h2>
       <p className="mb-6 text-sm text-muted">{t.progress.duration}</p>
+      {progress.background && (
+        <p className="-mt-3 mb-6 rounded-lg bg-mist px-3 py-2 text-sm text-ink">{t.progress.background}</p>
+      )}
 
       <ol className="grid gap-5" aria-live="polite">
         {STEP_IDS.map((id, i) => {
@@ -70,7 +75,7 @@ export function ProgressPanel({ progress, onCancel }: { progress: ProgressState;
       </ol>
 
       <button type="button" onClick={onCancel} className="mt-8 text-sm text-muted underline underline-offset-4 hover:text-ink">
-        {t.progress.cancel}
+        {progress.background ? t.progress.leave : t.progress.cancel}
       </button>
     </section>
   );
