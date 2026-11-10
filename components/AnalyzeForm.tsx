@@ -16,7 +16,22 @@ import { useDict, useLang } from "@/lib/i18n";
 
 type Tab = "url" | "text" | "pdf" | "claim";
 const TAB_IDS: Tab[] = ["url", "text", "pdf", "claim"];
-const GENRES: DeclaredType[] = ["news", "feature", "analysis", "opinion", "editorial", "academic_paper", "press_release", "blog", "other"];
+const GENRES: DeclaredType[] = [
+  "news",
+  "feature",
+  "analysis",
+  "opinion",
+  "editorial",
+  "academic_paper",
+  "press_release",
+  "blog",
+  "speech",
+  "official_document",
+  "propaganda",
+  "letter",
+  "historical_newspaper",
+  "other",
+];
 
 interface PdfState {
   status: "idle" | "reading" | "ready" | "error";

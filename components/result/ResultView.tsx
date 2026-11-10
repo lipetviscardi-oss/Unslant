@@ -269,6 +269,9 @@ export function ResultView({
           <div className="flex flex-wrap gap-2">
             <Chip tone="teal">{t.labels.contentType[context.contentType]}</Chip>
             {context.country && <Chip>{context.country}</Chip>}
+            {!isClaim && context.era !== undefined && (
+              <Chip>{context.era ? t.result.era.label(context.era) : t.result.era.unknown}</Chip>
+            )}
             {context.topic && <Chip>{context.topic}</Chip>}
           </div>
           {!isClaim && (context.contentTypeSource === "user" || context.contentTypeReason) && (
@@ -364,6 +367,7 @@ export function ResultView({
                     {context.politicalContext}
                   </p>
                 )}
+                {context.historical && <p className="max-w-[68ch] text-sm text-muted">{t.result.era.historicalNote}</p>}
               </section>
               <FactOpinion result={result} />
             </div>

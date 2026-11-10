@@ -23,6 +23,7 @@ ${contextBlock({
     "Tipo de texto": triage.contentType,
     País: triage.country,
     "Contexto político": triage.politicalContext,
+    Época: triage.era ? `${triage.era}${triage.historical ? " (texto histórico: analise com o contexto DESSA época)" : ""}` : "não identificada",
     Tema: triage.topic,
   })}
 

@@ -17,6 +17,7 @@
  */
 
 import { NOT_MILD_MIN } from "@/lib/taxonomy";
+import { anachronisms } from "@/lib/historico";
 
 export interface ContradictionInput {
   summary: string;
@@ -27,10 +28,12 @@ export interface ContradictionInput {
   overallScore: number;
   /** Categorias encontradas: nome e nota. */
   categories: { name: string; score: number }[];
+  /** Textos históricos: ano da época e o texto do documento (para achar anacronismos). */
+  era?: { year: number; label: string; documentText: string };
 }
 
 export interface Contradiction {
-  kind: "genre" | "label" | "dispute_side" | "dispute_strength" | "dispute_balance" | "no_bias" | "mild_vs_high";
+  kind: "anachronism" | "genre" | "label" | "dispute_side" | "dispute_strength" | "dispute_balance" | "no_bias" | "mild_vs_high";
   note: string;
   sentence: string;
 }
@@ -161,9 +164,26 @@ function scoreProblems(text: string, input: ContradictionInput): Contradiction[]
   return out;
 }
 
+/** Texto histórico: o resumo não pode citar pessoas ou partidos posteriores à época. */
+function eraProblems(text: string, input: ContradictionInput): Contradiction[] {
+  if (!input.era) return [];
+  const era = input.era;
+  return sentencesOf(text).flatMap((sentence) => {
+    const late = anachronisms(sentence, era.documentText, era.year);
+    return late.length
+      ? [{ kind: "anachronism" as const, note: `cita ${late.join(", ")}, que são posteriores à época do texto (${era.label}); analise só com o contexto daquela época`, sentence }]
+      : [];
+  });
+}
+
 /** Todas as contradições do resumo e do resumo simples (sem repetir a mesma frase e o mesmo tipo). */
 export function findContradictions(input: ContradictionInput): Contradiction[] {
-  const all = [input.summary, input.summarySimple].flatMap((t) => [...genreProblems(t, input), ...disputeProblems(t, input), ...scoreProblems(t, input)]);
+  const all = [input.summary, input.summarySimple].flatMap((t) => [
+    ...eraProblems(t, input),
+    ...genreProblems(t, input),
+    ...disputeProblems(t, input),
+    ...scoreProblems(t, input),
+  ]);
   const seen = new Set<string>();
   return all.filter((c) => {
     const k = `${c.kind}|${c.sentence}`;

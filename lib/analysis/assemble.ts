@@ -159,7 +159,18 @@ function verifyCategory(
         continue;
       }
       seen.add(pos.start);
-      evidence.push({ id: "", quote: ev.quote, explanation: ev.explanation, start: pos.start, end: pos.end, quoted, ...(ev.strength ? { strength: ev.strength } : {}) });
+      const periodNorm = ev.eraUsage === "period_norm";
+      evidence.push({
+        id: "",
+        quote: ev.quote,
+        explanation: ev.explanation,
+        start: pos.start,
+        end: pos.end,
+        quoted,
+        // Linguagem comum na época conta como sinal leve.
+        ...(ev.strength ? { strength: periodNorm ? "weak" : ev.strength } : periodNorm ? { strength: "weak" as const } : {}),
+        ...(ev.eraUsage && ev.eraUsage !== "none" ? { eraUsage: ev.eraUsage } : {}),
+      });
     }
     if (evidence.length === 0) {
       // Sem evidência verificável, não há afirmação de viés.
@@ -629,6 +640,8 @@ export function findingsForSynthesis(triage: TriageOutput, findings: Findings, t
         // Motivo do tipo, dado na identificação: o resumo não pode descrever o gênero de outro jeito.
         motivoDoTipo: triage.contentTypeReason || undefined,
         pais: triage.country,
+        epoca: triage.era || (lang === "pt" ? "não identificada" : "unidentified"),
+        ...(triage.historical ? { textoHistorico: true, contextoDaEpoca: triage.politicalContext } : {}),
         tema: triage.topic,
         resumo: triage.contentSummary,
       },
@@ -745,6 +758,10 @@ export function finalizeResult(params: {
       topic: triage.topic,
       contentSummary: triage.contentSummary,
       documentLanguage: triage.documentLanguage,
+      era: triage.era,
+      eraYear: triage.eraYear,
+      eraSource: triage.eraSource,
+      historical: triage.historical,
     },
     text,
     overall: findings.overall,

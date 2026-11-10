@@ -47,6 +47,12 @@ export const source: SourceInfo = {
 export const claimCheck = null;
 
 export const triage: TriageOutput = {
+  era: "2026",
+  eraYear: 2026,
+  eraSource: "content",
+  historical: false,
+  axesApplicable: true,
+  axesNote: "",
   contentType: "news",
   contentTypeReason: "Publicado como notícia, mas o próprio autor faz avaliações e apelos fora das aspas; a classificação de gênero segue a forma de publicação.",
   country: "Brasil",

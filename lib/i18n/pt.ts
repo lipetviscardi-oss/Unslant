@@ -208,6 +208,12 @@ export const pt = {
     },
 
     mode: { label: "Modo de exibição", simple: "Simples", detailed: "Detalhado" },
+    era: {
+      label: (era: string) => `Época: ${era}`,
+      unknown: "Época não identificada",
+      historicalNote: "Texto histórico: o contexto, a disputa e os eixos políticos são os da época do texto, não os de hoje.",
+      usage: { period_norm: "linguagem da época", loaded_then: "carregado mesmo para a época" },
+    },
     rebuttals: {
       title: "Respostas do autor às críticas",
       lede: "O texto rebate críticas conhecidas. Para cada uma, avaliamos se a resposta procede e até onde.",
@@ -386,6 +392,11 @@ export const pt = {
       academic_paper: "Artigo acadêmico",
       press_release: "Comunicado de imprensa",
       blog: "Blog",
+      speech: "Discurso",
+      official_document: "Documento oficial",
+      propaganda: "Propaganda",
+      letter: "Carta/correspondência",
+      historical_newspaper: "Jornal histórico",
       other: "Outro tipo de texto",
       claim: "Afirmação",
     },

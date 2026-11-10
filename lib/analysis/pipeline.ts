@@ -28,6 +28,8 @@ import { claimCheckPrompt } from "@/lib/prompts/claimCheck";
 import { balancePrompt } from "@/lib/prompts/balance";
 import { visualPrompt } from "@/lib/prompts/visual";
 import { findContradictions, removeSentences, type ContradictionInput } from "./contradictions";
+import { applyEraRules } from "./era";
+import { anachronisms } from "@/lib/historico";
 import { figureLabel, IMAGE_CATEGORY_IDS, toCallImages, visualContext, type VisualInput } from "./visuals";
 import { searchBalance } from "@/lib/ai/balance";
 import { counterpartsFor, leaningOf } from "@/lib/veiculos";
@@ -103,18 +105,31 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
 
   // 1. Identificação (modelo leve)
   onProgress({ type: "stage", stage: "context" });
-  const identified = await callStructured({
-    label: "identificação",
-    stage: "identificação",
-    light: true, // tarefa simples: tipo de texto, país e contexto
-    schema: TriageSchema,
-    documentBlock: buildDocumentBlock(parts[0].text, source, boundary, { index: 0, total: parts.length }),
-    task: triagePrompt(lang, isClaim, source.declaredType),
-    effort: config.ai.effort.triage,
-    maxTokens: config.ai.maxTokens.triage,
-    usage,
-    signal,
-  });
+  const runTriage = (retryNote = "") =>
+    callStructured({
+      label: "identificação",
+      stage: "identificação",
+      light: true, // tarefa simples: tipo de texto, época, país e contexto
+      schema: TriageSchema,
+      documentBlock: buildDocumentBlock(parts[0].text, source, boundary, { index: 0, total: parts.length }),
+      task: triagePrompt(lang, isClaim, source.declaredType, retryNote),
+      effort: config.ai.effort.triage,
+      maxTokens: config.ai.maxTokens.triage,
+      usage,
+      signal,
+    });
+  let identified = await runTriage();
+  // Texto histórico: o contexto político não pode citar pessoas ou partidos posteriores à época.
+  if (identified.historical) {
+    const late = anachronisms(identified.politicalContext, text, identified.eraYear);
+    if (late.length) {
+      console.warn(`[unslant] contexto anacrônico (${late.join(", ")}): identificação refeita`);
+      identified = await runTriage(
+        `o contexto político citou ${late.join(", ")}, que são posteriores à época do texto (${identified.era}). Descreva o cenário DAQUELA época, sem nada posterior a ela.`,
+      );
+      if (anachronisms(identified.politicalContext, text, identified.eraYear).length) identified = { ...identified, politicalContext: "" };
+    }
+  }
 
   // Na aba "Afirmação", o tipo é sempre "afirmação" (define os grupos analisados).
   // Se o usuário escolheu o tipo do texto no formulário, ele prevalece.
@@ -269,7 +284,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
 
   // 3. Conferência das citações e cálculo das notas
   const visual = visuals.length ? { inputs: visuals, output: visualOutput } : null;
-  const findings = buildFindings(text, triage, rawParts, lang, visual);
+  const findings = applyEraRules(buildFindings(text, triage, rawParts, lang, visual), triage, text, lang);
 
   // 4. Síntese + busca de textos para equilibrar, ao mesmo tempo
   onProgress({ type: "stage", stage: "balancing" });
@@ -300,6 +315,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
     contentTypeReason: triage.contentTypeReason,
     dispute: findings.political.dispute,
     overallScore: findings.overall.score,
+    ...(triage.historical && triage.eraYear ? { era: { year: triage.eraYear, label: triage.era, documentText: text } } : {}),
     categories: findings.groups.flatMap((g) => g.categories.filter((c) => c.status === "found").map((c) => ({ name: getCategory(c.id)?.category.name.pt ?? c.id, score: c.score }))),
   });
   const synthesisProblems = (out: SynthesisOutput) => {
@@ -366,7 +382,8 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
         lang,
       };
       // Para que lado o texto pende e quais veículos são "do outro lado" (lib/veiculos.ts).
-      const cp = counterpartsFor(triage.countryCode, leaningOf(findings.political.economic.position, findings.political.social.position));
+      // Texto histórico: a busca é por historiografia e fontes da época, não por "veículos do outro lado".
+      const cp = triage.historical ? null : counterpartsFor(triage.countryCode, leaningOf(findings.political.economic.position, findings.political.social.position));
       const params = { ...promptParams, counterparts: cp?.names };
       const { data, diagnostics, lineSource } = await searchBalance({
         task: balancePrompt(params),

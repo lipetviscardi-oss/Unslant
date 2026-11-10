@@ -9,7 +9,19 @@ import type { TriageOutput } from "@/lib/analysis/schemas";
 import { contextBlock, languageInstruction } from "./document";
 
 /** Instruções da visão geral (reaproveitadas quando ela vai junto de um pacote de especialistas). */
-export function overviewInstructions() {
+/** Regras extras para textos históricos (contexto, disputa e eixos DA ÉPOCA). */
+function historicalRules(triage?: TriageOutput) {
+  if (!triage?.historical) return "";
+  return `
+TEXTO HISTÓRICO (época: ${triage.era || "não identificada"}). Regras que valem para TODA a visão geral:
+- Analise com o cenário político DAQUELA época e lugar. NUNCA use partidos, pessoas ou disputas posteriores à época do texto (ex.: num texto de 1964, nada de Lula, Bolsonaro, PT, PL ou da polarização atual).
+- Disputa: use os lados que existiam NA ÉPOCA (ex.: UDN × PTB; governo Goulart × oposição civil-militar; governo militar × oposição; Aliados × Eixo; bloco soviético × bloco ocidental; abolicionistas × escravocratas). sideA continua sendo quem estava no poder naquele momento.
+- Eixos econômico e social: ${triage.axesApplicable ? "avalie com o sentido que esquerda e direita tinham NAQUELA época; se a posição não se encaixar bem, prefira \"unidentified\" a forçar uma classificação." : `use "not_applicable" nos DOIS eixos (esquerda/direita, como entendidas hoje, não se aplicam a esta época). Na justificativa, explique por quê: ${triage.axesNote || "as categorias atuais não organizavam a política daquele tempo"}.`}
+- Omissões: o que o texto deixa de fora considerando o que se sabia ou se debatia na época; se citar algo que só se soube depois (pela historiografia), diga isso explicitamente.
+`;
+}
+
+export function overviewInstructions(triage?: TriageOutput) {
   return `1) EIXOS IDEOLÓGICOS ("economic" e "social")
    Para cada eixo: position, confidence, justification (1 a 3 frases) e quote (trecho EXATO do documento que sustenta a classificação; "" se position não for "left" ou "right").
    position:
@@ -44,7 +56,7 @@ export function overviewInstructions() {
    Use o conhecimento geral amplamente aceito sobre o tema e a mesma régua para qualquer lado. Lista vazia se o texto não rebate nenhuma crítica.
 
 Muitos textos não têm inclinação em nenhum eixo nem favorecem lado algum. Isso é normal: não force classificações.
-`;
+${historicalRules(triage)}`;
 }
 
 export function overviewPrompt(triage: TriageOutput, lang: "pt" | "en") {
@@ -54,9 +66,10 @@ ${contextBlock({
     "Tipo de texto": triage.contentType,
     País: triage.country,
     "Contexto político": triage.politicalContext,
+    Época: triage.era ? `${triage.era}${triage.historical ? " (texto histórico: analise com o contexto DESSA época)" : ""}` : "não identificada",
     Tema: triage.topic,
   })}
 
-${overviewInstructions()}
+${overviewInstructions(triage)}
 ${languageInstruction(lang)}`;
 }

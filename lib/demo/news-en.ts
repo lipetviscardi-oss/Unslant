@@ -53,6 +53,12 @@ export const source: SourceInfo = {
 export const claimCheck = null;
 
 export const triage: TriageOutput = {
+  era: "2026",
+  eraYear: 2026,
+  eraSource: "content",
+  historical: false,
+  axesApplicable: true,
+  axesNote: "",
   contentType: "news",
   contentTypeReason:
     "Published as a news report, but the author adds judgments and predictions outside quotation marks; the genre follows the form of publication.",

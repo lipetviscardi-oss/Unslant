@@ -259,6 +259,47 @@ export function MethodologyPt() {
         encontradas na web para você checar por conta própria.
       </p>
 
+      <h2>Textos históricos</h2>
+      <p>
+        Discursos, documentos oficiais, propaganda, cartas e jornais antigos precisam ser lidos no contexto da época em
+        que foram escritos. Analisar um texto de 1964 com o cenário político de hoje seria um anacronismo. Por isso:
+      </p>
+      <ul>
+        <li>
+          <strong>Época:</strong> antes da análise, a IA identifica a data ou o período do texto, pela data escrita no
+          documento ou por pistas do conteúdo, e o resultado mostra &ldquo;Época: …&rdquo;. A data guardada num arquivo
+          PDF não é usada, porque costuma ser a data em que ele foi escaneado. Se a época não puder ser identificada, a
+          análise política é mostrada com confiança baixa.
+        </li>
+        <li>
+          <strong>Contexto da época:</strong> o &ldquo;Contexto considerado&rdquo;, os lados da disputa (por exemplo, UDN
+          × PTB, governo militar × oposição, Aliados × Eixo) e as omissões são os daquele período. Uma trava automática
+          impede que a análise cite pessoas ou partidos posteriores à época do texto; se isso acontecer, a parte afetada
+          é refeita ou descartada.
+        </li>
+        <li>
+          <strong>Esquerda e direita:</strong> só são usadas quando fazem sentido para a época. Em textos muito antigos,
+          em que essas categorias não organizavam a política como hoje, os eixos aparecem como &ldquo;não se aplica&rdquo;,
+          com a explicação.
+        </li>
+        <li>
+          <strong>Linguagem da época:</strong> termos que hoje soam ofensivos, mas eram o uso corrente, são marcados como
+          &ldquo;linguagem da época&rdquo; e contam como sinal leve. Usos carregados mesmo para os padrões daquele tempo
+          são marcados como tal. Propaganda, desumanização e estereótipos continuam sendo apontados normalmente.
+        </li>
+        <li>
+          <strong>Para equilibrar:</strong> em vez de notícias atuais, a busca traz historiografia de correntes
+          diferentes, acervos (como a Hemeroteca Digital da Biblioteca Nacional e o CPDOC/FGV) e outras fontes da mesma
+          época que mostrem o outro lado.
+        </li>
+      </ul>
+      <p>
+        <strong>Limitações:</strong> a IA sabe mais sobre períodos e lugares muito documentados do que sobre os pouco
+        documentados, e pode errar a época de textos sem data. Documentos escaneados sem texto selecionável ainda não
+        podem ser analisados. O resultado é um ponto de partida para a crítica de fontes, não substitui o trabalho do
+        historiador.
+      </p>
+
       <h2>Limitações que você deve conhecer</h2>
       <ul>
         <li>
@@ -530,6 +571,47 @@ export function MethodologyEn() {
         It does not consult sources during the check. That is why the AI is told to prefer &ldquo;not enough
         evidence&rdquo; when unsure. Right below, the &ldquo;Where to check this claim&rdquo; section lists real sources
         found on the web so you can check for yourself.
+      </p>
+
+      <h2>Historical texts</h2>
+      <p>
+        Speeches, official documents, propaganda, letters and old newspapers must be read in the context of the time
+        they were written. Analyzing a 1964 text with today&rsquo;s political landscape would be an anachronism. So:
+      </p>
+      <ul>
+        <li>
+          <strong>Period:</strong> before the analysis, the AI identifies the text&rsquo;s date or period, from a date
+          written in the document or from clues in its content, and the result shows &ldquo;Period: …&rdquo;. The date
+          stored in a PDF file is not used, since it is usually when the file was scanned. If the period cannot be
+          identified, the political analysis is shown with low confidence.
+        </li>
+        <li>
+          <strong>Context of the time:</strong> the &ldquo;Context considered&rdquo;, the sides of the dispute (e.g., UDN
+          vs. PTB, military government vs. opposition, Allies vs. Axis) and the omissions are those of that period. An
+          automatic check prevents the analysis from mentioning people or parties from after the text&rsquo;s time; if it
+          happens, the affected part is redone or discarded.
+        </li>
+        <li>
+          <strong>Left and right:</strong> used only when they make sense for the period. For very old texts, when these
+          categories did not organize politics as they do today, the axes are shown as &ldquo;not applicable&rdquo;, with
+          an explanation.
+        </li>
+        <li>
+          <strong>Period language:</strong> terms that sound offensive today but were common usage are marked as
+          &ldquo;period language&rdquo; and count as a mild signal. Usage that was loaded even by the standards of the
+          time is marked as such. Propaganda, dehumanization and stereotypes are still flagged as usual.
+        </li>
+        <li>
+          <strong>To balance your reading:</strong> instead of current news, the search brings historiography from
+          different schools, archives (such as Brazil&rsquo;s National Library digital newspaper archive and CPDOC/FGV)
+          and other sources from the same period that show the other side.
+        </li>
+      </ul>
+      <p>
+        <strong>Limitations:</strong> the AI knows more about well-documented periods and places than about poorly
+        documented ones, and it may get the period of undated texts wrong. Scanned documents without selectable text
+        cannot be analyzed yet. The result is a starting point for source criticism, not a substitute for the
+        historian&rsquo;s work.
       </p>
 
       <h2>Limitations you should know about</h2>

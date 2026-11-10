@@ -17,6 +17,11 @@ export type DeclaredType =
   | "academic_paper"
   | "press_release"
   | "blog"
+  | "speech"
+  | "official_document"
+  | "propaganda"
+  | "letter"
+  | "historical_newspaper"
   | "other";
 
 export type AnalyzeRequest = (

@@ -48,6 +48,11 @@ function EvidenceDetails({ refs, onClose }: { refs: EvidenceRef[]; onClose: () =
                 {r.groupDef?.name[lang]}
                 {r.evidence.strength ? ` · ${t.result.text.weight(t.result.text.strength[r.evidence.strength])}` : ""}
               </p>
+              {r.evidence.eraUsage && (
+                <p>
+                  <span className="rounded-full bg-mist px-2 py-0.5 text-xs text-ink">{t.result.era.usage[r.evidence.eraUsage]}</span>
+                </p>
+              )}
               <p className="text-[15px] leading-relaxed">{r.evidence.explanation}</p>
             </li>
           );

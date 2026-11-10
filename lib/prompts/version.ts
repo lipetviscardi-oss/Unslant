@@ -30,6 +30,12 @@ import { visualPrompt } from "./visual";
 export const ANALYSIS_VERSION = 7;
 
 const SAMPLE_TRIAGE: TriageOutput = {
+  era: "X",
+  eraYear: 0,
+  eraSource: "content",
+  historical: false,
+  axesApplicable: true,
+  axesNote: "",
   contentType: "news",
   contentTypeReason: "X",
   country: "X",

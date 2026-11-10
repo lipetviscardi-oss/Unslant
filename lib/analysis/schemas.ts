@@ -24,6 +24,11 @@ export const ContentTypeSchema = z.enum([
   "academic_paper",
   "press_release",
   "blog",
+  "speech",
+  "official_document",
+  "propaganda",
+  "letter",
+  "historical_newspaper",
   "other",
   "claim",
 ]);
@@ -44,6 +49,18 @@ export const TriageSchema = z.object({
   author: z.string(),
   outlet: z.string(),
   publishedAt: z.string(),
+  /** Época do texto ("1964", "anos 1950", "século XIX"; "" se não der para saber). */
+  era: z.string(),
+  /** Ano aproximado da época (0 = não identificado). */
+  eraYear: z.number(),
+  /** De onde veio a época: data do documento, pistas do conteúdo, ou não identificada. */
+  eraSource: z.enum(["document", "content", "unknown"]),
+  /** true = texto de outra época, cujo cenário político é diferente do atual. */
+  historical: z.boolean(),
+  /** false = esquerda/direita (como hoje) não fazem sentido para a época. */
+  axesApplicable: z.boolean(),
+  /** Por que os eixos não se aplicam (quando axesApplicable = false). */
+  axesNote: z.string(),
 });
 export type TriageOutput = z.infer<typeof TriageSchema>;
 
@@ -75,6 +92,8 @@ function specialistBase(categoryIds: readonly [string, ...string[]]) {
             explanation: z.string(),
             /** Peso deste trecho: sinal leve, médio ou forte do problema. */
             strength: z.enum(["weak", "medium", "strong"]),
+            /** Textos históricos: vocabulário comum na época ou carregado mesmo para a época. */
+            eraUsage: z.enum(["none", "period_norm", "loaded_then"]),
           }),
         ),
       }),
@@ -88,7 +107,7 @@ export interface SpecialistOutput {
     score: number;
     confidence: Confidence;
     summary: string;
-    evidence: { quote: string; explanation: string; strength?: "weak" | "medium" | "strong" }[];
+    evidence: { quote: string; explanation: string; strength?: "weak" | "medium" | "strong"; eraUsage?: "none" | "period_norm" | "loaded_then" }[];
   }[];
 }
 

@@ -207,6 +207,12 @@ export const en: Dict = {
     },
 
     mode: { label: "Display mode", simple: "Simple", detailed: "Detailed" },
+    era: {
+      label: (era: string) => `Period: ${era}`,
+      unknown: "Period not identified",
+      historicalNote: "Historical text: the context, the dispute and the political axes are those of the text's own time, not today's.",
+      usage: { period_norm: "period language", loaded_then: "loaded even for its time" },
+    },
     rebuttals: {
       title: "The author's replies to criticism",
       lede: "The text rebuts known criticisms. For each one, we assess whether the reply holds up and how far.",
@@ -384,6 +390,11 @@ export const en: Dict = {
       academic_paper: "Academic paper",
       press_release: "Press release",
       blog: "Blog",
+      speech: "Speech",
+      official_document: "Official document",
+      propaganda: "Propaganda",
+      letter: "Letter/correspondence",
+      historical_newspaper: "Historical newspaper",
       other: "Other",
       claim: "Claim",
     },

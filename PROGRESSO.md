@@ -197,11 +197,11 @@ Decisões: chave da IA neste ambiente via formulário seguro (sim); gasto máxim
 | B2 | Contradições internas: lib/analysis/contradictions.ts (a gênero/rótulo, c lado/intensidade/equilíbrio da disputa, d "sem viés"/"leve" × notas) + b (versão neutra, já existia). Correção: até 2 novas sínteses; depois tira a frase. Testado: 7 casos montados detectados, 0 falsos alarmes nos 3 exemplos, correção pela IA falsa (refazer e retirar frase) OK. `npm run checar-contradicoes` (análises antigas em .cache) e conferência no teste automático | feito; falta rodar com IA de verdade |
 | B3 | Lixo: comando `npm run checar-lixo` (antes/depois por link e PDF; avisa se sobrou lixo ou se algo com cara de conteúdo foi removido; relatório em testes/resultados/lixo-*.md). Testado aqui: Outras Palavras, Séralini, paper sintético OK | feito; falta o usuário rodar com os links guardados no computador dele |
 | B4 | PDFs: título, autores, revista e data pela 1ª página (nome da revista não vira título; data do ARQUIVO é ignorada); colunas achadas pelo espaço vazio (NEJM: resumo misturado com a coluna lateral — corrigido); números de tabela não são mais apagados como "número de página" (+60 números no Séralini). `npm run checar-pdfs`: Séralini ✅, NEJM ✅, 2 sintéticos ✅, telegrama 1964 ❌ (escaneado: precisa de leitura por IA — perguntar ao usuário) | feito (falta decisão sobre escaneados) |
-| A1 | Época (identificação + tela + confiança) | a fazer |
-| A2 | Contexto da época; disputa da época; eixos "não se aplica"; trava de figuras atuais | a fazer |
-| A3 | Linguagem da época (marca por trecho) | a fazer |
-| A4 | Gêneros: discurso, documento oficial, propaganda, carta, jornal histórico | a fazer |
-| A5 | Para equilibrar: historiografia e fontes da época | a fazer |
-| A6 | Metodologia: seção textos históricos | a fazer |
+| A1 | Época: identificação devolve era/eraYear/eraSource/historical; data do arquivo PDF ignorada; chip "Época: …" ou "Época não identificada"; sem época → confiança política baixa (lib/analysis/era.ts) | feito (falta testar com IA de verdade) |
+| A2 | Contexto/disputa/eixos da época (regras no overview e nos especialistas); axesApplicable=false → eixos "não se aplica"; trava de anacronismo (lib/historico.ts, lista editável com ano): refaz a identificação, descarta disputa anacrônica, contradição "anachronism" no resumo | feito (falta testar com IA de verdade) |
+| A3 | Linguagem da época: evidence.eraUsage (period_norm → peso leve; loaded_then); etiqueta na tela | feito (falta testar com IA de verdade) |
+| A4 | Gêneros: discurso, documento oficial, propaganda, carta, jornal histórico (formulário, identificação, rótulos) | feito (falta testar com IA de verdade) |
+| A5 | Para equilibrar em texto histórico: historiografia, acervos, fontes da época; sem busca de veículos do outro lado | feito (falta testar com IA de verdade) |
+| A6 | Metodologia: seção "Textos históricos" (pt/en) | feito (falta testar com IA de verdade) |
 | A7 | Teste com 4 textos históricos + teste automático | a fazer |
 | F | CHECKLIST-ANTES-DO-BETA.md + verificações no teste automático | a fazer |

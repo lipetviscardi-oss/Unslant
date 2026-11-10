@@ -35,11 +35,19 @@ export function balancePrompt(params: {
     dispute?.status === "favors_a" ? dispute.sideA : dispute?.status === "favors_b" ? dispute.sideB : "nenhum identificado";
   const isClaim = triage.contentType === "claim";
 
-  const goal = isClaim
+  const historical = triage.historical && !isClaim;
+  const goal = historical
+    ? `O documento é um TEXTO HISTÓRICO (época: ${triage.era || "não identificada"}). NÃO procure notícias atuais. Encontre, para o leitor equilibrar a leitura desta fonte histórica:
+- historiografia: livros, capítulos e artigos acadêmicos sobre o episódio ou o período, de historiadores de correntes DIFERENTES;
+- acervos e arquivos onde o leitor pode consultar documentos da época (ex.: Hemeroteca Digital da Biblioteca Nacional, CPDOC/FGV, Arquivo Nacional, arquivos públicos estaduais, Biblioteca Digital do Senado, bibliotecas presidenciais, arquivos nacionais de outros países);
+- outras FONTES PRIMÁRIAS da mesma época que mostrem o outro lado (discursos, documentos ou jornais do lado oposto, naquele momento).`
+    : isClaim
     ? `O usuário enviou uma AFIRMAÇÃO curta. Encontre fontes confiáveis que ajudem a conferir essa afirmação: dados oficiais, checagens de agências de fact-checking, reportagens explicativas ou estudos de instituições reconhecidas, preferencialmente com perspectivas diferentes.`
     : `Encontre outras coberturas do MESMO assunto ou acontecimento, de outros veículos, que ajudem o leitor a equilibrar o que leu: textos com perspectivas diferentes, com o contexto que faltou ou com dados de fontes primárias.`;
 
-  const counterpartNote = params.counterparts?.length
+  const counterpartNote = historical
+    ? ""
+    : params.counterparts?.length
     ? params.targeted
       ? `\nATENÇÃO: as buscas anteriores não trouxeram nenhum veículo do outro lado. Agora busque SOMENTE a cobertura do mesmo fato nestes veículos: ${params.counterparts.join(", ")}. Traga pelo menos um resultado de um deles (de preferência sobre o mesmo acontecimento; se não houver, sobre o mesmo tema).\n`
       : `\nOBRIGATÓRIO: o texto pende para um lado. Inclua pelo menos UM veículo confiável do outro lado. Bons exemplos para este país: ${params.counterparts.join(", ")}.\n`
@@ -48,7 +56,18 @@ export function balancePrompt(params: {
     ? `\nATENÇÃO: uma primeira rodada de buscas não encontrou textos suficientes. Agora faça buscas com termos OBJETIVOS e FACTUAIS: nomes das pessoas e instituições envolvidas + o fato principal (e a data aproximada, se souber), sem adjetivos e sem o enquadramento do texto original. Aceite qualquer veículo confiável, de qualquer linha editorial, que noticie o mesmo fato.\n`
     : "";
 
+  const historicalRules = historical
+    ? `
+REGRAS PARA TEXTO HISTÓRICO
+- Prefira fontes acadêmicas (SciELO, revistas de história, editoras universitárias, repositórios), arquivos e acervos oficiais e verbetes de instituições de pesquisa (ex.: dicionários históricos do CPDOC).
+- Em "perspective", diga a corrente ou o tipo de fonte (ex.: "historiografia crítica ao regime", "visão revisionista", "documento do lado oposto, 1964", "acervo digital").
+- Use editorialLine "academic" para trabalhos acadêmicos, "institutional" para arquivos e acervos públicos e "unknown" para o resto.
+- Em "suggestions", indique onde o leitor pode procurar mais fontes da época (acervos, coleções, termos de busca).
+`
+    : "";
+
   return `TAREFA: ${goal}
+${historicalRules}
 ${retryNote}${counterpartNote}
 ${contextBlock({
     "Tipo de texto": triage.contentType,

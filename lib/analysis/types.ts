@@ -49,6 +49,8 @@ export interface Evidence {
   figureId?: string;
   /** Peso do trecho (sinal leve, médio ou forte); a cor do destaque nunca passa da nota da categoria. */
   strength?: "weak" | "medium" | "strong";
+  /** Textos históricos: "period_norm" = linguagem comum na época; "loaded_then" = carregada mesmo para a época. */
+  eraUsage?: "period_norm" | "loaded_then";
 }
 
 /** Uma imagem, gráfico ou tabela analisada pela etapa "Imagens e gráficos". */
@@ -155,6 +157,12 @@ export interface AnalysisResult {
     topic: string;
     contentSummary: string;
     documentLanguage: string;
+    /** Época do texto ("1964", "anos 1950"); "" = não identificada (pode faltar em resultados antigos). */
+    era?: string;
+    eraYear?: number;
+    eraSource?: "document" | "content" | "unknown";
+    /** true = texto de outra época: contexto, disputa e eixos são os daquela época. */
+    historical?: boolean;
   };
 
   /** O texto exatamente como foi analisado (os destaques apontam para ele). */

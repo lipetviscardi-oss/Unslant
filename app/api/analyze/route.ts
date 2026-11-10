@@ -70,7 +70,22 @@ const RequestSchema = z.object({
   fresh: z.boolean().optional(),
   /** Tipo de texto escolhido pelo usuário (opcional; sem ele, a IA identifica). */
   contentType: z
-    .enum(["news", "feature", "analysis", "opinion", "editorial", "academic_paper", "press_release", "blog", "other"])
+    .enum([
+      "news",
+      "feature",
+      "analysis",
+      "opinion",
+      "editorial",
+      "academic_paper",
+      "press_release",
+      "blog",
+      "speech",
+      "official_document",
+      "propaganda",
+      "letter",
+      "historical_newspaper",
+      "other",
+    ])
     .optional(),
   /**
    * Opções só para o teste automático (npm run teste). Ignoradas fora do

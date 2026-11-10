@@ -46,6 +46,12 @@ export const text = "Os jovens de hoje não querem mais trabalhar, só querem sa
 export const source: SourceInfo = { type: "claim", claimContext: "grupo de família no WhatsApp" };
 
 export const triage: TriageOutput = {
+  era: "2026",
+  eraYear: 2026,
+  eraSource: "content",
+  historical: false,
+  axesApplicable: true,
+  axesNote: "",
   contentType: "claim",
   contentTypeReason: "Frase curta enviada na aba Afirmação.",
   country: "Brasil",

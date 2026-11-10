@@ -28,6 +28,7 @@ ${contextBlock({
     "Tipo de texto": triage.contentType,
     País: triage.country,
     "Contexto político": triage.politicalContext,
+    Época: triage.era ? `${triage.era}${triage.historical ? " (texto histórico: analise com o contexto DESSA época)" : ""}` : "não identificada",
     Tema: triage.topic,
   })}
 
@@ -42,10 +43,20 @@ Para CADA categoria acima (de todos os grupos), devolva exatamente uma entrada e
 - evidence: até ${config.ai.maxEvidencePerCategory} trechos, só os mais representativos. Cada um com "quote" (cópia EXATA do documento, 2 a 40 palavras), "explanation" (por que o trecho mostra o problema e, quando útil, como seria uma versão neutra) e "strength" (o peso DESTE trecho: "weak" = sinal leve, "medium" = sinal claro, "strong" = exemplo intenso e inequívoco). Seja proporcional à nota da categoria: numa categoria com nota moderada, a maioria dos trechos deve ser "weak" ou "medium"; "strong" é para os poucos trechos mais graves. Lista vazia se status não for "found".
 
 Lembre-se: notas altas exigem evidências fortes e recorrentes. Um único caso leve merece nota baixa.
+${
+  triage.historical
+    ? `
+TEXTO HISTÓRICO (época: ${triage.era || "não identificada"}): LINGUAGEM DA ÉPOCA
+- Cada evidência tem também "eraUsage": "period_norm" se o termo ou a expressão era o uso corrente e comum na época (hoje pode soar ofensivo ou carregado, mas era a forma normal de escrever então); "loaded_then" se era carregado, ofensivo ou propagandístico MESMO para os padrões daquela época; "none" quando a questão não se aplica (não é um problema de vocabulário).
+- Na "explanation", diga explicitamente qual dos dois casos é ("linguagem comum na época" ou "uso carregado mesmo para a época") e por quê.
+- Isso NÃO significa ignorar o viés: propaganda, desumanização, estereótipos e manipulação continuam sendo apontados normalmente. "period_norm" só diferencia vocabulário de época de uma escolha carregada do autor; um termo "period_norm" deve ter "strength" "weak".
+- Julgue com o contexto DAQUELA época: nunca compare com partidos, pessoas ou disputas posteriores.`
+    : `- Em "eraUsage", use sempre "none" (o texto é atual).`
+}
 ${withOverview ? `
 SEGUNDA PARTE — VISÃO GERAL (campo "overview")
 Depois das categorias, avalie o documento inteiro quanto à inclinação política, à proporção de fato vs. opinião e ao que ele pode estar omitindo. Esta parte é independente das categorias acima: avalie-a com o mesmo cuidado.
 
-${overviewInstructions()}` : ""}
+${overviewInstructions(triage)}` : ""}
 ${languageInstruction(lang)}`;
 }
