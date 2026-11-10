@@ -102,3 +102,17 @@ pode instalar @supabase/supabase-js e @supabase/ssr.
 3 códigos internos no resumo; 4 CBS: MBFC diz RIGHT-CENTER (2.2), atualizado 28/04/2026 — manter com data ou tirar? (aguardando) + reconferir a lista toda;
 5 resumo × gênero; 6 limpar newsletter/tags/"leia também" do texto; 7 equilibrar com pelo menos 1 veículo do outro lado (+ National Review, The Dispatch, Washington Examiner);
 8 imagens: só o visível; 9 teste: Mother Jones e Federalist 4–7, Reuters 1–3 (mesmo acontecimento? simetria?).
+Decisões: 1b (5 faixas nos dois idiomas: 0–2 leve/Mild, 2–4 moderado/Moderate, 4–6 acentuado/Marked, 6–8 forte/Strong, 8–10 muito forte/Very strong; um único arquivo);
+4a (manter classificação da fonte, mostrar data da avaliação); 9 sim (simetria Mother Jones × Federalist ≤ 1,5, lados opostos).
+| Item | O quê | Status |
+|---|---|---|
+| R1 | 5 faixas (taxonomy SCORING), resumo, destaques, modo simples, docs | em andamento |
+| R2 | Idioma: identificação com instrução de idioma; rodapé traduzido | a fazer |
+| R3 | Resumo sem códigos internos (dados legíveis + regra + conferência) | a fazer |
+| R5 | Resumo coerente com o gênero | a fazer |
+| R4 | Reconferir a lista de veículos (avaliação, país, data) + National Review, The Dispatch, Washington Examiner | a fazer |
+| R6 | Limpar newsletter, propaganda, "leia também" e tags do texto | a fazer |
+| R7 | Equilibrar: pelo menos 1 veículo do outro lado (busca dirigida se faltar) | a fazer |
+| R8 | Imagens: só o visível | a fazer |
+| R9 | Teste: Mother Jones e Federalist 4–7, Reuters 1–3, simetria MJ × Federalist | a fazer |
+Depois: Fase 4 (P2 em diante). Retomada automática: tarefa "Retomar unslant".
