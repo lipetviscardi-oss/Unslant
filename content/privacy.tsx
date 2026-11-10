@@ -139,7 +139,8 @@ export function PrivacyPt() {
         Pelas leis de proteção de dados (como a LGPD, no Brasil, o UK GDPR, no Reino Unido, e as leis de privacidade da
         Califórnia, nos Estados Unidos), você pode pedir para ver, corrigir, receber uma cópia ou apagar os seus dados.
         No próprio site, você já pode ver e apagar as suas análises em &ldquo;Minhas análises&rdquo; e apagar a sua
-        conta, o que apaga também todas as análises dela. Para qualquer outro pedido, escreva para <Contact lang="pt" />.
+        conta, o que apaga também todas as análises dela (os registros de uso do dia ficam, sem o seu e-mail, até
+        completarem {usageDays} dias, para que apagar e recriar a conta não zere o limite). Para qualquer outro pedido, escreva para <Contact lang="pt" />.
       </p>
 
       <h2>Cuidados recomendados</h2>
@@ -269,7 +270,8 @@ export function PrivacyEn() {
       <p>
         Under data protection laws (such as Brazil&rsquo;s LGPD, the UK GDPR and California&rsquo;s privacy laws), you can
         ask to access, correct, receive a copy of or delete your data. On the site itself, you can already view and delete
-        your analyses in &ldquo;My analyses&rdquo; and delete your account, which also deletes all of its analyses. For
+        your analyses in &ldquo;My analyses&rdquo; and delete your account, which also deletes all of its analyses (daily usage records remain, without your email,
+        until they reach {usageDays} days, so that deleting and re-creating an account does not reset the limit). For
         any other request, write to <Contact lang="en" />.
       </p>
 

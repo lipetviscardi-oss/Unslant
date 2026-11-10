@@ -103,7 +103,11 @@ export async function usedToday(v: Viewer): Promise<Record<Kind, number> | null>
   if (!db) return null;
   // Usos devolvidos (análise que falhou) não contam para a pessoa.
   let q = db.from("usage_events").select("kind").eq("refunded", false);
-  if (v.userId) q = q.eq("user_id", v.userId).eq("local_day", v.day);
+  if (v.userId) {
+    // Conta: inclui os usos de uma conta apagada hoje com o mesmo e-mail (ver detachUsage).
+    const owner = [`user_id.eq.${v.userId}`, v.email && `anon_key.eq.${emailKey(v.email)}`].filter(Boolean).join(",");
+    q = q.eq("local_day", v.day).or(owner);
+  }
   else {
     // Visitante: últimas 24 horas, pelo cookie OU pelo endereço (apagar o cookie não zera o limite).
     const keys = [v.anonKey && `anon_key.eq.${v.anonKey}`, v.ipKey && `ip_key.eq.${v.ipKey}`].filter(Boolean).join(",");
@@ -161,6 +165,27 @@ export async function refundUsage(eventId: number | null) {
   const db = supabaseAdmin();
   if (!db || eventId == null) return;
   await db.from("usage_events").update({ refunded: true }).eq("id", eventId);
+}
+
+/** Código anônimo (HMAC) do e-mail, para os usos de uma conta apagada. */
+function emailKey(email: string) {
+  return anonymize(`e:${email.trim().toLowerCase()}`);
+}
+
+/**
+ * Antes de apagar uma conta: os registros de uso deixam de apontar para ela
+ * (assim não são apagados junto) e passam a ter só um código anônimo do e-mail.
+ * Eles continuam contando no limite geral do site e no limite do dia de quem
+ * criar a conta de novo com o mesmo e-mail. Somem depois de config.privacy.usageDays.
+ */
+export async function detachUsage(userId: string, email: string | null) {
+  const db = supabaseAdmin();
+  if (!db) return;
+  const { error } = await db
+    .from("usage_events")
+    .update({ user_id: null, analysis_id: null, anon_key: email ? emailKey(email) : null })
+    .eq("user_id", userId);
+  if (error) throw new Error(`separar usos da conta: ${error.message}`);
 }
 
 /** Liga um uso já registrado à análise salva. */
