@@ -1,0 +1,22 @@
+<!--
+  E-MAIL DE LOGIN (Supabase → Authentication → Emails → Templates)
+  Cole este conteúdo em "Magic Link" e também em "Confirm signup".
+  Assunto: Seu link para entrar no unslant | Your unslant sign-in link
+-->
+<div style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; line-height: 1.5; color: #1d2b2a; max-width: 520px;">
+  <p style="font-size: 20px;"><strong>unslant</strong></p>
+
+  <p>Olá! Clique no botão abaixo para entrar no unslant. O link vale por 1 hora e só funciona uma vez.</p>
+  <p>
+    <a href="{{ .ConfirmationURL }}" style="display: inline-block; background: #1d2b2a; color: #ffffff; padding: 10px 22px; border-radius: 999px; text-decoration: none;">Entrar no unslant</a>
+  </p>
+  <p style="color: #5b6b69; font-size: 14px;">Se você não pediu este e-mail, pode ignorá-lo.</p>
+
+  <hr style="border: none; border-top: 1px solid #d5e1dc; margin: 24px 0;" />
+
+  <p>Hi! Click the button below to sign in to unslant. The link is valid for 1 hour and works only once.</p>
+  <p>
+    <a href="{{ .ConfirmationURL }}" style="display: inline-block; background: #1d2b2a; color: #ffffff; padding: 10px 22px; border-radius: 999px; text-decoration: none;">Sign in to unslant</a>
+  </p>
+  <p style="color: #5b6b69; font-size: 14px;">If you didn't request this email, you can ignore it.</p>
+</div>
