@@ -6,6 +6,7 @@
  * (um JSON por linha). Assim a tela mostra em que etapa a análise está.
  */
 
+import { createHash } from "node:crypto";
 import { z } from "zod";
 import { config } from "@/lib/config";
 import { AppError, errorMessage } from "@/lib/errors";
@@ -134,7 +135,11 @@ export async function POST(request: Request) {
 
         // 2. Já analisamos este texto antes? (cache)
         // Cada campo entra separado (JSON), para que textos diferentes nunca gerem a mesma chave.
-        const key = cacheKey(JSON.stringify({ mode: body.mode, source, text }), lang, promptVersion());
+        // As imagens entram na chave (resumidas por um hash): o mesmo texto com imagens diferentes
+        // nunca reaproveita o resultado guardado de outras imagens.
+        const imagesForKey = body.mode === "pdf" ? (body.images ?? []) : visuals.map((v) => ({ data: v.data, caption: v.caption }));
+        const images = imagesForKey.length ? createHash("sha256").update(JSON.stringify(imagesForKey)).digest("hex") : "";
+        const key = cacheKey(JSON.stringify({ mode: body.mode, source, text, images }), lang, promptVersion());
         const cached = dev?.noCache || body.fresh ? null : await readCache(key);
         if (cached) {
           cached.stats.fromCache = true;
