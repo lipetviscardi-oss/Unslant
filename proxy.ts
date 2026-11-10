@@ -1,11 +1,14 @@
 /**
- * Direciona quem acessa sem idioma no endereço (ex.: "/") para /pt ou /en.
- *  1. Se a pessoa já escolheu um idioma antes (cookie), usa esse.
- *  2. Senão, usa o idioma do navegador: português → /pt; outros → /en.
+ * Roda antes de cada página:
+ *  - direciona quem acessa sem idioma no endereço (ex.: "/") para /pt ou /en
+ *    (1. idioma escolhido antes, guardado em cookie; 2. idioma do navegador);
+ *  - renova a sessão de login do Supabase, quando ele está configurado.
  */
 
 import { NextResponse, type NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, LOCALES, hasLocale, type Locale } from "@/lib/i18n/config";
+import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL, supabaseConfigured } from "@/lib/supabase/config";
 
 function pickLocale(request: NextRequest): Locale {
   const saved = request.cookies.get(LOCALE_COOKIE)?.value;
@@ -28,10 +31,29 @@ function pickLocale(request: NextRequest): Locale {
   return "en"; // outros idiomas: inglês costuma ser mais útil
 }
 
-export function proxy(request: NextRequest) {
+/** Renova a sessão de login (o "token" expira de tempos em tempos) e devolve a resposta com os cookies novos. */
+async function refreshSession(request: NextRequest): Promise<NextResponse> {
+  let response = NextResponse.next({ request });
+  if (!supabaseConfigured()) return response;
+  const supabase = createServerClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    cookies: {
+      getAll: () => request.cookies.getAll(),
+      setAll: (cookiesToSet) => {
+        for (const { name, value } of cookiesToSet) request.cookies.set(name, value);
+        response = NextResponse.next({ request });
+        for (const { name, value, options } of cookiesToSet) response.cookies.set(name, value, options);
+      },
+    },
+  });
+  // Só renova a sessão se ela existir; sem login, não faz nada.
+  await supabase.auth.getClaims();
+  return response;
+}
+
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hasPrefix = LOCALES.some((l) => pathname === `/${l}` || pathname.startsWith(`/${l}/`));
-  if (hasPrefix) return;
+  if (hasPrefix) return refreshSession(request);
 
   const url = request.nextUrl.clone();
   url.pathname = `/${pickLocale(request)}${pathname === "/" ? "" : pathname}`;
