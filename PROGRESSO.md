@@ -97,7 +97,7 @@ pode instalar @supabase/supabase-js e @supabase/ssr.
 | P7 | Análise em segundo plano (etapas salvas no banco) | a fazer |
 | P8 | Privacidade, README, testes | a fazer |
 
-## Rodada 8 — ajustes da versão em inglês (plano enviado; aguardando decisões; Fase 4 pausada até terminar)
+## Rodada 8 — ajustes da versão em inglês: FEITA (usuário vai rodar npm run teste:salvar + npm run teste)
 1 faixas (manter 3 ou voltar a 5? aguardando); 2 idioma misturado (identificação sem instrução de idioma; rodapé com nomes internos);
 3 códigos internos no resumo; 4 CBS: MBFC diz RIGHT-CENTER (2.2), atualizado 28/04/2026 — manter com data ou tirar? (aguardando) + reconferir a lista toda;
 5 resumo × gênero; 6 limpar newsletter/tags/"leia também" do texto; 7 equilibrar com pelo menos 1 veículo do outro lado (+ National Review, The Dispatch, Washington Examiner);
@@ -114,6 +114,6 @@ Decisões: 1b (5 faixas nos dois idiomas: 0–2 leve/Mild, 2–4 moderado/Modera
 | R6 | Limpar newsletter, propaganda, "leia também" e tags do texto | feito |
 | R7 | Equilibrar: pelo menos 1 veículo do outro lado (busca dirigida se faltar) | feito |
 | R8 | Imagens: só o visível | feito |
-| R9 | Teste: Mother Jones e Federalist 4–7, Reuters 1–3, simetria MJ × Federalist | em andamento |
+| R9 | Teste: Mother Jones e Federalist 4–7, Reuters 1–3, simetria MJ × Federalist | feito |
 Depois: Fase 4 (P2 em diante). Retomada automática: tarefa "Retomar unslant".
 - R4: 55 páginas reconferidas (todas iguais à lista; CBS = RIGHT-CENTER, atualizada em 04/2026). Novos: National Review (right), The Dispatch e Washington Examiner (center_right).

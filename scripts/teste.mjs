@@ -13,7 +13,7 @@
  *
  * Confere as regras (faixa de nota de cada artigo, simetria entre os dois
  * lados, lados opostos na disputa) e mostra ✅ ou ❌. Custa cerca de
- * US$ 0,50 por rodada (4 análises completas).
+ * cerca de US$ 0,15 por artigo analisado.
  *
  * Antes da primeira vez: npm run teste:salvar
  */
@@ -140,7 +140,7 @@ if (missing.length) {
 }
 
 console.log(`Teste automático — ${manifest.casos.length} artigos${experiment !== "padrão" ? ` — EXPERIMENTO: ${experiment}` : ""}`);
-console.log("Cada análise leva cerca de 30 segundos. Custo estimado: até US$ 0,50 no total.\n");
+console.log("Cada análise leva cerca de 30 segundos. Custo estimado: cerca de US$ 0,15 por artigo.\n");
 
 // 2. Analisa cada artigo do zero (um de cada vez, para não estourar o limite da IA)
 const runs = {};

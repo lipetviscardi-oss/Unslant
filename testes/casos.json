@@ -52,29 +52,43 @@
       "link": ""
     },
     {
-      "id": "eua-direita",
-      "nome": "EUA — veículo de direita",
-      "opcional": true,
+      "id": "mother-jones",
+      "nome": "Mother Jones",
       "procurar": [
-        "foxnews",
-        "newsmax",
-        "breitbart",
-        "dailywire",
-        "nypost"
+        "motherjones",
+        "mother jones"
+      ],
+      "faixa": [
+        4,
+        7
       ],
       "titulo": "",
       "link": ""
     },
     {
-      "id": "eua-esquerda",
-      "nome": "EUA — veículo de esquerda",
-      "opcional": true,
+      "id": "federalist",
+      "nome": "The Federalist",
       "procurar": [
-        "msnbc",
-        "ms.now",
-        "huffpost",
-        "motherjones",
-        "theatlantic"
+        "thefederalist",
+        "the federalist"
+      ],
+      "faixa": [
+        4,
+        7
+      ],
+      "titulo": "",
+      "link": ""
+    },
+    {
+      "id": "reuters",
+      "nome": "Reuters",
+      "procurar": [
+        "reuters.com",
+        "reuters"
+      ],
+      "faixa": [
+        1,
+        3
       ],
       "titulo": "",
       "link": ""
@@ -117,8 +131,8 @@
     },
     {
       "entre": [
-        "eua-direita",
-        "eua-esquerda"
+        "mother-jones",
+        "federalist"
       ],
       "diferencaMaxima": 1.5,
       "ladosOpostos": true

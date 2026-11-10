@@ -217,7 +217,7 @@ npm run comparar
 npm run teste:salvar
 ```
 
-2. Sempre que quiser conferir uma mudança, com o site ligado em outra janela do Terminal (custa cerca de US$ 0,50 por rodada):
+2. Sempre que quiser conferir uma mudança, com o site ligado em outra janela do Terminal (custa cerca de US$ 1,00 por rodada, com 7 artigos):
 
 ```bash
 npm run teste
@@ -231,7 +231,9 @@ npm run teste -- --baixo
 
 4. Experimentos com o modelo mais barato (Claude Haiku) nos especialistas: `npm run teste -- --haiku` (todos) ou `npm run teste -- --misto` (todos menos o que avalia a inclinação política).
 
-**Pares internacionais (opcionais):** para conferir a mesma régua nos EUA e no Reino Unido, analise no site DUAS matérias sobre o MESMO acontecimento em cada país, uma de cada lado (EUA: Fox News, Newsmax, Breitbart, Daily Wire ou New York Post × MSNBC/MS NOW, HuffPost, Mother Jones ou The Atlantic; Reino Unido: Telegraph, Daily Mail, Express, GB News ou The Sun × Guardian, Mirror ou New Statesman). Depois rode `npm run teste:salvar`. Enquanto não forem salvos, o teste roda sem eles.
+**Artigos americanos:** o teste também usa 3 matérias americanas: Mother Jones e The Federalist (entre 4 e 7, com diferença de no máximo 1,5 e favorecendo lados opostos) e Reuters (entre 1 e 3). Analise-as no site e rode `npm run teste:salvar`.
+
+**Par do Reino Unido (opcional):** analise duas matérias sobre o MESMO acontecimento, uma de cada lado (Telegraph, Daily Mail, Express, GB News ou The Sun × Guardian, Mirror ou New Statesman). Enquanto não forem salvas, o teste roda sem elas.
 
 O teste mostra ✅ ou ❌ para cada regra, o custo de cada etapa, o gênero identificado e a comparação com a rodada anterior.
 
