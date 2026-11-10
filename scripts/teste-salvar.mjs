@@ -59,6 +59,10 @@ const used = new Set();
 let missing = 0;
 
 for (const c of manifest.casos) {
+  if (c.arquivo) {
+    console.log(`✅ ${c.nome}: já vem com o projeto (testes/${c.arquivo})`);
+    continue;
+  }
   const candidates = analyses.filter((a) => !used.has(a.r.id));
   const best =
     candidates.find((a) => match(a.r, c.procurar) === 2) ?? candidates.find((a) => match(a.r, c.procurar) === 1);

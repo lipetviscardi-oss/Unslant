@@ -12,7 +12,7 @@
  *
  * Confere as regras (faixa de nota de cada artigo, simetria entre os dois
  * lados, lados opostos na disputa) e mostra ✅ ou ❌. Custa cerca de
- * US$ 0,40 por rodada (3 análises completas).
+ * US$ 0,50 por rodada (4 análises completas).
  *
  * Antes da primeira vez: npm run teste:salvar
  */
@@ -34,6 +34,8 @@ const base = `http://localhost:${port}`;
 const root = process.cwd();
 const manifest = JSON.parse(readFileSync(path.join(root, "testes", "casos.json"), "utf8"));
 const textsDir = path.join(root, "testes", "textos");
+/** Onde fica o texto de cada caso: um arquivo do próprio projeto (caso.arquivo) ou o guardado pelo teste:salvar. */
+const caseFile = (c) => (c.arquivo ? path.join(root, "testes", c.arquivo) : path.join(textsDir, `${c.id}.json`));
 const resultsDir = path.join(root, "testes", "resultados");
 
 const GENRE = {
@@ -96,7 +98,8 @@ async function analyze(body) {
 function requestFor(saved, useUrl) {
   const common = { lang: saved.lang ?? "pt", ...(saved.contentType ? { contentType: saved.contentType } : {}) };
   if (saved.mode === "url" && useUrl) return { mode: "url", url: saved.url, ...common };
-  if (saved.mode === "pdf") return { mode: "pdf", text: saved.text, meta: saved.meta ?? {}, ...common };
+  if (saved.mode === "pdf")
+    return { mode: "pdf", text: saved.text, meta: saved.meta ?? {}, ...(saved.images?.length ? { images: saved.images } : {}), ...common };
   return { mode: "text", text: saved.text, ...common };
 }
 
@@ -111,7 +114,7 @@ try {
 }
 
 // 1. Os textos estão guardados?
-const missing = manifest.casos.filter((c) => !existsSync(path.join(textsDir, `${c.id}.json`)));
+const missing = manifest.casos.filter((c) => !existsSync(caseFile(c)));
 if (missing.length) {
   console.log(`Faltam os textos de: ${missing.map((c) => c.nome).join(", ")}.`);
   console.log("Rode antes: npm run teste:salvar");
@@ -119,12 +122,12 @@ if (missing.length) {
 }
 
 console.log(`Teste automático — ${manifest.casos.length} artigos${experiment !== "padrão" ? ` — EXPERIMENTO: ${experiment}` : ""}`);
-console.log("Cada análise leva cerca de 30 segundos. Custo estimado: até US$ 0,40 no total.\n");
+console.log("Cada análise leva cerca de 30 segundos. Custo estimado: até US$ 0,50 no total.\n");
 
 // 2. Analisa cada artigo do zero (um de cada vez, para não estourar o limite da IA)
 const runs = {};
 for (const c of manifest.casos) {
-  const saved = JSON.parse(readFileSync(path.join(textsDir, `${c.id}.json`), "utf8"));
+  const saved = JSON.parse(readFileSync(caseFile(c), "utf8"));
   process.stdout.write(`Analisando ${c.nome} `);
   const t0 = Date.now();
   try {
@@ -159,10 +162,10 @@ for (const c of manifest.casos) {
     continue;
   }
   const score = r.overall.score;
-  const [min, max] = c.faixa;
+  const [min, max] = c.faixa ?? [0, 10];
   const genre = `${GENRE[r.context.contentType] ?? r.context.contentType}${r.context.contentTypeSource === "user" ? " (informado)" : ""}`;
   console.log(`\n• ${c.nome}`);
-  console.log(`  Nota: ${n(score, 1)} (${r.overall.label}) — esperado entre ${min} e ${max}`);
+  console.log(`  Nota: ${n(score, 1)} (${r.overall.label})${c.faixa ? ` — esperado entre ${min} e ${max}` : ""}`);
   console.log(`  Gênero: ${genre}${r.context.contentTypeReason ? ` — ${r.context.contentTypeReason}` : ""}`);
   console.log(`  Disputa: ${disputeText(r.political.dispute)}`);
   console.log(`  Custo: US$ ${n(r.stats.estimatedCostUsd, 3)} · ${Math.round(r.stats.durationMs / 1000)} s`);
@@ -170,7 +173,19 @@ for (const c of manifest.casos) {
   if (stages.length) {
     console.log(`  Por etapa: ${stages.map(([k, v]) => `${k} ${n(v.costUsd, 3)}${/ \+ /.test(v.model) ? ` (${v.model.replace(/claude-|-5-5/g, "")})` : /haiku/.test(v.model) ? " (Haiku)" : ""}`).join(" · ")}`);
   }
-  check(score >= min && score <= max, `${c.nome}: nota ${n(score, 1)} dentro da faixa ${min}–${max}`);
+  if (c.faixa) check(score >= min && score <= max, `${c.nome}: nota ${n(score, 1)} dentro da faixa ${min}–${max}`);
+
+  // Imagens e gráficos: quantas figuras a IA viu e se apontou o gráfico enganoso.
+  if (r.figures?.length) {
+    console.log(`  Imagens: ${r.figures.map((f) => `${f.label} (${f.kind}): ${f.description.slice(0, 90)}`).join(" | ")}`);
+  }
+  if (c.graficoEnganoso) {
+    const mc = r.groups.flatMap((g) => g.categories).find((x) => x.id === "misleading_chart");
+    const onFigure = mc?.evidence?.some((e) => e.figureId);
+    console.log(`  Gráfico enganoso: ${mc ? `${mc.status}, nota ${n(mc.score, 1)}` : "categoria ausente"}${mc?.summary ? ` — ${mc.summary.slice(0, 140)}` : ""}`);
+    check(!!r.figures?.length, `${c.nome}: a IA recebeu e descreveu as imagens (${r.figures?.length ?? 0})`);
+    check(mc?.status === "found" && mc.score >= 3.5 && onFigure, `${c.nome}: gráfico enganoso apontado na figura, com nota pelo menos moderada`);
+  }
 }
 
 const sim = manifest.simetria;

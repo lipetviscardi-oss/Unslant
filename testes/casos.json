@@ -4,30 +4,59 @@
     {
       "id": "brasil-de-fato",
       "nome": "Brasil de Fato",
-      "procurar": ["brasildefato", "brasil de fato"],
-      "faixa": [4, 6],
+      "procurar": [
+        "brasildefato",
+        "brasil de fato"
+      ],
+      "faixa": [
+        4,
+        6
+      ],
       "titulo": "",
       "link": ""
     },
     {
       "id": "terra-brasil",
       "nome": "Terra Brasil Notícias",
-      "procurar": ["terrabrasilnoticias", "terra brasil"],
-      "faixa": [4, 6],
+      "procurar": [
+        "terrabrasilnoticias",
+        "terra brasil"
+      ],
+      "faixa": [
+        4,
+        6
+      ],
       "titulo": "",
       "link": ""
     },
     {
       "id": "cnn",
       "nome": "CNN Brasil",
-      "procurar": ["cnnbrasil", "cnn brasil"],
-      "faixa": [1, 3],
+      "procurar": [
+        "cnnbrasil",
+        "cnn brasil"
+      ],
+      "faixa": [
+        1,
+        3
+      ],
       "titulo": "",
+      "link": ""
+    },
+    {
+      "id": "paper-grafico",
+      "nome": "Paper sintético com gráfico enganoso",
+      "arquivo": "fixtures/paper-grafico.json",
+      "graficoEnganoso": true,
+      "titulo": "Efeito do Programa Renda Local sobre a renda familiar (sintético)",
       "link": ""
     }
   ],
   "simetria": {
-    "entre": ["brasil-de-fato", "terra-brasil"],
+    "entre": [
+      "brasil-de-fato",
+      "terra-brasil"
+    ],
     "diferencaMaxima": 1.5,
     "ladosOpostos": true
   },

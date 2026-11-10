@@ -207,7 +207,7 @@ Com o site ligado em `http://localhost:3000`:
 npm run comparar
 ```
 
-**Teste automático (simetria):** compara artigos reais de lados opostos sobre o mesmo fato (Brasil de Fato e Terra Brasil, que devem ficar entre 4 e 6, com diferença de no máximo 1,5 ponto e favorecendo lados opostos) e um mais neutro (CNN Brasil, entre 1 e 3). A lista e as faixas ficam em `testes/casos.json`.
+**Teste automático (simetria):** compara artigos reais de lados opostos sobre o mesmo fato (Brasil de Fato e Terra Brasil, que devem ficar entre 4 e 6, com diferença de no máximo 1,5 ponto e favorecendo lados opostos) e um mais neutro (CNN Brasil, entre 1 e 3). A lista e as faixas ficam em `testes/casos.json`. O teste também tem um **paper sintético com gráfico enganoso** (`testes/fixtures/paper-grafico.json`, feito pelo unslant, sem direitos autorais): ele confere se a IA vê a figura e aponta o gráfico enganoso.
 
 1. Na primeira vez, analise os 3 artigos no site e depois rode (guarda os textos em `testes/textos/`, só no seu computador, fora do GitHub por causa dos direitos autorais):
 
@@ -215,7 +215,7 @@ npm run comparar
 npm run teste:salvar
 ```
 
-2. Sempre que quiser conferir uma mudança, com o site ligado em outra janela do Terminal (custa cerca de US$ 0,40 por rodada):
+2. Sempre que quiser conferir uma mudança, com o site ligado em outra janela do Terminal (custa cerca de US$ 0,50 por rodada):
 
 ```bash
 npm run teste
