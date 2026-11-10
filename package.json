@@ -13,7 +13,8 @@
     "verificar": "node scripts/verificar-chaves.mjs",
     "conferir-veiculos": "node --no-warnings scripts/conferir-veiculos.mjs",
     "checar-lixo": "node --no-warnings --experimental-transform-types --import ./scripts/lib/carregar-ts.mjs scripts/checar-lixo.mjs",
-    "checar-pdfs": "node --no-warnings --experimental-transform-types --import ./scripts/lib/carregar-ts.mjs scripts/checar-pdfs.mjs"
+    "checar-pdfs": "node --no-warnings --experimental-transform-types --import ./scripts/lib/carregar-ts.mjs scripts/checar-pdfs.mjs",
+    "checar-contradicoes": "node --no-warnings --experimental-transform-types --import ./scripts/lib/carregar-ts.mjs scripts/checar-contradicoes.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.6.0",

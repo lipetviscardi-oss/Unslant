@@ -216,6 +216,8 @@ export interface AnalysisResult {
     /** Custo por etapa (identificação, especialistas, busca...). */
     stages?: Record<string, StageCost>;
     discardedEvidence: number;
+    /** Contradições internas achadas no resumo e corrigidas (refeito ou frase retirada). */
+    contradictions?: { found: number; fixed: number; removedSentences: number; remaining: string[] };
     /** Só em testes: "esforço" usado nos especialistas, se diferente do padrão. */
     specialistEffort?: string;
     /** Só em testes: modelo leve nos especialistas ("haiku" ou "mixed"). */

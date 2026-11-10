@@ -206,6 +206,12 @@ for (const c of manifest.casos) {
     console.log(`  Eixo econômico: ${name[pos] ?? pos}`);
     check(pos === c.eixoEconomico, `${c.nome}: eixo econômico ${name[c.eixoEconomico]} (deu ${name[pos] ?? pos})`);
   }
+  // Contradições internas: corrigidas na hora da análise; nenhuma pode sobrar.
+  const ct = r.stats.contradictions;
+  if (ct) {
+    console.log(`  Contradições: ${ct.found} encontrada(s), ${ct.fixed} corrigida(s)${ct.removedSentences ? ` (${ct.removedSentences} frase(s) retirada(s))` : ""}`);
+    check(ct.remaining.length === 0, `${c.nome}: nenhuma contradição sobrou no resumo${ct.remaining.length ? ` (sobrou: ${ct.remaining[0].slice(0, 120)})` : ""}`);
+  }
   // Novidades da Rodada 9 (só informativo): respostas do autor, ressalva da disputa, referências, peso dos trechos.
   if (r.rebuttals?.length) console.log(`  Respostas do autor: ${r.rebuttals.map((x) => `${x.verdict} — ${x.criticism.slice(0, 60)}`).join(" | ")}`);
   if (r.political.dispute?.caveat) console.log(`  Ressalva da disputa: ${r.political.dispute.caveat}`);
@@ -303,6 +309,10 @@ if (previous) {
   }
 }
 writeFileSync(path.join(resultsDir, `${summary.data.replace(/[:.]/g, "-")}.json`), JSON.stringify(summary, null, 2));
+// Resultados completos (para anexar no chat e conferir os detalhes).
+const fullFile = path.join(resultsDir, `${summary.data.replace(/[:.]/g, "-")}-completo.json`);
+writeFileSync(fullFile, JSON.stringify({ data: summary.data, regras: checks, resultados: runs }));
+console.log(`Resultados completos: ${path.relative(root, fullFile)} (pode anexar no chat)`);
 
 console.log(summary.aprovado ? "\nTESTE APROVADO ✅" : "\nTESTE REPROVADO ❌ (veja as regras acima)");
 process.exit(summary.aprovado ? 0 : 1);

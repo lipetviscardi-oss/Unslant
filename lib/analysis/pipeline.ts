@@ -16,7 +16,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { activeModel, config } from "@/lib/config";
 import { AppError } from "@/lib/errors";
-import type { Lang } from "@/lib/taxonomy";
+import { getCategory, type Lang } from "@/lib/taxonomy";
 import { countWords, splitIntoParts } from "@/lib/text";
 import { callStructured, runLimited, UsageTracker } from "@/lib/ai/client";
 import { buildDocumentBlock, newBoundary } from "@/lib/prompts/document";
@@ -27,6 +27,7 @@ import { synthesisPrompt } from "@/lib/prompts/synthesis";
 import { claimCheckPrompt } from "@/lib/prompts/claimCheck";
 import { balancePrompt } from "@/lib/prompts/balance";
 import { visualPrompt } from "@/lib/prompts/visual";
+import { findContradictions, removeSentences, type ContradictionInput } from "./contradictions";
 import { figureLabel, IMAGE_CATEGORY_IDS, toCallImages, visualContext, type VisualInput } from "./visuals";
 import { searchBalance } from "@/lib/ai/balance";
 import { counterpartsFor, leaningOf } from "@/lib/veiculos";
@@ -290,34 +291,57 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
   const hasRewriteCandidates = rewriteCandidates(findings, text).size > 0;
 
   const blankRewrite = (out: SynthesisOutput): SynthesisOutput => ({ ...out, rewrite: { evidenceId: "", rewritten: "", explanation: "" } });
-  // Confere a síntese: a versão neutra não pode inventar nada e o resumo precisa usar a intensidade certa.
-  const synthesisProblem = (out: SynthesisOutput) => {
+  // Confere a síntese contra o resto do relatório: a versão neutra não pode inventar nada nem repetir como
+  // fato algo "sem fonte", e o resumo não pode contradizer o tipo de texto, a disputa ou as notas.
+  const contradictionInput = (out: SynthesisOutput): ContradictionInput => ({
+    summary: out.summary,
+    summarySimple: out.summarySimple,
+    contentType: triage.contentType,
+    contentTypeReason: triage.contentTypeReason,
+    dispute: findings.political.dispute,
+    overallScore: findings.overall.score,
+    categories: findings.groups.flatMap((g) => g.categories.filter((c) => c.status === "found").map((c) => ({ name: getCategory(c.id)?.category.name.pt ?? c.id, score: c.score }))),
+  });
+  const synthesisProblems = (out: SynthesisOutput) => {
+    const problems: { kind: "rewrite" | "summary"; note: string; sentence?: string }[] = [];
     const rw = rewriteProblem(findings, out, text);
-    if (rw) return { kind: "rewrite" as const, note: `a versão neutra ${rw}. Isso é proibido: reescreva usando só o que está no trecho original.` };
+    if (rw) problems.push({ kind: "rewrite", note: `a versão neutra ${rw}. Isso é proibido: reescreva usando só o que está no trecho original.` });
     const sm = summaryProblem(findings, out);
-    if (sm) return { kind: "summary" as const, note: `o resumo ${sm}.` };
-    return null;
+    if (sm) problems.push({ kind: "summary", note: `o resumo ${sm}.` });
+    for (const c of findContradictions(contradictionInput(out))) problems.push({ kind: "summary", note: `o resumo ${c.note} (frase: "${c.sentence}").`, sentence: c.sentence });
+    return problems;
   };
   let rewriteDiscarded = false;
+  const contradictions = { found: 0, fixed: 0, removedSentences: 0, remaining: [] as string[] };
 
   const synthesisTask = (async (): Promise<SynthesisOutput | null> => {
     try {
       let out = await runSynthesis();
       if (!hasRewriteCandidates) out = blankRewrite(out);
-      let problem = synthesisProblem(out);
-      if (problem) {
-        console.warn(`[unslant] síntese refeita: ${problem.note}`);
-        out = await runSynthesis(`na tentativa anterior ${problem.note}`);
+      let problems = synthesisProblems(out);
+      contradictions.found = problems.length;
+      // Até 2 novas tentativas, dizendo à IA exatamente o que estava errado.
+      for (let attempt = 1; attempt <= 2 && problems.length; attempt++) {
+        console.warn(`[unslant] síntese refeita (${attempt}): ${problems.map((p) => p.note).join(" | ")}`);
+        out = await runSynthesis(`na tentativa anterior: ${problems.map((p) => p.note).join(" ")}`);
         if (!hasRewriteCandidates) out = blankRewrite(out);
-        problem = synthesisProblem(out);
-        if (problem?.kind === "rewrite") {
-          console.warn(`[unslant] versão neutra descartada: ${problem.note}`);
-          rewriteDiscarded = true;
-          out = blankRewrite(out);
-        } else if (problem) {
-          console.warn(`[unslant] resumo mantido apesar do aviso: ${problem.note}`);
-        }
+        problems = synthesisProblems(out);
       }
+      // Último recurso: versão neutra com problema é descartada; frase contraditória do resumo é retirada.
+      if (problems.some((p) => p.kind === "rewrite")) {
+        console.warn("[unslant] versão neutra descartada");
+        rewriteDiscarded = true;
+        out = blankRewrite(out);
+      }
+      const bad = problems.filter((p) => p.sentence).map((p) => p.sentence!);
+      if (bad.length) {
+        out = { ...out, summary: removeSentences(out.summary, bad), summarySimple: removeSentences(out.summarySimple, bad) };
+        contradictions.removedSentences = bad.length;
+      }
+      const left = synthesisProblems(out).filter((p) => p.kind === "summary");
+      contradictions.remaining = left.map((p) => p.note);
+      contradictions.fixed = Math.max(0, contradictions.found - left.length);
+      if (left.length) console.warn(`[unslant] contradição que ficou no resumo: ${left.map((p) => p.note).join(" | ")}`);
       return out;
     } catch (err) {
       // Sem a síntese, a análise ainda é útil: mostramos o resto.
@@ -394,6 +418,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
     balance,
     stats: {
       model: activeModel(),
+      contradictions,
       parts: parts.length,
       durationMs: Date.now() - startedAt,
       inputTokens: usage.inputTokens,
