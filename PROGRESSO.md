@@ -203,5 +203,5 @@ Decisões: chave da IA neste ambiente via formulário seguro (sim); gasto máxim
 | A4 | Gêneros: discurso, documento oficial, propaganda, carta, jornal histórico (formulário, identificação, rótulos) | feito (falta testar com IA de verdade) |
 | A5 | Para equilibrar em texto histórico: historiografia, acervos, fontes da época; sem busca de veículos do outro lado | feito (falta testar com IA de verdade) |
 | A6 | Metodologia: seção "Textos históricos" (pt/en) | feito (falta testar com IA de verdade) |
-| A7 | Teste com 4 textos históricos + teste automático | a fazer |
+| A7 | 3 textos históricos (Wikisource): AI-5 1968, Doutrina Truman 1947 (sem data no texto), Nabuco 1883 (sem data); conferências no teste: época certa, histórico, nenhum anacronismo, eixos "não se aplica" (Nabuco). Carta-testamento não está no Wikisource nem na Wikipédia. Telegrama Gordon 1964 = 4º caso se o usuário aprovar a leitura de escaneados | feito com IA falsa; falta IA de verdade |
 | F | CHECKLIST-ANTES-DO-BETA.md + verificações no teste automático | a fazer |

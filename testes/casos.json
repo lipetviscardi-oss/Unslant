@@ -142,6 +142,43 @@
       "eixoEconomico": "left",
       "titulo": "Terceiro turno, a revanche do mercado",
       "link": "https://outraspalavras.net/?p=3208529"
+    },
+    {
+      "id": "hist-ai5",
+      "nome": "Histórico: AI-5 (1968)",
+      "arquivo": "fixtures/hist-ai5.json",
+      "historico": true,
+      "epoca": [
+        1968,
+        1968
+      ],
+      "titulo": "Ato Institucional nº 5",
+      "link": "https://pt.wikisource.org/wiki/Ato_Institucional_n.%C2%BA_5"
+    },
+    {
+      "id": "hist-truman",
+      "nome": "Histórico: Doutrina Truman (1947)",
+      "arquivo": "fixtures/hist-truman.json",
+      "historico": true,
+      "epoca": [
+        1947,
+        1947
+      ],
+      "titulo": "Truman Doctrine",
+      "link": "https://en.wikisource.org/wiki/Truman_Doctrine"
+    },
+    {
+      "id": "hist-nabuco",
+      "nome": "Histórico: Nabuco, O Abolicionismo (1883)",
+      "arquivo": "fixtures/hist-nabuco.json",
+      "historico": true,
+      "epoca": [
+        1878,
+        1888
+      ],
+      "eixosNaoSeAplicam": true,
+      "titulo": "O Abolicionismo, cap. I",
+      "link": "https://pt.wikisource.org/wiki/O_Abolicionismo/I"
     }
   ],
   "simetria": [

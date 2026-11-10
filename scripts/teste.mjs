@@ -211,6 +211,32 @@ for (const c of manifest.casos) {
     console.log(`  Eixo econômico: ${name[pos] ?? pos}`);
     check(pos === c.eixoEconomico, `${c.nome}: eixo econômico ${name[c.eixoEconomico]} (deu ${name[pos] ?? pos})`);
   }
+  // Textos históricos: época, contexto da época, disputa da época, linguagem da época e nenhum anacronismo.
+  if (c.historico || c.epoca) {
+    const ctx = r.context;
+    console.log(`  Época: ${ctx.era || "não identificada"} (ano ${ctx.eraYear || "?"}, fonte: ${ctx.eraSource ?? "?"}${ctx.historical ? ", texto histórico" : ""})`);
+    console.log(`  Contexto considerado: ${ctx.politicalContext}`);
+    const d = r.political.dispute;
+    console.log(`  Disputa: ${d ? `${d.sideA || "?"} × ${d.sideB || "?"} → ${disputeText(d)}` : "—"}`);
+    console.log(`  Eixos: econômico ${r.political.economic.position}, social ${r.political.social.position}${r.political.economic.position === "not_applicable" ? ` — ${r.political.economic.justification.slice(0, 140)}` : ""}`);
+    const eraTerms = r.groups.flatMap((g) => g.categories.flatMap((x) => x.evidence.filter((e) => e.eraUsage).map((e) => `«${e.quote.slice(0, 50)}» (${e.eraUsage === "period_norm" ? "linguagem da época" : "carregado mesmo para a época"})`)));
+    console.log(`  Linguagem da época: ${eraTerms.length ? eraTerms.join(" | ") : "nenhum termo marcado"}`);
+    if (c.epoca) {
+      const [y0, y1] = c.epoca;
+      check(ctx.eraYear >= y0 && ctx.eraYear <= y1, `${c.nome}: época identificada corretamente (${ctx.era || "não identificada"}; esperado ${y0 === y1 ? y0 : `${y0}–${y1}`})`);
+    }
+    if (c.historico) {
+      check(ctx.historical === true, `${c.nome}: reconhecido como texto histórico`);
+      // Nenhum partido ou figura política atual na análise (fora o próprio texto, as citações e os links da busca).
+      const { anachronisms } = await import(path.join(root, "lib", "historico.ts"));
+      const analysisText = JSON.stringify({ context: ctx, political: r.political, summary: r.summary, summarySimple: r.summarySimple, omissions: r.omissions, rebuttals: r.rebuttals, categories: r.groups.flatMap((g) => g.categories.map((x) => [x.summary, ...x.evidence.map((e) => e.explanation)])) });
+      const late = anachronisms(analysisText, r.text, ctx.eraYear);
+      check(late.length === 0, `${c.nome}: nenhum partido ou figura política atual na análise${late.length ? ` (apareceu: ${late.join(", ")})` : ""}`);
+    }
+    if (c.eixosNaoSeAplicam) {
+      check(r.political.economic.position === "not_applicable" && r.political.social.position === "not_applicable", `${c.nome}: eixos esquerda/direita marcados como "não se aplica"`);
+    }
+  }
   // Contradições internas: corrigidas na hora da análise; nenhuma pode sobrar.
   const ct = r.stats.contradictions;
   if (ct) {

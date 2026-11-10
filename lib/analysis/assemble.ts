@@ -254,6 +254,7 @@ function verifyDispute(d: OverviewOutput["dispute"], matcher: QuoteMatcher, lang
       confidence: "low",
       justification: `${d.justification} ${NOTES.axisDiscarded[lang]}`,
       quote: "",
+      caveat: "",
       start: null,
       end: null,
     };
