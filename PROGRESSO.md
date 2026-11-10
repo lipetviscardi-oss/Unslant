@@ -33,3 +33,12 @@ Faixas da nota, dados/estatística, versão neutra no estilo de notícia, bug vi
 - --haiku: REPROVADO (BdF 3,0 · Terra 3,2 · CNN 1,9; US$ 0,040). Simétrico, mas menos sensível: a distância entre os textos enviesados e o neutro cai de ~3 para ~1,2 ponto; CNN passa a "favorece levemente".
 - --misto: REPROVADO (2,9 · 3,1 · 1,6; US$ 0,066). Mesmo problema: as notas vêm das categorias, que ficaram quase todas no Haiku.
 - Decisão: especialistas continuam no Sonnet (padrão atual, US$ 0,14). Próxima ideia (aguardando o usuário): experimento "enxuto" no Sonnet (2 chamadas em vez de 4, até 2 buscas, explicações mais curtas).
+
+## Rodada 5 — ajustes finos (aprovada; depois começa a Fase 3)
+| Item | O quê | Status |
+|---|---|---|
+| 5 | Bug visual em "Outras sugestões" (grid → flex) | feito |
+| 1 | Cache: versão da análise, custo original, botão "Analisar de novo" | em andamento |
+| 2 | Versão neutra: só trechos elegíveis (fora das aspas, sem atribuição, ≥ moderado) | a fazer |
+| 4 | Escala única leve/moderado/forte (0–3,4 / 3,5–6,4 / 6,5–10) + resumo natural | a fazer |
+| 3 | 50 veículos com fonte conferida; órgãos públicos = "Oficial" | a fazer |

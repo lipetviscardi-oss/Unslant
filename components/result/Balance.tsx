@@ -16,7 +16,7 @@ export function Balance({ result }: { result: AnalysisResult }) {
   const tb = t.result.balance;
 
   return (
-    <section aria-labelledby="balance-title" className="grid gap-5">
+    <section aria-labelledby="balance-title" className="flex flex-col gap-5">
       <div>
         <h2 id="balance-title" className="text-2xl font-medium">
           {isClaim ? tb.titleClaim : tb.title}
@@ -36,7 +36,7 @@ export function Balance({ result }: { result: AnalysisResult }) {
           ) : (
             <ul className="grid gap-3 md:grid-cols-2">
               {b.data.articles.map((a, i) => (
-                <li key={a.url} className="grid content-start gap-2 rounded-[16px] bg-paper p-5">
+                <li key={a.url} className="flex flex-col gap-2 rounded-[16px] bg-paper p-5">
                   <p className="flex flex-wrap items-baseline gap-x-2 text-sm text-muted">
                     <span>{a.outlet}</span>
                     {a.editorialLine && (
@@ -70,11 +70,12 @@ export function Balance({ result }: { result: AnalysisResult }) {
           )}
 
           {b.data.suggestions.length > 0 && (
-            <div className="grid gap-3">
+            <div className="flex flex-col gap-3">
               <h3 className="text-lg font-medium">{tb.suggestionsTitle}</h3>
-              <ul className="grid gap-3 md:grid-cols-2">
+              {/* flex (e não grid): o Safari calculava errado a altura dos itens e sobrepunha o texto */}
+              <ul className="flex flex-col gap-4">
                 {b.data.suggestions.map((s) => (
-                  <li key={s.title} className="grid gap-1 border-l-[3px] border-teal pl-4">
+                  <li key={s.title} className="flex flex-col gap-1 border-l-[3px] border-teal pl-4">
                     <p className="font-medium">{s.title}</p>
                     <p className="text-[15px] leading-relaxed text-muted">{s.explanation}</p>
                   </li>
