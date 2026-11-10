@@ -195,7 +195,7 @@ Decisões: chave da IA neste ambiente via formulário seguro (sim); gasto máxim
 |---|---|---|
 | B1 | Veículos: 92 domínios — 73 conferidos ✅ (todas as fontes batem; CBS = RIGHT-CENTER no MBFC desde 28/04/2026), 19 sem classificação política. Corrigidas 3 notas (texto exato da Wikipédia: Gazeta do Povo, Brasil de Fato) e Aos Fatos (mostra o viés LEFT-CENTER do MBFC). Comando `npm run conferir-veiculos` → docs/veiculos-conferidos.md | feito |
 | B2 | Contradições internas (a gênero, b versão neutra, c disputa, d notas) com correção automática; rodar nas 8 análises | a fazer |
-| B3 | Lixo: comando `npm run checar-lixo` (antes/depois por link) | a fazer |
+| B3 | Lixo: comando `npm run checar-lixo` (antes/depois por link e PDF; avisa se sobrou lixo ou se algo com cara de conteúdo foi removido; relatório em testes/resultados/lixo-*.md). Testado aqui: Outras Palavras, Séralini, paper sintético OK | feito; falta o usuário rodar com os links guardados no computador dele |
 | B4 | PDFs: título, autores, data e revista (3+ PDFs) | a fazer |
 | A1 | Época (identificação + tela + confiança) | a fazer |
 | A2 | Contexto da época; disputa da época; eixos "não se aplica"; trava de figuras atuais | a fazer |

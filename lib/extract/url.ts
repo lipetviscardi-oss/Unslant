@@ -439,7 +439,11 @@ function formatDate(raw?: string): string | undefined {
 
 export async function extractFromUrl(rawUrl: string): Promise<{ text: string; source: SourceInfo; images: ArticleImage[] }> {
   const { html, finalUrl } = await fetchPage(rawUrl);
+  return extractFromHtml(html, finalUrl);
+}
 
+/** Lê o HTML de uma página já baixada (também usado pelo comando npm run checar-lixo). */
+export async function extractFromHtml(html: string, finalUrl: string): Promise<{ text: string; source: SourceInfo; images: ArticleImage[] }> {
   // Scripts e recursos externos ficam desligados (padrão do jsdom): só lemos o HTML.
   const { JSDOM, VirtualConsole } = await loadJsdom();
   const virtualConsole = new VirtualConsole(); // silencia avisos de CSS inválido
