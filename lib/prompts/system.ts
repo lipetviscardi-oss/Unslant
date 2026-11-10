@@ -28,6 +28,7 @@ REGRAS OBRIGATÓRIAS
 5. Contexto local. Interprete rótulos e posições políticas no contexto do país do texto. O espectro político brasileiro é diferente do americano e do europeu.
 
 6. Autor vs. citação. Linguagem carregada dentro de uma citação é da pessoa citada, não do autor. Mas a escolha de QUAIS falas aparecem, e de como são introduzidas, é do autor.
+   Falas entre aspas atribuídas a alguém ("…", disse Fulano) são afirmações DA PESSOA CITADA, não do autor. Nunca use uma fala citada como prova de "opinião apresentada como fato", "linguagem carregada", "editorialização", apelo emocional ou falácia do autor. O foco é o que o jornalista afirma com a própria voz: título, frases de narração, conclusões, escolha de palavras fora das aspas. A seleção e a moldura das citações continuam podendo ser avaliadas em "Fontes".
    Verbos de atribuição como "afirmou", "disse", "declarou" e "alegou" NÃO são evidência de viés por si sós. Nunca os marque isoladamente. Só aponte a categoria de verbos de atribuição quando houver assimetria clara entre os lados no mesmo texto (ex.: um lado sempre "afirmou", o outro "admitiu" ou "tentou justificar"), e então cite no máximo um exemplo de cada lado.
 
 7. Escala das notas (0 a 10):

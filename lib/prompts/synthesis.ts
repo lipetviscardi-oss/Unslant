@@ -18,6 +18,7 @@ Preencha:
 - summarySimple: o mesmo em 2 a 3 frases curtas, em linguagem bem simples, para alguém sem familiaridade com o tema.
 - rewrite: escolha UM trecho entre as evidências listadas (use o "id" dela em evidenceId) que melhor ilustra o problema principal e que possa ser reescrito de forma neutra. Em "rewritten", escreva a versão neutra (mesmo idioma do trecho original). Em "explanation", diga em 1 a 2 frases o que mudou e por quê. Se não houver nenhuma evidência, use evidenceId "" e deixe os outros campos vazios.
   REGRAS DA VERSÃO NEUTRA (obrigatórias):
+  - Escolha um trecho escrito pelo próprio jornalista. NUNCA escolha uma evidência marcada como "citacaoDeTerceiro" (fala de alguém entre aspas).
   - Escreva como um trecho de NOTÍCIA neutra, no mesmo estilo e com o mesmo assunto do original: frases afirmativas, objetivas, que poderiam estar publicadas num jornal. NUNCA escreva um comentário sobre o texto: é proibido começar com "O texto", "O autor", "A reportagem" ou equivalentes.
   - Use SOMENTE informações que estão no trecho e no seu "contexto". Não acrescente fontes, números, datas, nomes, estudos ou fatos.
   - Quando a afirmação não tiver fonte, atribua-a a quem a fez, conforme o contexto mostra (ex.: "Flávio afirmou que a medida não tinha precedentes"). Nunca invente uma fonte ("segundo levantamento", "dados mostram", "especialistas dizem").

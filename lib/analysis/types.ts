@@ -28,6 +28,8 @@ export interface Evidence {
   /** Posição do trecho no texto analisado (para destacar). */
   start: number;
   end: number;
+  /** true = o trecho está entre aspas: é fala de alguém citado, não do autor. */
+  quoted?: boolean;
 }
 
 export interface CategoryResult {

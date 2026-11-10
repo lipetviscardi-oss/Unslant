@@ -40,6 +40,10 @@ export interface Findings {
 const CONF_RANK: Record<Confidence, number> = { low: 0, medium: 1, high: 2 };
 
 const NOTES = {
+  quotedOnly: {
+    pt: "Os trechos apontados eram falas de pessoas citadas, entre aspas, e não afirmações do próprio autor. Por isso, não contam aqui.",
+    en: "The flagged passages were quotes from other people, in quotation marks, not the author's own statements, so they don't count here.",
+  },
   noNumbers: {
     pt: "O texto não traz números ou estatísticas.",
     en: "The text contains no numbers or statistics.",
@@ -71,17 +75,57 @@ export function activeGroups(triage: TriageOutput): BiasGroup[] {
   return TAXONOMY.filter((g) => g.appliesTo.includes(kind));
 }
 
+/**
+ * Categorias que avaliam a VOZ DO AUTOR. Nelas, um trecho entre aspas (fala
+ * de alguém citado) não serve como prova: é afirmação da pessoa citada, não
+ * do jornalista. (A escolha de quais falas aparecem é avaliada em "Fontes".)
+ */
+const AUTHOR_VOICE = new Set([
+  "loaded_language",
+  "labeling",
+  "euphemism_dysphemism",
+  "generalizations",
+  "spin",
+  "opinion_as_fact",
+  "editorializing",
+  "clickbait",
+  "fear_outrage",
+  "false_urgency",
+  "correlation_causation",
+  "straw_man",
+  "false_dilemma",
+  "ad_hominem",
+  "slippery_slope",
+  "appeal_to_authority",
+  "false_equivalence",
+]);
+
+/** Trechos do texto que estão entre aspas (falas citadas). */
+export function findQuotedRanges(text: string): { start: number; end: number }[] {
+  const ranges: { start: number; end: number }[] = [];
+  const re = /“[^”]{1,1500}”|«[^»]{1,1500}»|"[^"\n]{1,1500}"|‘[^’\n]{2,600}’/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) ranges.push({ start: m.index, end: m.index + m[0].length });
+  return ranges;
+}
+
+function insideQuotes(pos: { start: number; end: number }, quoted: { start: number; end: number }[]) {
+  return quoted.some((q) => pos.start >= q.start && pos.end <= q.end);
+}
+
 function verifyCategory(
   categoryId: string,
   raw: SpecialistOutput["categories"][number],
   matcher: QuoteMatcher,
   lang: Lang,
+  quotedRanges: { start: number; end: number }[],
 ): CategoryResult {
   let status = raw.status;
   let score = status === "found" ? clamp(raw.score, 0, 10) : 0;
   let summary = raw.summary;
   const evidence: Evidence[] = [];
   let discarded = 0;
+  let quotedOnly = 0;
   const seen = new Set<number>();
 
   if (status === "found") {
@@ -92,14 +136,20 @@ function verifyCategory(
         continue;
       }
       if (seen.has(pos.start)) continue; // trecho repetido
+      const quoted = insideQuotes(pos, quotedRanges);
+      // Fala de alguém citado não prova viés na voz do autor.
+      if (quoted && AUTHOR_VOICE.has(categoryId)) {
+        quotedOnly++;
+        continue;
+      }
       seen.add(pos.start);
-      evidence.push({ id: "", quote: ev.quote, explanation: ev.explanation, start: pos.start, end: pos.end });
+      evidence.push({ id: "", quote: ev.quote, explanation: ev.explanation, start: pos.start, end: pos.end, quoted });
     }
     if (evidence.length === 0) {
       // Sem evidência verificável, não há afirmação de viés.
       status = "none_found";
       score = 0;
-      summary = NOTES.discarded[lang];
+      summary = quotedOnly > 0 && discarded === 0 ? NOTES.quotedOnly[lang] : NOTES.discarded[lang];
     }
   }
 
@@ -207,6 +257,8 @@ export function rewriteProblem(findings: Findings, synthesis: SynthesisOutput, t
   const rw = synthesis.rewrite;
   if (!rw.evidenceId || !rw.rewritten.trim()) return null;
   const rewritten = rw.rewritten.trim();
+  const chosen = findings.groups.flatMap((g) => g.categories).flatMap((c) => c.evidence).find((e) => e.id === rw.evidenceId);
+  if (chosen?.quoted) return "escolheu uma fala citada entre aspas, que é de outra pessoa e não do autor; escolha um trecho escrito pelo próprio jornalista";
   if (META_START.test(rewritten)) return "virou um comentário sobre o texto em vez de uma reescrita no estilo de notícia";
 
   const lowerText = text.toLowerCase();
@@ -242,6 +294,7 @@ export function buildFindings(
 
   // Trava: sem nenhum número no texto, as categorias de dados não se aplicam.
   const hasNumbers = /\d/.test(text);
+  const quotedRanges = findQuotedRanges(text);
 
   for (const group of activeGroups(triage)) {
     const categories: CategoryResult[] = group.categories.map((cat) => {
@@ -269,7 +322,7 @@ export function buildFindings(
             discarded: 0,
           } satisfies CategoryResult;
         }
-        return verifyCategory(cat.id, raw, matcher, lang);
+        return verifyCategory(cat.id, raw, matcher, lang, quotedRanges);
       });
       return mergeCategory(perPart);
     });
@@ -329,6 +382,7 @@ export function findingsForSynthesis(triage: TriageOutput, findings: Findings, t
             evidencias: c.evidence.map((e) => ({
               id: e.id,
               trecho: e.quote,
+              ...(e.quoted ? { citacaoDeTerceiro: true } : {}),
               // frase em volta do trecho, para a reescrita saber quem disse o quê
               contexto: text.slice(Math.max(0, e.start - 220), Math.min(text.length, e.end + 220)),
               explicacao: e.explanation,
