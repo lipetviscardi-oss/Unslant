@@ -228,6 +228,7 @@ export const EditorialLineSchema = z.enum([
   "academic",
   "wire",
   "international",
+  "specialized",
   "unknown",
 ]);
 export type EditorialLine = z.infer<typeof EditorialLineSchema>;

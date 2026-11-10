@@ -15,8 +15,11 @@
  *     RIGHT → "right". A mesma régua para todos os veículos avaliados por ela.
  *   - Wikipédia em português, quando o artigo descreve a linha editorial do
  *     veículo (o trecho usado está em "note").
- *  Veículos sem fonte clara (ex.: UOL, CNN Brasil, Veja, Metrópoles, Poder360)
- *  ficam de fora de propósito: a IA estima e o site avisa que é estimativa.
+ *  Veículos sem fonte clara ficam de fora DE PROPÓSITO: a IA estima e o site
+ *  mostra "estimativa da IA" com um aviso. Conferidos em 10/11/2026 e sem
+ *  fonte (MBFC não avalia; a Wikipédia não descreve a linha): UOL, Metrópoles,
+ *  Poder360, CNN Brasil, Correio Braziliense, Nexo, Outras Palavras, piauí,
+ *  Valor Econômico, Intercept Brasil, rádio Jovem Pan (só o portal tem fonte).
  *
  *  COMO ACRESCENTAR: copie uma linha, troque o domínio (sem "www."), o nome,
  *  a linha e a fonte. Um domínio também vale para os subdomínios
@@ -27,7 +30,8 @@
  *    "institutional" (oficial: governo, Congresso, tribunais, institutos
  *    públicos), "legal" (veículo jurídico), "fact_check" (checagem),
  *    "academic" (acadêmico), "wire" (agência de notícias),
- *    "international" (internacional)
+ *    "international" (internacional), "specialized" (especializado, sem
+ *    posição política: ex.: Retraction Watch, Science Media Centre)
  * ============================================================================
  */
 
@@ -53,9 +57,32 @@ const WIKI = (article: string, quote: string) => ({
   note: quote,
 });
 const OFFICIAL = (what: string) => ({ label: "Domínio oficial", note: what });
+/** Veículo especializado: a fonte é a descrição pública do próprio site. */
+const SITE = (url: string, what: string) => ({ label: "Site do veículo", url, note: what });
 
 export const OUTLETS: Record<string, OutletInfo> = {
   /* ----------------------------- Brasil ----------------------------- */
+  // Wikipédia (conferido em 10/11/2026)
+  "gazetadopovo.com.br": {
+    name: "Gazeta do Povo",
+    line: "right",
+    source: WIKI("Gazeta_do_Povo", "Ideologia na ficha: \"Direita\"; \"um dos principais veículos de propaganda ideológica do conservadorismo brasileiro\""),
+  },
+  "veja.abril.com.br": {
+    name: "Veja",
+    line: "right",
+    source: WIKI("Veja", "Ideologia na ficha: \"Direita (pós-década de 90)\""),
+  },
+  "revistaforum.com.br": {
+    name: "Revista Fórum",
+    line: "left",
+    source: WIKI("Revista_Fórum", "Ideologia na ficha: \"esquerda\""),
+  },
+  "jovempan.com.br": {
+    name: "Jovem Pan News",
+    line: "right",
+    source: WIKI("Jovem_Pan_News", "Classificada na categoria da Wikipédia \"Organizações conservadoras do Brasil\""),
+  },
   "folha.uol.com.br": { name: "Folha de S.Paulo", line: "center_left", source: MBFC("folha-de-s-paulo-bias-and-credibility/", "LEFT-CENTER", "2026-08") },
   "oglobo.globo.com": { name: "O Globo", line: "center_right", source: MBFC("globo-bias-and-credibility/", "RIGHT-CENTER (Globo)", "2026-01") },
   "g1.globo.com": { name: "g1", line: "center_right", source: MBFC("globo-bias-and-credibility/", "RIGHT-CENTER (Globo)", "2026-01") },
@@ -186,6 +213,17 @@ export const OUTLETS: Record<string, OutletInfo> = {
   /* ----------------------------- Acadêmico ---------------------------- */
   "scielo.br": { name: "SciELO", line: "academic", source: { label: "Tipo de veículo", note: "biblioteca de revistas científicas" } },
   "scielo.org": { name: "SciELO", line: "academic", source: { label: "Tipo de veículo", note: "biblioteca de revistas científicas" } },
+  /* -------------------------- Especializados -------------------------- */
+  "retractionwatch.com": {
+    name: "Retraction Watch",
+    line: "specialized",
+    source: SITE("https://retractionwatch.com/", "Blog do Center for Scientific Integrity que acompanha retratações de artigos científicos"),
+  },
+  "sciencemediacentre.org": {
+    name: "Science Media Centre",
+    line: "specialized",
+    source: SITE("https://www.sciencemediacentre.org/", "Organização independente que reúne comentários de cientistas para jornalistas (Reino Unido)"),
+  },
 };
 
 /** Procura o domínio (e os domínios "pais") na lista; o mais específico vence. */

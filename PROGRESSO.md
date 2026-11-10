@@ -178,7 +178,7 @@ Decisões: A) item 9 = intensidade por trecho; B) limite de imagens e PDF contar
 | R9-5 | Problemas das imagens entram nas notas das categorias (IMAGE_CATEGORY_IDS em visuals.ts; nota = maior entre texto e imagem); regra "mesmo critério para figuras parecidas" | feito (testado com dados simulados) |
 | R9-6 | "Respostas do autor às críticas" (overview.rebuttals; seção nova no detalhado; a síntese avalia até onde procedem) | feito (falta conferir na tela e com IA de verdade) |
 | R9-7 | Disputa com ressalva (dispute.caveat) no resumo simples, no detalhado e na síntese | feito (falta conferir com IA de verdade) |
-| R9-8 | Veículos brasileiros + linha "especializado"; sem fonte = estimativa com aviso | a fazer |
+| R9-8 | Veículos: + Gazeta do Povo (direita), Veja (direita), Revista Fórum (esquerda), Jovem Pan News (direita) pela Wikipédia; Retraction Watch e Science Media Centre como "especializado". MBFC não avalia os brasileiros (perfil do país é pago). Sem fonte (estimativa da IA com aviso ⚠️): UOL, Metrópoles, Poder360, CNN Brasil, Correio Braziliense, Nexo, Outras Palavras, piauí, Valor, Intercept Brasil | feito |
 | R9-9 | Intensidade por trecho (evidence.strength weak/medium/strong); cor = peso do trecho limitado pela faixa da categoria; filtro padrão esconde sinais leves; legenda nova | feito (conferido na tela com dados simulados) |
 | R9-11 | Casos Séralini (PDF) e Outras Palavras no teste automático | a fazer |
 | R9-V | Validação com IA de verdade (≤ US$ 2) | a fazer |

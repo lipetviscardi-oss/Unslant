@@ -72,6 +72,10 @@ export function Balance({ result, limit, compact }: { result: AnalysisResult; li
             </ul>
           )}
 
+          {b.data.articles.slice(0, limit).some((a, i) => b.lineSource?.[i] !== "table" && a.editorialLine && a.editorialLine !== "unknown") && (
+            <p className="max-w-[70ch] text-sm text-muted">⚠️ {tb.estimatedNote}</p>
+          )}
+
           {!compact && b.data.suggestions.length > 0 && (
             <div className="flex flex-col gap-3">
               <h3 className="text-lg font-medium">{tb.suggestionsTitle}</h3>
