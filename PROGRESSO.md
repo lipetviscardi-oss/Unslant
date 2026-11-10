@@ -79,6 +79,6 @@ pode instalar @supabase/supabase-js e @supabase/ssr.
 ## Rodada 7 — internacional (antes da Fase 4)
 | Item | O quê | Status |
 |---|---|---|
-| I1 | Mais veículos britânicos (e americanos) na lista, com fonte MBFC conferida | em andamento |
-| I2 | Exemplo pronto em inglês | a fazer |
+| I1 | Mais veículos britânicos (e americanos) na lista, com fonte MBFC conferida | feito |
+| I2 | Exemplo pronto em inglês | em andamento |
 | I3 | Teste automático com pares EUA e Reino Unido (simetria em vários pares) | a fazer |

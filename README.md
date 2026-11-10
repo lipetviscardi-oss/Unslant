@@ -252,7 +252,7 @@ O teste mostra ✅ ou ❌ para cada regra, o custo de cada etapa, o gênero iden
 | `content/privacy.tsx` | Texto da página Privacidade (atualize antes de lançar login ou pagamentos) |
 | `lib/prompts/claimCheck.ts` | Instruções da verificação de afirmações |
 | `lib/prompts/balance.ts` | Instruções da busca de textos para equilibrar |
-| `lib/veiculos.ts` | Linha editorial de ~60 veículos e órgãos, cada uma com fonte (Media Bias/Fact Check ou Wikipédia). Veículos fora da lista recebem uma estimativa da IA, marcada como "estimativa" |
+| `lib/veiculos.ts` | Linha editorial de ~75 veículos e órgãos, cada uma com fonte (Media Bias/Fact Check ou Wikipédia). Veículos fora da lista recebem uma estimativa da IA, marcada como "estimativa" |
 | `testes/casos.json` | Artigos e faixas de nota do teste automático |
 
 Cada arquivo tem comentários explicando o que pode ser mudado. Depois de salvar, o site recarrega sozinho (se estiver ligado com `npm run dev`).

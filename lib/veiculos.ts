@@ -8,7 +8,8 @@
  *  "estimativa".
  *
  *  REGRA: toda classificação política precisa de uma fonte pública conferida.
- *  Fontes usadas (conferidas em 10/11/2026):
+ *  Fontes usadas (conferidas em 10/11/2026; veículos britânicos e mais
+ *  americanos acrescentados em 10/11/2026, com o país conferido na página):
  *   - Media Bias/Fact Check (MBFC), escala: LEFT → "left", LEFT-CENTER →
  *     "center_left", LEAST BIASED → "center", RIGHT-CENTER → "center_right",
  *     RIGHT → "right". A mesma régua para todos os veículos avaliados por ela.
@@ -114,11 +115,31 @@ export const OUTLETS: Record<string, OutletInfo> = {
   "vox.com": { name: "Vox", line: "left", source: MBFC("vox/", "LEFT") },
   "nypost.com": { name: "New York Post", line: "center_right", source: MBFC("new-york-post/", "RIGHT-CENTER") },
   "breitbart.com": { name: "Breitbart", line: "right", source: MBFC("breitbart/", "RIGHT") },
+  "newsmax.com": { name: "Newsmax", line: "right", source: MBFC("newsmax/", "RIGHT") },
+  "dailywire.com": { name: "The Daily Wire", line: "right", source: MBFC("the-daily-wire/", "RIGHT") },
+  "foxbusiness.com": { name: "Fox Business", line: "center_right", source: MBFC("fox-business/", "RIGHT-CENTER") },
+  "newsweek.com": { name: "Newsweek", line: "center_right", source: MBFC("newsweek/", "RIGHT-CENTER") },
+  "thehill.com": { name: "The Hill", line: "center", source: MBFC("the-hill/", "LEAST BIASED") },
+  "theatlantic.com": { name: "The Atlantic", line: "center_left", source: MBFC("the-atlantic/", "LEFT-CENTER") },
+  "huffpost.com": { name: "HuffPost", line: "left", source: MBFC("huffington-post/", "LEFT") },
   "bbc.com": { name: "BBC", line: "center", source: MBFC("bbc/", "LEAST BIASED") },
   "bbc.co.uk": { name: "BBC", line: "center", source: MBFC("bbc/", "LEAST BIASED") },
   "theguardian.com": { name: "The Guardian", line: "center_left", source: MBFC("the-guardian/", "LEFT-CENTER") },
   "independent.co.uk": { name: "The Independent", line: "center_left", source: MBFC("the-independent/", "LEFT-CENTER") },
   "dailymail.co.uk": { name: "Daily Mail", line: "right", source: MBFC("daily-mail/", "RIGHT") },
+  "telegraph.co.uk": { name: "The Telegraph", line: "right", source: MBFC("daily-telegraph/", "RIGHT") },
+  "thetimes.com": { name: "The Times", line: "center_right", source: MBFC("the-times-of-london/", "RIGHT-CENTER") },
+  "thetimes.co.uk": { name: "The Times", line: "center_right", source: MBFC("the-times-of-london/", "RIGHT-CENTER") },
+  "spectator.co.uk": { name: "The Spectator", line: "center_right", source: MBFC("the-spectator/", "RIGHT-CENTER") },
+  "standard.co.uk": { name: "Evening Standard", line: "center_right", source: MBFC("london-evening-standard/", "RIGHT-CENTER") },
+  "itv.com": { name: "ITV News", line: "center_right", source: MBFC("itv-news/", "RIGHT-CENTER") },
+  "gbnews.com": { name: "GB News", line: "right", source: MBFC("gb-news/", "RIGHT") },
+  "thesun.co.uk": { name: "The Sun", line: "right", source: MBFC("the-sun/", "RIGHT") },
+  "express.co.uk": { name: "Daily Express", line: "right", source: MBFC("daily-express/", "RIGHT") },
+  "newstatesman.com": { name: "New Statesman", line: "center_left", source: MBFC("new-statesman/", "LEFT-CENTER") },
+  "mirror.co.uk": { name: "Daily Mirror", line: "center_left", source: MBFC("daily-mirror/", "LEFT-CENTER") },
+  "inews.co.uk": { name: "The i", line: "center_left", source: MBFC("inews/", "LEFT-CENTER") },
+  "channel4.com": { name: "Channel 4 News", line: "center_left", source: MBFC("channel-4-news/", "LEFT-CENTER") },
   "news.sky.com": { name: "Sky News", line: "center", source: MBFC("sky-news/", "LEAST BIASED") },
   "economist.com": { name: "The Economist", line: "center", source: MBFC("the-economist/", "LEAST BIASED") },
   "ft.com": { name: "Financial Times", line: "center", source: MBFC("financial-times/", "LEAST BIASED") },

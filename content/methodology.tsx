@@ -230,7 +230,7 @@ export function MethodologyPt() {
         </li>
         <li>
           <strong>Linha editorial.</strong> Cada sugestão mostra a linha editorial do veículo (esquerda, centro-esquerda,
-          centro, centro-direita, direita, oficial, jurídico, checagem, acadêmico, agência de notícias). Cerca de 60
+          centro, centro-direita, direita, oficial, jurídico, checagem, acadêmico, agência de notícias). Cerca de 75
           veículos e órgãos vêm de uma lista fixa do site, e cada classificação tem uma fonte pública com link: a avaliação
           do Media Bias/Fact Check ou, para veículos brasileiros que ele não avalia, a descrição da linha editorial na
           Wikipédia. Órgãos públicos (governo, Congresso, STF, TSE) aparecem como &ldquo;oficial&rdquo;. Veículos sem
@@ -500,7 +500,7 @@ export function MethodologyEn() {
         </li>
         <li>
           <strong>Editorial line.</strong> Each suggestion shows the outlet&rsquo;s editorial line (left, center-left,
-          center, center-right, right, official, legal, fact-checking, academic, news agency). About 60 outlets and
+          center, center-right, right, official, legal, fact-checking, academic, news agency). About 75 outlets and
           bodies come from a fixed list kept by the site, and each classification has a public source with a link: the
           Media Bias/Fact Check rating or, for Brazilian outlets it does not rate, the description of the editorial line on
           Portuguese Wikipedia. Public bodies (government, Congress, courts) appear as &ldquo;official&rdquo;. Outlets
