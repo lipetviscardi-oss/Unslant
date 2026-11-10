@@ -116,6 +116,33 @@ function pageToLines(items: TextItemLike[], pageWidth: number): Line[] {
 }
 
 /**
+ * Título pela primeira página: as linhas seguidas com a maior letra
+ * (papers costumam ter o título quebrado em 2 ou 3 linhas).
+ */
+function titleFromFirstPage(lines: Line[]): string | undefined {
+  const candidates = lines.filter((l) => /\p{L}{3}/u.test(l.text) && l.text.length >= 4);
+  if (candidates.length === 0) return undefined;
+  const max = Math.max(...candidates.map((l) => l.height));
+  // A letra do título precisa ser claramente maior que a do texto normal.
+  if (max < median(candidates.map((l) => l.height)) * 1.3) return undefined;
+  const first = lines.findIndex((l) => candidates.includes(l) && l.height >= max * 0.9);
+  const parts: string[] = [];
+  for (let k = first; k < lines.length && lines[k].height >= max * 0.9 && parts.length < 4; k++) parts.push(lines[k].text);
+  const title = parts.join(" ").replace(/\s+/g, " ").trim();
+  const words = title.split(" ").length;
+  return words >= 3 && words <= 40 ? title : undefined;
+}
+
+/** Título dos metadados que é só lixo (nome de arquivo, "Microsoft Word - ...", "Untitled"). */
+function usefulMetaTitle(title: string | undefined, fileName: string): string | undefined {
+  if (!title) return undefined;
+  const base = fileName.replace(/\.pdf$/i, "").trim().toLowerCase();
+  if (title.toLowerCase() === base) return undefined;
+  if (/^(microsoft (word|powerpoint)|untitled|sem t[íi]tulo|document\d*$|doc\d*$)|\.(docx?|pdf|tex|odt)$/i.test(title)) return undefined;
+  return title.split(/\s+/).length >= 2 ? title : undefined;
+}
+
+/**
  * 2. Páginas em duas colunas (comum em papers): lê a coluna da esquerda
  * inteira antes da direita. Linhas que ocupam a largura toda (título,
  * resumo) ficam antes ou depois das colunas, conforme a posição.
@@ -288,9 +315,11 @@ export async function extractFromPdf(file: File): Promise<{ text: string; source
   const images = await renderVisualPages(pdf, visualHints);
   await pdf.cleanup();
 
+  // Título: a maior letra da primeira página; senão, os metadados (se não forem lixo); senão, o nome do arquivo.
+  const bestTitle = (pages[0] && titleFromFirstPage(pages[0])) ?? usefulMetaTitle(title, file.name) ?? file.name.replace(/\.pdf$/i, "");
   return {
     text: normalizeText(paragraphs.join("\n\n")),
-    source: { type: "pdf", title: title ?? file.name.replace(/\.pdf$/i, ""), author },
+    source: { type: "pdf", title: bestTitle, author },
     images,
   };
 }
