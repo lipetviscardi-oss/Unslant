@@ -165,3 +165,22 @@ Decisões do usuário (10/11/2026): botão de sugestões sim; 5 análises por di
 - **Depois: passo 9** (teste final do usuário: 1 paper longo + 1 notícia; atenção ao limite de 5 min da Vercel) e passo 10 (convite).
 - O ambiente desta sessão libera unslant.vercel.app, unslant.world e www.unslant.world (dá para testar o site publicado daqui).
 - Depois: passo 5 (ligar unslant.world na Vercel + DNS na GoDaddy), 6 (Supabase URLs), 7 (Resend), 8 (e-mail de contato), 9 (teste final), 10 (convite: 4 análises por pessoa, sugerir 2 papers + 2 notícias).
+
+## Rodada 9 (ajustes depois do teste com o paper do Séralini e o Outras Palavras) — aprovada em 10/11/2026
+Decisões: A) item 9 = intensidade por trecho; B) limite de imagens e PDF contar como 2 **ficam para a fase final** (avisar o usuário quando formos implementar); C) veículos sem fonte = estimativa da IA com aviso; E) gasto máximo com IA de verdade nesta rodada: **US$ 2** (gasto até agora: US$ 0).
+
+| # | Item | Status |
+|---|---|---|
+| R9-1 | Título do PDF (maior letra da 1ª página → metadados → nome do arquivo) | a fazer |
+| R9-2 | Referências recolhidas e fora da análise; anúncios de editora | a fazer |
+| R9-3 | Lixo por site (lib/extract/lixo-por-site.ts) + parágrafos duplicados | a fazer |
+| R9-4 | Versão neutra não repete número "sem fonte" como fato (regra + conferência) | a fazer |
+| R9-5 | Problemas das imagens entram nas notas das categorias; mesmo critério para figuras parecidas | a fazer |
+| R9-6 | "Respostas do autor às críticas" (avaliação: procede / em parte / não) | a fazer |
+| R9-7 | Disputa com ressalva no resumo simples | a fazer |
+| R9-8 | Veículos brasileiros + linha "especializado"; sem fonte = estimativa com aviso | a fazer |
+| R9-9 | Intensidade por trecho nos destaques | a fazer |
+| R9-11 | Casos Séralini (PDF) e Outras Palavras no teste automático | a fazer |
+| R9-V | Validação com IA de verdade (≤ US$ 2) | a fazer |
+
+Lembrete para a fase final: limite de imagens por PDF (priorizar gráficos/fotos) e PDF longo contar como 2 análises no plano grátis — **avisar o usuário**.
