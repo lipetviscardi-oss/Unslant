@@ -14,7 +14,9 @@
     "conferir-veiculos": "node --no-warnings scripts/conferir-veiculos.mjs",
     "checar-lixo": "node --no-warnings --experimental-transform-types --import ./scripts/lib/carregar-ts.mjs scripts/checar-lixo.mjs",
     "checar-pdfs": "node --no-warnings --experimental-transform-types --import ./scripts/lib/carregar-ts.mjs scripts/checar-pdfs.mjs",
-    "checar-contradicoes": "node --no-warnings --experimental-transform-types --import ./scripts/lib/carregar-ts.mjs scripts/checar-contradicoes.mjs"
+    "checar-contradicoes": "node --no-warnings --experimental-transform-types --import ./scripts/lib/carregar-ts.mjs scripts/checar-contradicoes.mjs",
+    "teste:beta": "node scripts/teste.mjs --so seralini,outras-palavras,mother-jones,federalist,brasil-de-fato,terra-brasil,cnn,reuters,hist-ai5,hist-truman,hist-nabuco",
+    "checar-beta": "node scripts/checar-beta.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.6.0",

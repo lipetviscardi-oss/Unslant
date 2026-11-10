@@ -204,4 +204,7 @@ Decisões: chave da IA neste ambiente via formulário seguro (sim); gasto máxim
 | A5 | Para equilibrar em texto histórico: historiografia, acervos, fontes da época; sem busca de veículos do outro lado | feito (falta testar com IA de verdade) |
 | A6 | Metodologia: seção "Textos históricos" (pt/en) | feito (falta testar com IA de verdade) |
 | A7 | 3 textos históricos (Wikisource): AI-5 1968, Doutrina Truman 1947 (sem data no texto), Nabuco 1883 (sem data); conferências no teste: época certa, histórico, nenhum anacronismo, eixos "não se aplica" (Nabuco). Carta-testamento não está no Wikisource nem na Wikipédia. Telegrama Gordon 1964 = 4º caso se o usuário aprovar a leitura de escaneados | feito com IA falsa; falta IA de verdade |
-| F | CHECKLIST-ANTES-DO-BETA.md + verificações no teste automático | a fazer |
+| F | CHECKLIST-ANTES-DO-BETA.md; `npm run checar-beta` (4 conferências sem IA) e `npm run teste:beta` (11 casos com IA, ~US$ 2,50); --so aceita lista | feito |
+
+### Onde paramos (Rodada 10, 10/11/2026 à noite)
+- Tudo implementado e testado sem IA. Falta: (1) o usuário rodar `npm run checar-beta` e `npm run teste:beta` (a chave da Anthropic não pode ficar neste ambiente) e anexar `testes/resultados/…-completo.json` e `lixo-….md`; (2) decisão do usuário sobre ler PDFs escaneados com a IA (telegrama 1964).

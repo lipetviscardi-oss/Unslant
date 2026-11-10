@@ -23,7 +23,7 @@ import path from "node:path";
 
 const args = process.argv.slice(2);
 const low = args.includes("--baixo");
-// --so <id>: roda só um caso (ex.: npm run teste -- --so paper-grafico)
+// --so <id>: roda só um caso (ex.: npm run teste -- --so paper-grafico); vários: --so a,b,c
 const onlyIndex = args.indexOf("--so");
 const only = onlyIndex !== -1 ? args[onlyIndex + 1] : undefined;
 const specialistModel = args.includes("--haiku") ? "haiku" : args.includes("--misto") ? "mixed" : undefined;
@@ -38,12 +38,14 @@ const base = `http://localhost:${port}`;
 const root = process.cwd();
 const manifest = JSON.parse(readFileSync(path.join(root, "testes", "casos.json"), "utf8"));
 if (only) {
-  manifest.casos = manifest.casos.filter((c) => c.id === only);
-  if (!manifest.casos.length) {
-    console.log(`Não existe caso com id "${only}" em testes/casos.json.`);
+  const wanted = only.split(",").map((x) => x.trim()).filter(Boolean);
+  const unknown = wanted.filter((id) => !manifest.casos.some((c) => c.id === id));
+  if (unknown.length) {
+    console.log(`Não existe caso com id "${unknown.join(", ")}" em testes/casos.json.`);
     process.exit(1);
   }
-  delete manifest.simetria; // simetria só faz sentido com os dois lados juntos
+  manifest.casos = manifest.casos.filter((c) => wanted.includes(c.id));
+  // A simetria só é conferida quando os dois lados do par estão na rodada.
 }
 const textsDir = path.join(root, "testes", "textos");
 /** Onde fica o texto de cada caso: um arquivo do próprio projeto (caso.arquivo) ou o guardado pelo teste:salvar. */
