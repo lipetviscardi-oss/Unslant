@@ -45,3 +45,7 @@ next-env.d.ts
 
 # unslant: cache local de análises (economiza chamadas à IA durante testes)
 /.cache/
+
+# unslant: textos e resultados do teste automático (só no seu computador)
+/testes/textos/
+/testes/resultados/

@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "comparar": "node scripts/comparar.mjs"
+    "comparar": "node scripts/comparar.mjs",
+    "teste:salvar": "node scripts/teste-salvar.mjs",
+    "teste": "node scripts/teste.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.6.0",

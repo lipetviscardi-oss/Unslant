@@ -39,6 +39,18 @@ const RequestSchema = z.object({
   contentType: z
     .enum(["news", "feature", "analysis", "opinion", "editorial", "academic_paper", "press_release", "blog", "other"])
     .optional(),
+  /**
+   * Opções só para o teste automático (npm run teste). Ignoradas fora do
+   * modo de desenvolvimento (npm run dev).
+   */
+  devOptions: z
+    .object({
+      /** Analisa do zero, sem usar o cache. */
+      noCache: z.boolean().optional(),
+      /** Experimenta outro "esforço" nos especialistas (o resultado não vai para o cache). */
+      specialistEffort: z.enum(["low", "medium", "high"]).optional(),
+    })
+    .optional(),
 });
 
 export async function POST(request: Request) {
@@ -49,6 +61,7 @@ export async function POST(request: Request) {
     return Response.json({ code: "INVALID_INPUT", message: errorMessage("INVALID_INPUT") }, { status: 400 });
   }
   const lang = body.lang;
+  const dev = process.env.NODE_ENV === "development" ? body.devOptions : undefined;
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream<Uint8Array>({
@@ -99,7 +112,7 @@ export async function POST(request: Request) {
         // 2. Já analisamos este texto antes? (cache)
         // Cada campo entra separado (JSON), para que textos diferentes nunca gerem a mesma chave.
         const key = cacheKey(JSON.stringify({ mode: body.mode, source, text }), lang, promptVersion());
-        const cached = await readCache(key);
+        const cached = dev?.noCache ? null : await readCache(key);
         if (cached) {
           cached.stats.fromCache = true;
           send({ type: "result", result: cached });
@@ -109,8 +122,16 @@ export async function POST(request: Request) {
         // 3. Análise com a IA
         reserveDailySlot();
         reserved = true;
-        const result = await runPipeline({ text, source, lang, signal: request.signal, onProgress: send });
-        await writeCache(key, result);
+        const result = await runPipeline({
+          text,
+          source,
+          lang,
+          signal: request.signal,
+          onProgress: send,
+          specialistEffort: dev?.specialistEffort,
+        });
+        // Resultado de experimento não entra no cache (para não se misturar com as análises normais).
+        if (!dev?.specialistEffort) await writeCache(key, result);
         send({ type: "result", result });
       } catch (err) {
         const code = err instanceof AppError ? err.code : "UNKNOWN";

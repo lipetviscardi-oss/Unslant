@@ -174,6 +174,8 @@ export interface AnalysisResult {
     /** Custo por etapa (identificação, especialistas, busca...). */
     stages?: Record<string, StageCost>;
     discardedEvidence: number;
+    /** Só em testes: "esforço" usado nos especialistas, se diferente do padrão. */
+    specialistEffort?: string;
     fromCache: boolean;
   };
 }

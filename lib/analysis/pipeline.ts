@@ -57,6 +57,8 @@ export interface PipelineInput {
   lang: Lang;
   signal?: AbortSignal;
   onProgress: (event: StreamEvent) => void;
+  /** Só para testes: troca o "esforço" dos especialistas (ver npm run teste -- --baixo). */
+  specialistEffort?: "low" | "medium" | "high";
 }
 
 /**
@@ -80,6 +82,7 @@ function buildBundles(groups: BiasGroup[]): BiasGroup[][] {
 export async function runPipeline(input: PipelineInput): Promise<AnalysisResult> {
   const startedAt = Date.now();
   const { text, source, lang, signal, onProgress } = input;
+  const specialistEffort = input.specialistEffort ?? config.ai.effort.specialist;
   const usage = new UsageTracker();
   const wordCount = countWords(text);
   const parts = splitIntoParts(text, config.text.maxWordsPerPart);
@@ -138,7 +141,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
           schema: withOverview ? specialistWithOverviewSchema(ids) : specialistSchema(ids),
           documentBlock,
           task: specialistPrompt(bundle, triage, lang, withOverview),
-          effort: config.ai.effort.specialist,
+          effort: specialistEffort,
           maxTokens: config.ai.maxTokens.specialist + (withOverview ? config.ai.maxTokens.overview : 0),
           usage,
           signal,
@@ -320,6 +323,7 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
       estimatedCostUsd: usage.costUsd(),
       webSearches: usage.webSearches,
       stages: usage.report(),
+      ...(input.specialistEffort ? { specialistEffort: input.specialistEffort } : {}),
       fromCache: false,
     },
   });
