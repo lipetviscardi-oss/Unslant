@@ -229,7 +229,7 @@ export const pt = {
 
     stats: {
       aria: "Informações técnicas da análise",
-      model: "Modelo: ",
+      model: "Modelos: ",
       cost: "Custo estimado: ",
       costCached: "US$ 0 (resultado guardado)",
       time: "Tempo: ",

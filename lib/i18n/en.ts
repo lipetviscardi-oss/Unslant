@@ -228,7 +228,7 @@ export const en: Dict = {
 
     stats: {
       aria: "Technical details of the analysis",
-      model: "Model: ",
+      model: "Models: ",
       cost: "Estimated cost: ",
       costCached: "US$ 0 (saved result)",
       time: "Time: ",

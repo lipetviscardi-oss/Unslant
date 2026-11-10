@@ -32,8 +32,6 @@ export const config = {
     /**
      * Só Anthropic: modelo mais barato para tarefas simples (identificação,
      * resumo final e busca na web). ~20x mais barato que o principal.
-     * Enquanto o modelo leve faz a identificação, uma chamada sem resposta
-     * "aquece" o cache do texto no modelo principal para os especialistas.
      */
     lightModel: "claude-haiku-5-5",
 
@@ -83,6 +81,14 @@ export const config = {
      * automaticamente com outro modelo (recurso "fallback"). Recomendado: true.
      */
     useRefusalFallback: true,
+
+    /**
+     * Guardar o texto no cache da Anthropic entre as etapas da análise.
+     * Desligado: como cada etapa usa um formato de resposta diferente, a
+     * Anthropic não reaproveita o cache entre elas, e gravar custa 25% a mais.
+     * (Medido nos testes de novembro/2026: "cache lido 0" em todas as etapas.)
+     */
+    cacheDocument: false,
 
     /** Máximo de trechos de evidência por categoria (os mais representativos). */
     maxEvidencePerCategory: 2,

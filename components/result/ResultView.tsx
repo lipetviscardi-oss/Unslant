@@ -25,6 +25,20 @@ function Chip({ children, tone = "plain" }: { children: React.ReactNode; tone?: 
   );
 }
 
+const MODEL_LABEL: Record<string, string> = {
+  "claude-sonnet-5-5": "Claude Sonnet 5.5",
+  "claude-haiku-5-5": "Claude Haiku 5.5",
+  "gemini-3.8-flash": "Gemini 3.8 Flash",
+};
+
+/** "Claude Sonnet 5.5 (especialistas, visão geral) · Claude Haiku 5.5 (identificação, síntese, busca)" */
+function modelsUsed(s: AnalysisResult["stats"]): string {
+  if (!s.stages) return MODEL_LABEL[s.model] ?? s.model;
+  const byModel = new Map<string, string[]>();
+  for (const [stage, v] of Object.entries(s.stages)) byModel.set(v.model, [...(byModel.get(v.model) ?? []), stage]);
+  return [...byModel.entries()].map(([m, stages]) => `${MODEL_LABEL[m] ?? m} (${stages.join(", ")})`).join(" · ");
+}
+
 function Stats({ result }: { result: AnalysisResult }) {
   const t = useDict();
   const lang = useLang();
@@ -34,9 +48,9 @@ function Stats({ result }: { result: AnalysisResult }) {
   return (
     <section aria-label={t.result.stats.aria} className="border-t border-line pt-6 text-sm text-muted">
       <dl className="grid gap-x-8 gap-y-2 sm:grid-cols-2 lg:grid-cols-4">
-        <div>
+        <div className="sm:col-span-2 lg:col-span-4">
           <dt className="inline">{t.result.stats.model}</dt>
-          <dd className="inline text-ink">{result.demo ? t.result.stats.demoModel : s.model}</dd>
+          <dd className="inline text-ink">{result.demo ? t.result.stats.demoModel : modelsUsed(s)}</dd>
         </div>
         {!result.demo && (
           <>
