@@ -1,34 +1,15 @@
 /**
  * DIAGNÓSTICO: GET /api/health
- * Mostra se o servidor está de pé e qual versão do Node.js ele usa
- * (útil para conferir a publicação na Vercel). Não mostra nenhum segredo.
- * Com ?url=1, testa a leitura de uma página simples (example.com), sem IA.
+ * Mostra se o servidor está de pé, qual versão do Node.js ele usa e se a
+ * biblioteca de leitura de links (jsdom) carrega. Não mostra nenhum segredo.
  */
 
-import { extractFromUrl } from "@/lib/extract/url";
-
-export async function GET(request: Request) {
+export async function GET() {
   let jsdom = "ok";
   try {
     await import("jsdom");
   } catch (err) {
-    jsdom = describe(err);
+    jsdom = err instanceof Error ? `${err.name}: ${err.message.slice(0, 300)}` : "erro";
   }
-  let url: string | undefined;
-  if (new URL(request.url).searchParams.get("url") === "1") {
-    try {
-      const page = await extractFromUrl("https://example.com");
-      url = `ok (${page.text.length} caracteres)`;
-    } catch (err) {
-      url = describe(err);
-    }
-  }
-  return Response.json({ ok: true, node: process.version, jsdom, url }, { headers: { "Cache-Control": "no-store" } });
-}
-
-function describe(err: unknown): string {
-  if (!(err instanceof Error)) return "erro";
-  const detail = (err as { detail?: string; code?: string }).detail ?? "";
-  const cause = err.cause instanceof Error ? ` | causa: ${err.cause.message}` : "";
-  return `${err.name}: ${err.message} ${detail}${cause}`.slice(0, 600);
+  return Response.json({ ok: true, node: process.version, jsdom }, { headers: { "Cache-Control": "no-store" } });
 }
