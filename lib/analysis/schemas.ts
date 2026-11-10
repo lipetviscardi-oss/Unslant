@@ -52,6 +52,15 @@ export const CategoryStatusSchema = z.enum(["found", "none_found", "not_applicab
 export type CategoryStatus = z.infer<typeof CategoryStatusSchema>;
 
 export function specialistSchema(categoryIds: readonly [string, ...string[]]) {
+  return specialistBase(categoryIds);
+}
+
+/** Pacote de especialistas que também faz a visão geral (uma chamada a menos). */
+export function specialistWithOverviewSchema(categoryIds: readonly [string, ...string[]]) {
+  return specialistBase(categoryIds).extend({ overview: OverviewSchema });
+}
+
+function specialistBase(categoryIds: readonly [string, ...string[]]) {
   return z.object({
     categories: z.array(
       z.object({

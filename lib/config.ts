@@ -48,13 +48,20 @@ export const config = {
     ],
 
     /**
+     * true = a "visão geral" (inclinação política, disputa, fato x opinião,
+     * omissões) vai junto do pacote de especialistas com menos categorias,
+     * em vez de ser uma chamada separada. Economiza uma chamada por análise.
+     */
+    overviewWithSpecialists: true,
+
+    /**
      * "Esforço" de raciocínio de cada etapa: "low" | "medium" | "high".
      * Mais esforço = análise mais cuidadosa, porém mais lenta e mais cara.
      */
     effort: {
       triage: "low", // identificar tipo de texto, país e contexto
       specialist: "medium", // cada "especialista" (linguagem, fontes, dados...)
-      overview: "medium", // inclinação política, fato x opinião, omissões (igual aos especialistas, para reaproveitar o cache)
+      overview: "medium", // inclinação política, fato x opinião, omissões (só usado se overviewWithSpecialists = false)
       synthesis: "low", // resumo final e sugestão de reescrita
       claimCheck: "medium", // verificação de afirmações
     },

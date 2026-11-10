@@ -8,17 +8,9 @@
 import type { TriageOutput } from "@/lib/analysis/schemas";
 import { contextBlock, languageInstruction } from "./document";
 
-export function overviewPrompt(triage: TriageOutput, lang: "pt" | "en") {
-  return `TAREFA: avaliar a inclinação política do documento acima, a proporção de fato vs. opinião e o que ele pode estar omitindo.
-
-${contextBlock({
-    "Tipo de texto": triage.contentType,
-    País: triage.country,
-    "Contexto político": triage.politicalContext,
-    Tema: triage.topic,
-  })}
-
-1) EIXOS IDEOLÓGICOS ("economic" e "social")
+/** Instruções da visão geral (reaproveitadas quando ela vai junto de um pacote de especialistas). */
+export function overviewInstructions() {
+  return `1) EIXOS IDEOLÓGICOS ("economic" e "social")
    Para cada eixo: position, confidence, justification (1 a 3 frases) e quote (trecho EXATO do documento que sustenta a classificação; "" se position não for "left" ou "right").
    position:
    - "not_applicable" quando o TEMA do texto não envolve aquele eixo. O eixo econômico só se aplica se o texto trata de economia, impostos, gasto público, trabalho, mercado, regulação, privatização, renda etc. O eixo social só se aplica se o texto trata de costumes, valores, religião, direitos de minorias, segurança pública/punição, drogas, família etc. Uma disputa eleitoral, um escândalo ou uma briga entre políticos NÃO é, por si só, tema econômico ou social.
@@ -43,6 +35,19 @@ ${contextBlock({
 4) O QUE O TEXTO PODE ESTAR OMITINDO: até 5 itens (omissions), cada um com "title" (curto) e "explanation" (1 a 2 frases). Pense em: dados de comparação, versão de partes envolvidas, contexto histórico, consequências para outros grupos, incertezas. Baseie-se em conhecimento geral amplamente aceito; não invente fatos específicos. Lista vazia se nada relevante faltar.
 
 Muitos textos não têm inclinação em nenhum eixo nem favorecem lado algum. Isso é normal: não force classificações.
+`;
+}
 
+export function overviewPrompt(triage: TriageOutput, lang: "pt" | "en") {
+  return `TAREFA: avaliar a inclinação política do documento acima, a proporção de fato vs. opinião e o que ele pode estar omitindo.
+
+${contextBlock({
+    "Tipo de texto": triage.contentType,
+    País: triage.country,
+    "Contexto político": triage.politicalContext,
+    Tema: triage.topic,
+  })}
+
+${overviewInstructions()}
 ${languageInstruction(lang)}`;
 }

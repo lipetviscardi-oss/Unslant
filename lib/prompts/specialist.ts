@@ -9,8 +9,9 @@ import type { BiasGroup } from "@/lib/taxonomy";
 import type { TriageOutput } from "@/lib/analysis/schemas";
 import { config } from "@/lib/config";
 import { contextBlock, languageInstruction } from "./document";
+import { overviewInstructions } from "./overview";
 
-export function specialistPrompt(groups: BiasGroup[], triage: TriageOutput, lang: "pt" | "en") {
+export function specialistPrompt(groups: BiasGroup[], triage: TriageOutput, lang: "pt" | "en", withOverview = false) {
   const sections = groups
     .map((group) => {
       const categories = group.categories
@@ -20,7 +21,7 @@ export function specialistPrompt(groups: BiasGroup[], triage: TriageOutput, lang
     })
     .join("\n\n");
 
-  return `TAREFA: analise o documento acima SOMENTE quanto aos grupos de viés listados abaixo.
+  return `TAREFA: analise o documento acima SOMENTE quanto aos grupos de viés listados abaixo${withOverview ? " e, depois, faça a visão geral descrita no fim" : ""}.
 
 ${contextBlock({
     "Tipo de texto": triage.contentType,
@@ -40,6 +41,10 @@ Para CADA categoria acima (de todos os grupos), devolva exatamente uma entrada e
 - evidence: até ${config.ai.maxEvidencePerCategory} trechos, só os mais representativos. Cada um com "quote" (cópia EXATA do documento, 2 a 40 palavras) e "explanation" (por que o trecho mostra o problema e, quando útil, como seria uma versão neutra). Lista vazia se status não for "found".
 
 Lembre-se: notas altas exigem evidências fortes e recorrentes. Um único caso leve merece nota baixa.
+${withOverview ? `
+SEGUNDA PARTE — VISÃO GERAL (campo "overview")
+Depois das categorias, avalie o documento inteiro quanto à inclinação política, à proporção de fato vs. opinião e ao que ele pode estar omitindo. Esta parte é independente das categorias acima: avalie-a com o mesmo cuidado.
 
+${overviewInstructions()}` : ""}
 ${languageInstruction(lang)}`;
 }

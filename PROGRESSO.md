@@ -13,8 +13,8 @@ Cada item concluído é salvo no GitHub logo em seguida.
 | C | Coerência da disputa: intensidade leve/clara/forte; resumo não pode contradizer o marcador | feito |
 | D | Gênero: critérios fixos, motivo mostrado, editoria/seção da página como pista, seletor de gênero no formulário | feito |
 | E | Linha editorial dos veículos sugeridos (tabela lib/veiculos.ts + estimativa da IA) | feito |
-| F | Custo: visão geral junto de um pacote de especialistas (4 chamadas em vez de 5) | em andamento |
-| G | Teste automático: npm run teste:salvar e npm run teste (faixas, simetria ≤ 1,5, lados opostos) | a fazer |
+| F | Custo: visão geral junto de um pacote de especialistas (4 chamadas em vez de 5) | feito |
+| G | Teste automático: npm run teste:salvar e npm run teste (faixas, simetria ≤ 1,5, lados opostos) | em andamento |
 | H | Verificação final (tipos, lint, build) + README/Metodologia + instruções ao usuário | a fazer |
 
 ### Decisões

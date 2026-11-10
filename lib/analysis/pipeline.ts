@@ -2,7 +2,8 @@
  * LINHA DE MONTAGEM DA ANÁLISE
  *
  *  1. Identificação  — tipo de texto, país e contexto (1 chamada rápida)
- *  2. Especialistas  — um por grupo da taxonomia + visão geral, em paralelo
+ *  2. Especialistas  — grupos da taxonomia em pacotes, em paralelo; a visão
+ *                      geral vai junto do pacote menor (config.ai.overviewWithSpecialists)
  *  3. Conferência    — citações procuradas no texto, notas calculadas
  *  4. Síntese        — resumo final e sugestão de reescrita neutra
  *     + Busca na web  — textos para equilibrar a leitura (ao mesmo tempo)
@@ -33,6 +34,7 @@ import {
   SynthesisSchema,
   TriageSchema,
   specialistSchema,
+  specialistWithOverviewSchema,
   type ClaimCheckOutput,
   type SpecialistOutput,
   type SynthesisOutput,
@@ -61,6 +63,8 @@ export interface PipelineInput {
  * Junta os grupos ativos nas chamadas definidas em config.ai.specialistBundles.
  * Grupos que não estiverem em nenhum pacote viram uma chamada própria.
  */
+const count = (bundle: BiasGroup[]) => bundle.reduce((n, g) => n + g.categories.length, 0);
+
 function buildBundles(groups: BiasGroup[]): BiasGroup[][] {
   const used = new Set<string>();
   const bundles: BiasGroup[][] = [];
@@ -108,7 +112,11 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
   // 2. Especialistas (agrupados) + visão geral (+ verificação, para afirmações), em paralelo
   const groups = activeGroups(triage);
   const bundles = buildBundles(groups);
-  const perPart = bundles.length + 1;
+  // A visão geral vai junto do pacote com menos categorias (ou numa chamada separada).
+  const overviewHost = config.ai.overviewWithSpecialists && bundles.length > 0
+    ? bundles.reduce((best, b, i, all) => (count(b) < count(all[best]) ? i : best), 0)
+    : -1;
+  const perPart = bundles.length + (overviewHost === -1 ? 1 : 0);
   const total = parts.length * perPart + (isClaim ? 1 : 0);
   let done = 0;
   onProgress({ type: "stage", stage: "analyzing", done, total });
@@ -120,24 +128,26 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
   const tasks: (() => Promise<{ part: number; groupId: string | null; output: unknown }>)[] = [];
   parts.forEach((part, partIndex) => {
     const documentBlock = buildDocumentBlock(part.text, source, boundary, { index: partIndex, total: parts.length });
-    for (const bundle of bundles) {
+    bundles.forEach((bundle, bundleIndex) => {
       const ids = bundle.flatMap((g) => g.categories.map((c) => c.id)) as [string, ...string[]];
+      const withOverview = bundleIndex === overviewHost;
       tasks.push(async () => {
         const output = await callStructured({
-          label: `especialistas ${bundle.map((g) => g.id).join("+")} (parte ${partIndex + 1})`,
+          label: `especialistas ${bundle.map((g) => g.id).join("+")}${withOverview ? " + visão geral" : ""} (parte ${partIndex + 1})`,
           stage: "especialistas",
-          schema: specialistSchema(ids),
+          schema: withOverview ? specialistWithOverviewSchema(ids) : specialistSchema(ids),
           documentBlock,
-          task: specialistPrompt(bundle, triage, lang),
+          task: specialistPrompt(bundle, triage, lang, withOverview),
           effort: config.ai.effort.specialist,
-          maxTokens: config.ai.maxTokens.specialist,
+          maxTokens: config.ai.maxTokens.specialist + (withOverview ? config.ai.maxTokens.overview : 0),
           usage,
           signal,
         });
         tick();
         return { part: partIndex, groupId: "__bundle__", output };
       });
-    }
+    });
+    if (overviewHost !== -1) return;
     tasks.push(async () => {
       const output = await callStructured({
         label: `visão geral (parte ${partIndex + 1})`,
@@ -182,8 +192,10 @@ export async function runPipeline(input: PipelineInput): Promise<AnalysisResult>
     let overview: RawPart["overview"] | undefined;
     for (const o of outputs.filter((x) => x.part === i)) {
       if (o.groupId === "__bundle__") {
+        const out = o.output as SpecialistOutput & { overview?: RawPart["overview"] };
+        if (out.overview) overview = out.overview;
         // Separa as categorias de cada chamada agrupada por grupo da taxonomia.
-        for (const cat of (o.output as SpecialistOutput).categories) {
+        for (const cat of out.categories) {
           const groupId = groups.find((g) => g.categories.some((c) => c.id === cat.categoryId))?.id;
           if (!groupId) continue;
           (specialists[groupId] ??= { categories: [] }).categories.push(cat);
