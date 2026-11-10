@@ -258,6 +258,10 @@ function mergeDisputes(ds: DisputeResult[]): DisputeResult {
 const SOURCE_NOUNS =
   /\b(levantamentos?|estudos?|pesquisas?|relat[óo]rios?|especialistas|dados oficiais|surveys?|stud(y|ies)|reports?|polls?|experts|research)\b/gi;
 
+/** Marcas de atribuição ou de "sem fonte" numa frase da versão neutra. */
+const REWRITE_ATTRIBUTION =
+  /\b(segundo|de acordo com|conforme|afirma|afirmou|afirmam|diz|disse|dizem|estima|estimou|alega|alegou|sustenta|calcula|sem fonte|according to|says|said|claims?|claimed|estimates?|estimated|argues?|argued|no source|unsourced)\b/i;
+
 /** Reescrita que virou comentário sobre o texto ("O texto informa que..."). */
 const META_START = /^\s*(o|este|esse|a)\s+(texto|autor|autora|artigo|trecho|reportagem|matéria)\b|^\s*(the|this)\s+(text|author|article|passage|story)\b/i;
 
@@ -353,6 +357,23 @@ export function rewriteProblem(findings: Findings, synthesis: SynthesisOutput, t
   const lowerText = text.toLowerCase();
   const newNumbers = (rewritten.match(/\d+([.,]\d+)?/g) ?? []).filter((n) => !text.includes(n));
   if (newNumbers.length) return `acrescentou números que não estão no texto original (${newNumbers.join(", ")})`;
+
+  // Número que a análise marcou como "sem fonte": só pode aparecer atribuído ("segundo o autor") ou com "sem fonte indicada".
+  const unsourced = new Set(
+    findings.groups
+      .flatMap((g) => g.categories)
+      .filter((c) => c.id === "unsourced_data" && c.score > 0)
+      .flatMap((c) => c.evidence)
+      .flatMap((e) => e.quote.match(/\d+([.,]\d+)?/g) ?? []),
+  );
+  if (unsourced.size) {
+    const sentences = rewritten.split(/(?<=[.!?])\s+/);
+    const asFact = sentences.flatMap((sent) =>
+      (sent.match(/\d+([.,]\d+)?/g) ?? []).filter((n) => unsourced.has(n) && !REWRITE_ATTRIBUTION.test(sent)),
+    );
+    if (asFact.length)
+      return `repetiu como fato um número que a análise marcou como sem fonte (${[...new Set(asFact)].join(", ")}); atribua a quem afirma ("segundo o autor") ou acrescente "(sem fonte indicada)"`;
+  }
 
   const newSources = [...new Set((rewritten.match(SOURCE_NOUNS) ?? []).map((t) => t.toLowerCase()))].filter(
     (t) => !lowerText.includes(t),

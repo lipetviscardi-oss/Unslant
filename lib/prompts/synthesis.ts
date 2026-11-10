@@ -28,6 +28,7 @@ Preencha:
   - Use SOMENTE informações que estão no trecho e no seu "contexto". Não acrescente fontes, números, datas, nomes, estudos ou fatos.
   - Quando a afirmação não tiver fonte, atribua-a a quem a fez, conforme o contexto mostra (ex.: "Flávio afirmou que a medida não tinha precedentes"). Nunca invente uma fonte ("segundo levantamento", "dados mostram", "especialistas dizem").
   - Se a afirmação sem fonte for do próprio autor, reescreva-a de forma descritiva e não categórica, sem transformá-la em fato (ex.: trocar "é a primeira vez na história" por "a medida seria inédita, de acordo com a campanha" apenas se o contexto disser quem defende isso; caso contrário, retire a parte não sustentada).
+  - NÚMEROS SEM FONTE: se a análise marcou um número como "sem fonte" (categoria unsourced_data), a versão neutra NÃO pode apresentá-lo como fato. Atribua na mesma frase ("segundo o autor, os juros custaram R$ 1,18 trilhão") ou acrescente "(sem fonte indicada)". Em inglês: "according to the author" / "(no source given)".
   - Neutralizar = trocar adjetivos e verbos carregados por termos descritivos, separar fato de opinião e atribuir opiniões a quem as emite.${retryNote ? `
   ATENÇÃO: ${retryNote}` : ""}
 
