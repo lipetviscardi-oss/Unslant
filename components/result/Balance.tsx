@@ -9,7 +9,8 @@ import type { AnalysisResult } from "@/lib/analysis/types";
 import { lookupOutlet } from "@/lib/veiculos";
 import { useDict } from "@/lib/i18n";
 
-export function Balance({ result }: { result: AnalysisResult }) {
+/** limit = quantos textos mostrar (modo simples); compact = sem "Outras sugestões". */
+export function Balance({ result, limit, compact }: { result: AnalysisResult; limit?: number; compact?: boolean }) {
   const t = useDict();
   const b = result.balance;
   if (!b || b.status === "disabled") return null;
@@ -36,7 +37,7 @@ export function Balance({ result }: { result: AnalysisResult }) {
             <p className="text-muted">{tb.none}</p>
           ) : (
             <ul className="grid gap-3 md:grid-cols-2">
-              {b.data.articles.map((a, i) => (
+              {b.data.articles.slice(0, limit).map((a, i) => (
                 <li key={a.url} className="flex flex-col gap-2 rounded-[16px] bg-paper p-5">
                   <p className="flex flex-wrap items-baseline gap-x-2 text-sm text-muted">
                     <span>{a.outlet}</span>
@@ -71,7 +72,7 @@ export function Balance({ result }: { result: AnalysisResult }) {
             </ul>
           )}
 
-          {b.data.suggestions.length > 0 && (
+          {!compact && b.data.suggestions.length > 0 && (
             <div className="flex flex-col gap-3">
               <h3 className="text-lg font-medium">{tb.suggestionsTitle}</h3>
               {/* flex (e não grid): o Safari calculava errado a altura dos itens e sobrepunha o texto */}

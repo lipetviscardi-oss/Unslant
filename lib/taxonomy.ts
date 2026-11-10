@@ -34,6 +34,8 @@ export interface BiasCategory {
   /** Identificador único (só letras minúsculas, números e "_"). */
   id: string;
   name: Localized;
+  /** Nome em linguagem do dia a dia, usado no modo simples (o que o texto faz). */
+  simpleName: Localized;
   /** Explicação curta para o leitor do site. */
   description: Localized;
   /** Orientação para a IA: o que procurar e como julgar. */
@@ -82,6 +84,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "loaded_language",
         name: { pt: "Linguagem carregada / emocional", en: "Loaded / emotional language" },
+        simpleName: { pt: "Usa palavras carregadas de emoção", en: "Uses emotionally loaded words" },
         description: {
           pt: "Palavras com forte carga emocional ou de julgamento no lugar de termos neutros.",
           en: "Words with strong emotional or judgmental weight instead of neutral terms.",
@@ -92,6 +95,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "labeling",
         name: { pt: "Rótulos e adjetivação", en: "Labels and characterization" },
+        simpleName: { pt: "Usa rótulos que já julgam", en: "Uses labels that already judge" },
         description: {
           pt: "Rótulos que já carregam um julgamento (ex.: 'regime' em vez de 'governo').",
           en: "Labels that carry a built-in judgment (e.g., 'regime' instead of 'government').",
@@ -102,6 +106,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "euphemism_dysphemism",
         name: { pt: "Eufemismos e disfemismos", en: "Euphemisms and dysphemisms" },
+        simpleName: { pt: "Suaviza um lado e piora o outro", en: "Softens one side and worsens the other" },
         description: {
           pt: "Suavizar algo para um lado (eufemismo) ou piorar algo para o outro (disfemismo).",
           en: "Softening something for one side (euphemism) or harshening it for another (dysphemism).",
@@ -112,6 +117,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "attribution_verbs",
         name: { pt: "Verbos de atribuição assimétricos", en: "Asymmetric attribution verbs" },
+        simpleName: { pt: "Descreve as falas de cada lado de forma desigual", en: "Describes each side's statements unequally" },
         description: {
           pt: "'Afirmou' para um lado e 'alegou' ou 'admitiu' para o outro.",
           en: "'Stated' for one side and 'claimed' or 'admitted' for the other.",
@@ -122,6 +128,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "generalizations",
         name: { pt: "Intensificadores e generalizações", en: "Intensifiers and generalizations" },
+        simpleName: { pt: "Generaliza com \"todos\", \"sempre\", \"nunca\"", en: "Generalizes with \"all\", \"always\", \"never\"" },
         description: {
           pt: "'Todos', 'sempre', 'nunca', 'ninguém' usados sem base.",
           en: "'All', 'always', 'never', 'no one' used without support.",
@@ -147,6 +154,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "framing",
         name: { pt: "Framing (moldura da história)", en: "Framing (story frame)" },
+        simpleName: { pt: "Conta a história já com culpados definidos", en: "Tells the story with culprits already chosen" },
         description: {
           pt: "A narrativa escolhida define vítimas, culpados e o 'problema' antes dos fatos.",
           en: "The chosen narrative defines victims, culprits and 'the problem' before the facts do.",
@@ -157,6 +165,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "headline_body",
         name: { pt: "Título vs. corpo", en: "Headline vs. body" },
+        simpleName: { pt: "O título promete algo que o texto não mostra", en: "The headline promises what the text doesn't show" },
         description: {
           pt: "Título sensacionalista ou que não corresponde ao conteúdo do texto.",
           en: "A sensational headline, or one that the body does not support.",
@@ -167,6 +176,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "emphasis_placement",
         name: { pt: "Ênfase e posicionamento", en: "Emphasis and placement" },
+        simpleName: { pt: "Destaca um lado e deixa o outro para o fim", en: "Highlights one side and leaves the other for last" },
         description: {
           pt: "O que aparece no início ganha destaque; o que vai para o final some.",
           en: "What appears first gets attention; what is pushed to the end disappears.",
@@ -177,6 +187,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "spin",
         name: { pt: "Spin", en: "Spin" },
+        simpleName: { pt: "Dá aos fatos uma interpretação embutida", en: "Gives the facts a built-in interpretation" },
         description: {
           pt: "Fatos neutros apresentados de forma favorável ou desfavorável.",
           en: "Neutral facts presented in a favorable or unfavorable light.",
@@ -187,6 +198,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "visual_framing",
         name: { pt: "Enquadramento por imagem", en: "Visual framing" },
+        simpleName: { pt: "Usa fotos ou legendas que induzem a leitura", en: "Uses photos or captions that steer the reading" },
         description: {
           pt: "Fotos, ilustrações ou legendas que induzem uma leitura do assunto.",
           en: "Photos, illustrations or captions that steer how the subject is read.",
@@ -213,6 +225,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "source_balance",
         name: { pt: "Seleção e equilíbrio de fontes", en: "Source selection and balance" },
+        simpleName: { pt: "Ouve só um lado (ou dá muito mais espaço a ele)", en: "Hears only one side (or gives it far more space)" },
         description: {
           pt: "Só um lado é ouvido, ou um lado tem muito mais espaço.",
           en: "Only one side is heard, or one side gets far more space.",
@@ -223,6 +236,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "vague_sources",
         name: { pt: "Fontes anônimas ou vagas", en: "Anonymous or vague sources" },
+        simpleName: { pt: "Cita fontes vagas ou sem nome", en: "Cites vague or unnamed sources" },
         description: {
           pt: "'Especialistas dizem', 'segundo analistas', sem nome ou referência.",
           en: "'Experts say', 'analysts believe', with no name or reference.",
@@ -233,6 +247,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "selective_quotes",
         name: { pt: "Citações seletivas ou fora de contexto", en: "Selective or out-of-context quotes" },
+        simpleName: { pt: "Recorta falas e muda o sentido", en: "Cuts quotes in a way that changes their meaning" },
         description: {
           pt: "Trechos de falas recortados de forma a mudar o sentido.",
           en: "Quotes trimmed in a way that changes their meaning.",
@@ -243,6 +258,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "source_credentials",
         name: { pt: "Credenciais das fontes", en: "Source credentials" },
+        simpleName: { pt: "Apresenta como especialista quem não é", en: "Presents non-experts as experts" },
         description: {
           pt: "Opiniões apresentadas como de especialistas sem que sejam.",
           en: "Opinions presented as expert views when they are not.",
@@ -268,6 +284,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "missing_context",
         name: { pt: "Contexto relevante omitido", en: "Relevant context omitted" },
+        simpleName: { pt: "Deixa de fora um contexto importante", en: "Leaves out important context" },
         description: {
           pt: "Falta um contexto que mudaria a interpretação (histórico, comparação, causas).",
           en: "Missing context that would change the interpretation (history, comparison, causes).",
@@ -278,6 +295,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "missing_perspectives",
         name: { pt: "Perspectivas ausentes", en: "Missing perspectives" },
+        simpleName: { pt: "Ignora quem é afetado ou pensa diferente", en: "Ignores those affected or who think differently" },
         description: {
           pt: "Grupos afetados ou visões relevantes que não aparecem.",
           en: "Affected groups or relevant viewpoints that do not appear.",
@@ -288,6 +306,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "selective_facts",
         name: { pt: "Seleção de fatos", en: "Selective facts" },
+        simpleName: { pt: "Escolhe só os fatos que convêm", en: "Picks only the convenient facts" },
         description: {
           pt: "Só os fatos que favorecem uma narrativa são apresentados.",
           en: "Only facts that favor one narrative are presented.",
@@ -313,6 +332,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "misleading_numbers",
         name: { pt: "Números enganosos", en: "Misleading numbers" },
+        simpleName: { pt: "Usa números de forma enganosa", en: "Uses numbers in a misleading way" },
         description: {
           pt: "Números sem base de comparação, ou absolutos quando o relativo importa (e vice-versa).",
           en: "Numbers without a baseline, or absolute figures where relative ones matter (and vice versa).",
@@ -323,6 +343,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "correlation_causation",
         name: { pt: "Correlação como causalidade", en: "Correlation as causation" },
+        simpleName: { pt: "Trata coincidência como causa", en: "Treats coincidence as cause" },
         description: {
           pt: "Duas coisas que acontecem juntas apresentadas como causa e efeito.",
           en: "Two things that happen together presented as cause and effect.",
@@ -333,6 +354,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "cherry_picking",
         name: { pt: "Recorte temporal seletivo", en: "Cherry-picked timeframe" },
+        simpleName: { pt: "Escolhe a dedo o período dos dados", en: "Hand-picks the time period of the data" },
         description: {
           pt: "Período escolhido a dedo para mostrar a tendência desejada.",
           en: "A hand-picked time window that shows the desired trend.",
@@ -343,6 +365,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "unsourced_data",
         name: { pt: "Dados sem fonte", en: "Unsourced data" },
+        simpleName: { pt: "Traz números sem dizer de onde vêm", en: "Gives numbers without saying where they come from" },
         description: {
           pt: "Números ou gráficos sem indicação de onde vieram.",
           en: "Numbers or charts with no indication of where they came from.",
@@ -352,6 +375,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "misleading_chart",
         name: { pt: "Gráfico ou tabela enganosa", en: "Misleading chart or table" },
+        simpleName: { pt: "Usa gráfico ou tabela que distorce os dados", en: "Uses a chart or table that distorts the data" },
         description: {
           pt: "Gráficos e tabelas que distorcem os dados ou dizem algo diferente do texto.",
           en: "Charts and tables that distort the data or say something different from the text.",
@@ -378,6 +402,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "opinion_as_fact",
         name: { pt: "Opinião apresentada como fato", en: "Opinion presented as fact" },
+        simpleName: { pt: "Apresenta opinião como se fosse fato", en: "Presents opinion as if it were fact" },
         description: {
           pt: "Juízos de valor escritos como se fossem constatações objetivas.",
           en: "Value judgments written as if they were objective findings.",
@@ -388,6 +413,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "editorializing",
         name: { pt: "Editorialização em texto noticioso", en: "Editorializing in news" },
+        simpleName: { pt: "O repórter opina dentro da notícia", en: "The reporter gives opinions inside the news" },
         description: {
           pt: "O repórter opina dentro de uma notícia que deveria ser informativa.",
           en: "The reporter inserts opinion into a story meant to inform.",
@@ -413,6 +439,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "clickbait",
         name: { pt: "Clickbait", en: "Clickbait" },
+        simpleName: { pt: "Usa título feito só para gerar clique", en: "Uses a headline made just to get clicks" },
         description: {
           pt: "Títulos ou frases feitos para gerar clique, com mistério ou exagero.",
           en: "Headlines or lines built to drive clicks through mystery or exaggeration.",
@@ -422,6 +449,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "fear_outrage",
         name: { pt: "Medo e indignação", en: "Fear and outrage" },
+        simpleName: { pt: "Tenta provocar medo ou revolta", en: "Tries to provoke fear or outrage" },
         description: {
           pt: "Texto montado para provocar medo ou revolta.",
           en: "Text built to provoke fear or outrage.",
@@ -431,6 +459,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "false_urgency",
         name: { pt: "Urgência artificial", en: "Artificial urgency" },
+        simpleName: { pt: "Cria uma pressa que não existe", en: "Creates a rush that doesn't exist" },
         description: {
           pt: "'Agora ou nunca', prazos dramáticos sem base.",
           en: "'Now or never', dramatic deadlines without basis.",
@@ -455,6 +484,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "straw_man",
         name: { pt: "Espantalho", en: "Straw man" },
+        simpleName: { pt: "Distorce o argumento do outro lado", en: "Distorts the other side's argument" },
         description: {
           pt: "Distorcer a posição do outro lado para facilitar a crítica.",
           en: "Distorting the other side's position to make it easier to attack.",
@@ -464,6 +494,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "false_dilemma",
         name: { pt: "Falso dilema", en: "False dilemma" },
+        simpleName: { pt: "Mostra só duas opções quando há outras", en: "Shows only two options when there are more" },
         description: {
           pt: "Apresentar só duas opções quando existem outras.",
           en: "Presenting only two options when more exist.",
@@ -473,6 +504,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "ad_hominem",
         name: { pt: "Ad hominem", en: "Ad hominem" },
+        simpleName: { pt: "Ataca a pessoa em vez do argumento", en: "Attacks the person instead of the argument" },
         description: {
           pt: "Atacar a pessoa em vez do argumento.",
           en: "Attacking the person instead of the argument.",
@@ -482,6 +514,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "slippery_slope",
         name: { pt: "Ladeira escorregadia", en: "Slippery slope" },
+        simpleName: { pt: "Exagera as consequências de um passo", en: "Exaggerates where one step will lead" },
         description: {
           pt: "Sugerir que um passo levará inevitavelmente a uma catástrofe.",
           en: "Suggesting one step will inevitably lead to disaster.",
@@ -491,6 +524,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "appeal_to_authority",
         name: { pt: "Apelo à autoridade", en: "Appeal to authority" },
+        simpleName: { pt: "Usa o prestígio de alguém no lugar de provas", en: "Uses someone's prestige instead of evidence" },
         description: {
           pt: "Usar o prestígio de alguém no lugar de evidências.",
           en: "Using someone's prestige in place of evidence.",
@@ -500,6 +534,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "false_equivalence",
         name: { pt: "Falsa equivalência", en: "False equivalence" },
+        simpleName: { pt: "Trata como iguais coisas que não são", en: "Treats unequal things as equal" },
         description: {
           pt: "Tratar como equivalentes posições com pesos de evidência muito diferentes.",
           en: "Treating positions with very different evidence as equal.",
@@ -525,6 +560,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "sponsored_content",
         name: { pt: "Conteúdo patrocinado disfarçado", en: "Disguised sponsored content" },
+        simpleName: { pt: "Parece notícia, mas é propaganda", en: "Looks like news, but is advertising" },
         description: {
           pt: "Texto com cara de notícia que promove um produto, empresa ou causa.",
           en: "News-like text that promotes a product, company or cause.",
@@ -534,6 +570,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "conflicts_of_interest",
         name: { pt: "Conflitos de interesse", en: "Conflicts of interest" },
+        simpleName: { pt: "O autor ou o veículo tem interesse no assunto", en: "The author or outlet has a stake in the topic" },
         description: {
           pt: "Interesses do autor ou do veículo que podem influenciar o texto.",
           en: "Interests of the author or outlet that may shape the text.",
@@ -559,36 +596,42 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "stereotype_gender",
         name: { pt: "Estereótipos de gênero", en: "Gender stereotypes" },
+        simpleName: { pt: "Usa estereótipos de gênero", en: "Uses gender stereotypes" },
         description: { pt: "Papéis ou traços atribuídos a alguém por seu gênero.", en: "Roles or traits attributed to someone because of gender." },
         aiHint: "Descrições de aparência/vida pessoal só para mulheres, papéis tradicionais presumidos, linguagem desigual por gênero.",
       },
       {
         id: "stereotype_race",
         name: { pt: "Estereótipos raciais ou étnicos", en: "Racial or ethnic stereotypes" },
+        simpleName: { pt: "Usa estereótipos de raça ou etnia", en: "Uses racial or ethnic stereotypes" },
         description: { pt: "Associações estereotipadas a raça ou etnia.", en: "Stereotyped associations with race or ethnicity." },
         aiHint: "Menção desnecessária de raça/etnia, associação de grupos a crime ou comportamentos.",
       },
       {
         id: "stereotype_class",
         name: { pt: "Estereótipos de classe", en: "Class stereotypes" },
+        simpleName: { pt: "Usa estereótipos sobre pobres, ricos ou trabalhadores", en: "Uses stereotypes about the poor, the rich or workers" },
         description: { pt: "Retratos estereotipados de pobres, ricos ou trabalhadores.", en: "Stereotyped portrayals of the poor, rich or workers." },
         aiHint: "Generalizações sobre comportamento de classes sociais, desumanização de pobres ou caricatura de ricos.",
       },
       {
         id: "stereotype_region",
         name: { pt: "Estereótipos regionais", en: "Regional stereotypes" },
+        simpleName: { pt: "Usa preconceitos sobre regiões", en: "Uses prejudice about regions" },
         description: { pt: "Preconceitos sobre regiões, estados ou cidades.", en: "Prejudice about regions, states or cities." },
         aiHint: "No Brasil, atenção a estereótipos sobre Nordeste, Norte, periferias; em outros países, equivalentes locais.",
       },
       {
         id: "stereotype_religion",
         name: { pt: "Estereótipos religiosos", en: "Religious stereotypes" },
+        simpleName: { pt: "Generaliza sobre quem segue uma religião", en: "Generalizes about followers of a religion" },
         description: { pt: "Generalizações sobre fiéis de uma religião.", en: "Generalizations about followers of a religion." },
         aiHint: "Associação de religiões a fanatismo, violência ou atraso; ou o inverso, idealização acrítica.",
       },
       {
         id: "stereotype_nationality",
         name: { pt: "Estereótipos de nacionalidade", en: "Nationality stereotypes" },
+        simpleName: { pt: "Generaliza sobre povos ou imigrantes", en: "Generalizes about peoples or immigrants" },
         description: { pt: "Generalizações sobre povos ou imigrantes.", en: "Generalizations about nations or immigrants." },
         aiHint: "Traços atribuídos a um povo inteiro, imigrantes retratados como ameaça ou fardo em bloco.",
       },
@@ -610,6 +653,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "hasty_generalization",
         name: { pt: "Generalização apressada", en: "Hasty generalization" },
+        simpleName: { pt: "Tira uma regra de poucos casos", en: "Draws a rule from a few cases" },
         description: {
           pt: "Tirar uma regra geral a partir de poucos casos.",
           en: "Drawing a general rule from a few cases.",
@@ -620,6 +664,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "anecdotal_evidence",
         name: { pt: "Experiência pessoal como prova", en: "Anecdote as proof" },
+        simpleName: { pt: "Usa um caso pessoal como prova", en: "Uses a personal story as proof" },
         description: {
           pt: "Usar um caso vivido ou ouvido como se provasse uma tendência.",
           en: "Using a personal or second-hand story as if it proved a trend.",
@@ -629,6 +674,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "availability_bias",
         name: { pt: "Viés de disponibilidade", en: "Availability bias" },
+        simpleName: { pt: "Acha que algo é comum só porque aparece muito", en: "Thinks something is common just because it's seen a lot" },
         description: {
           pt: "Achar que algo é comum porque aparece muito no noticiário ou nas redes.",
           en: "Believing something is common because it shows up a lot in the news or on social media.",
@@ -639,6 +685,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "confirmation_bias",
         name: { pt: "Viés de confirmação", en: "Confirmation bias" },
+        simpleName: { pt: "Considera só o que confirma o que já se pensa", en: "Considers only what confirms existing beliefs" },
         description: {
           pt: "Considerar só o que confirma o que já se acredita.",
           en: "Considering only what confirms what one already believes.",
@@ -649,6 +696,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "unfalsifiable",
         name: { pt: "Afirmação impossível de verificar", en: "Unfalsifiable claim" },
+        simpleName: { pt: "Não tem como ser verificada", en: "Can't be checked" },
         description: {
           pt: "Formulada de um jeito que nenhuma evidência poderia confirmar ou desmentir.",
           en: "Phrased so that no evidence could confirm or refute it.",
@@ -658,6 +706,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "echoed_slogan",
         name: { pt: "Bordão ou narrativa pronta", en: "Slogan or ready-made narrative" },
+        simpleName: { pt: "Repete um bordão sem examiná-lo", en: "Repeats a slogan without examining it" },
         description: {
           pt: "Repete uma frase feita que circula em um grupo, veículo ou rede, sem examiná-la.",
           en: "Repeats a stock phrase that circulates in a group, outlet or network, without examining it.",
@@ -683,6 +732,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "funding_conflicts",
         name: { pt: "Financiamento e conflitos de interesse", en: "Funding and conflicts of interest" },
+        simpleName: { pt: "Quem pagou o estudo pode ter interesse no resultado", en: "Whoever paid for the study may have a stake in the result" },
         description: {
           pt: "Quem financiou o estudo e possíveis conflitos declarados.",
           en: "Who funded the study and any declared conflicts.",
@@ -693,6 +743,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "sampling_bias",
         name: { pt: "Viés de amostragem / amostra pequena", en: "Sampling bias / small sample" },
+        simpleName: { pt: "Usa amostra pequena ou pouco representativa", en: "Uses a small or unrepresentative sample" },
         description: {
           pt: "Amostra pequena ou não representativa para as conclusões tiradas.",
           en: "A sample too small or unrepresentative for the conclusions drawn.",
@@ -702,6 +753,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "abstract_spin",
         name: { pt: "Conclusões maiores que os resultados", en: "Conclusions overreach results" },
+        simpleName: { pt: "Conclui mais do que os resultados mostram", en: "Concludes more than the results show" },
         description: {
           pt: "Resumo ou conclusão prometem mais do que os dados mostram.",
           en: "Abstract or conclusion claim more than the data show.",
@@ -712,6 +764,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "observational_causality",
         name: { pt: "Causalidade a partir de dados observacionais", en: "Causality from observational data" },
+        simpleName: { pt: "Afirma causa sem um estudo capaz de provar", en: "Claims cause without a study able to prove it" },
         description: {
           pt: "Conclusões de causa e efeito em estudo que só observa associações.",
           en: "Cause-and-effect conclusions from a study that only observes associations.",
@@ -721,6 +774,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "p_hacking",
         name: { pt: "Sinais de p-hacking ou análise seletiva", en: "Signs of p-hacking or selective analysis" },
+        simpleName: { pt: "Testa muitas coisas e destaca só o que deu certo", en: "Tests many things and highlights only what worked" },
         description: {
           pt: "Muitas comparações e só as 'significativas' são destacadas.",
           en: "Many comparisons, with only the 'significant' ones highlighted.",
@@ -731,6 +785,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "selective_citation",
         name: { pt: "Citação seletiva / viés de confirmação", en: "Selective citation / confirmation bias" },
+        simpleName: { pt: "Cita só os estudos que concordam", en: "Cites only studies that agree" },
         description: {
           pt: "Só são citados estudos que concordam com a hipótese.",
           en: "Only studies that agree with the hypothesis are cited.",
@@ -740,6 +795,7 @@ export const TAXONOMY: BiasGroup[] = [
       {
         id: "unacknowledged_limitations",
         name: { pt: "Limitações não reconhecidas", en: "Unacknowledged limitations" },
+        simpleName: { pt: "Não admite as fraquezas do estudo", en: "Doesn't admit the study's weaknesses" },
         description: {
           pt: "Fraquezas importantes do estudo não são mencionadas.",
           en: "Important weaknesses of the study go unmentioned.",

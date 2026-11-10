@@ -137,6 +137,20 @@ export const en: Dict = {
         "The score measures how biased the text is overall (language, sources, data, reasoning…), not just politically. 0 is a balanced text; 10 is severe distortion.",
     },
 
+    mode: { label: "Display mode", simple: "Simple", detailed: "Detailed" },
+    simple: {
+      politicalTitle: "Political leaning",
+      favors: (side: string, how: string) => `${how.charAt(0).toUpperCase() + how.slice(1)} favors ${side}`,
+      strength: { slight: "slightly", moderate: "moderately", strong: "strongly" },
+      balanced: "Treats the sides of the dispute evenly",
+      axis: (axis: string, pos: string) => `${axis}: ${pos.toLowerCase()}`,
+      noLeaning: "No political leaning identified.",
+      problemsTitle: "Main problems",
+      noProblems: "No relevant problems found.",
+      level: { low: "mild", mid: "moderate", high: "strong" },
+      seeAll: "See full analysis",
+      seeAllHelp: "All categories, the full text with highlighted passages, images and sources.",
+    },
     axes: {
       title: "Political leaning",
       countryNote: (country: string) => `Assessed against the political spectrum of the text's country (${country}). `,

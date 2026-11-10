@@ -16,6 +16,7 @@ import { GroupOverview } from "./GroupOverview";
 import { HighlightedText } from "./HighlightedText";
 import { ClaimCheck } from "./ClaimCheck";
 import { Balance } from "./Balance";
+import { ModeToggle, PoliticalLine, TopProblems, type ResultMode } from "./SimpleView";
 import { CategoryDetails, FactOpinion, Omissions, Rewrite } from "./Sections";
 
 function Chip({ children, tone = "plain" }: { children: React.ReactNode; tone?: "plain" | "teal" }) {
@@ -89,6 +90,8 @@ function Stats({ result }: { result: AnalysisResult }) {
   );
 }
 
+const MODE_KEY = "unslant-result-mode";
+
 export function ResultView({
   result,
   onReset,
@@ -104,6 +107,22 @@ export function ResultView({
   const index = useMemo(() => buildEvidenceIndex(result), [result]);
   const [selected, setSelected] = useState<string[]>([]);
   const [showAll, setShowAll] = useState(false);
+  // Modo simples primeiro; o site lembra a última escolha do leitor (só neste navegador).
+  const [mode, setModeState] = useState<ResultMode>(() => {
+    try {
+      return window.localStorage.getItem(MODE_KEY) === "detailed" ? "detailed" : "simple";
+    } catch {
+      return "simple";
+    }
+  });
+  const setMode = useCallback((m: ResultMode) => {
+    setModeState(m);
+    try {
+      window.localStorage.setItem(MODE_KEY, m);
+    } catch {
+      /* navegador sem armazenamento: só não lembra a escolha */
+    }
+  }, []);
 
   /** Rola até um trecho no texto e o seleciona. Devolve false se ele não estiver visível. */
   const scrollToEvidence = useCallback((evidenceId: string) => {
@@ -137,6 +156,15 @@ export function ResultView({
       setTimeout(() => scrollToEvidence(evidenceId), 60);
     },
     [scrollToEvidence, index],
+  );
+
+  /** No modo simples, "Ver no texto" abre o modo detalhado e vai até o trecho. */
+  const showInDetailed = useCallback(
+    (evidenceId: string) => {
+      setMode("detailed");
+      setTimeout(() => showEvidence(evidenceId), 80);
+    },
+    [setMode, showEvidence],
   );
 
   const showGroup = useCallback((groupId: string) => {
@@ -230,52 +258,87 @@ export function ResultView({
           )}
         </header>
 
-        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
-          <ScoreCard result={result} />
-          <PoliticalAxes result={result} />
-        </div>
+        <ModeToggle mode={mode} onChange={setMode} />
 
-        {isClaim && result.claimCheck && <ClaimCheck check={result.claimCheck} />}
-
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-          <section aria-labelledby="summary-title" className="grid content-start gap-2">
-            <h2 id="summary-title" className="text-xl font-medium">
-              {t.result.summaryTitle}
-            </h2>
-            <p className="max-w-[68ch] text-[17px] leading-relaxed">{result.summary}</p>
-            {context.politicalContext && (
-              <p className="mt-2 max-w-[68ch] text-[15px] leading-relaxed text-muted">
-                <span className="font-medium text-ink">{t.result.contextConsidered}</span>
-                {context.politicalContext}
-              </p>
-            )}
-          </section>
-          <FactOpinion result={result} />
-        </div>
+        {mode === "simple" ? (
+          <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
+            <ScoreCard result={result} />
+            <PoliticalLine result={result} />
+          </div>
+        ) : null}
+        {mode === "simple" && isClaim && result.claimCheck && <ClaimCheck check={result.claimCheck} />}
       </div>
 
-      <GroupOverview groups={result.groups} onSelectGroup={showGroup} />
+      {mode === "simple" ? (
+        <>
+          <TopProblems result={result} onShow={showInDetailed} />
+          {!isClaim && <Rewrite result={result} onShow={showInDetailed} />}
+          <Balance result={result} limit={2} compact />
+          <div className="flex flex-col items-start gap-2 border-t border-line pt-8">
+            <button
+              type="button"
+              onClick={() => {
+                setMode("detailed");
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className="rounded-full bg-ink px-5 py-2.5 font-display text-[16px] font-medium text-paper hover:bg-teal-deep"
+            >
+              {t.result.simple.seeAll}
+            </button>
+            <p className="text-sm text-muted">{t.result.simple.seeAllHelp}</p>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="grid gap-8">
+            <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
+              <ScoreCard result={result} />
+              <PoliticalAxes result={result} />
+            </div>
 
-      <HighlightedText
-        result={result}
-        index={index}
-        selected={selected}
-        onSelect={setSelected}
-        showAll={showAll}
-        onToggleAll={() => setShowAll((v) => !v)}
-      />
+            {isClaim && result.claimCheck && <ClaimCheck check={result.claimCheck} />}
 
-      <Figures result={result} />
+            <div className="grid gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+              <section aria-labelledby="summary-title" className="grid content-start gap-2">
+                <h2 id="summary-title" className="text-xl font-medium">
+                  {t.result.summaryTitle}
+                </h2>
+                <p className="max-w-[68ch] text-[17px] leading-relaxed">{result.summary}</p>
+                {context.politicalContext && (
+                  <p className="mt-2 max-w-[68ch] text-[15px] leading-relaxed text-muted">
+                    <span className="font-medium text-ink">{t.result.contextConsidered}</span>
+                    {context.politicalContext}
+                  </p>
+                )}
+              </section>
+              <FactOpinion result={result} />
+            </div>
+          </div>
 
-      <div className="grid gap-10 lg:grid-cols-2">
-        <Omissions result={result} />
-        {/* Em afirmações, a "versão mais precisa" já aparece na verificação. */}
-        {!isClaim && <Rewrite result={result} onShow={showEvidence} />}
-      </div>
+          <GroupOverview groups={result.groups} onSelectGroup={showGroup} />
 
-      <Balance result={result} />
+          <HighlightedText
+            result={result}
+            index={index}
+            selected={selected}
+            onSelect={setSelected}
+            showAll={showAll}
+            onToggleAll={() => setShowAll((v) => !v)}
+          />
 
-      <CategoryDetails groups={result.groups} onShow={showEvidence} />
+          <Figures result={result} />
+
+          <div className="grid gap-10 lg:grid-cols-2">
+            <Omissions result={result} />
+            {/* Em afirmações, a "versão mais precisa" já aparece na verificação. */}
+            {!isClaim && <Rewrite result={result} onShow={showEvidence} />}
+          </div>
+
+          <Balance result={result} />
+
+          <CategoryDetails groups={result.groups} onShow={showEvidence} />
+        </>
+      )}
 
       <Stats result={result} />
     </div>

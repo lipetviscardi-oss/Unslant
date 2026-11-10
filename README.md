@@ -187,6 +187,7 @@ Com o site ligado em `http://localhost:3000`:
 | Teste | Como fazer | O que deve acontecer |
 |---|---|---|
 | **Exemplo pronto** (grátis) | Clique em **Ver uma análise pronta** | Nota 5,9 ("Viés moderado"), inclinação econômica "Esquerda", social "Não identificado" e dezenas de trechos destacados |
+| **Modo simples e detalhado** (grátis) | Clique em **Ver uma análise pronta** | Abre no modo **Simples** (nota, inclinação em uma linha, 3 principais problemas com exemplo). O botão **Detalhado** (ou "Ver análise completa") mostra tudo; "Ver no texto" abre o detalhado no trecho. O site lembra a última escolha |
 | **Afirmação pronta** (grátis) | Clique em **Ver uma afirmação analisada** | Nota 3,7 ("Viés moderado") e o quadro "Verificação da afirmação" |
 | **Idioma** (grátis) | Clique em **English** no topo | O site inteiro muda para inglês (endereço `/en`); o botão vira **Português** |
 | **Páginas** (grátis) | Clique em **Metodologia**, **Tipos de viés** e **Privacidade** no topo (no celular, ficam no rodapé) | Textos completos nos dois idiomas |
@@ -334,7 +335,7 @@ Detalhes técnicos:
 ## Próximas fases
 
 - ~~**Fase 2:** busca na web e a seção "Para equilibrar sua leitura".~~ Pronta.
-- **Fase 3:** ~~interface em português e inglês~~ e ~~página de Metodologia~~ (já prontas); falta o modo simples e detalhado.
+- ~~**Fase 3:** interface em português e inglês, página de Metodologia e modo simples e detalhado.~~ Pronta.
 - **Fase 4:** login (Supabase), histórico e limite de 3 análises por dia.
 - **Fase 5:** plano pago (Stripe).
 - **Fase 6:** publicação na Vercel com domínio próprio.

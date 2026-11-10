@@ -137,6 +137,20 @@ export const pt = {
         "A nota mede o quanto o texto é enviesado de forma geral (linguagem, fontes, dados, lógica…), não só politicamente. 0 é um texto equilibrado; 10, uma distorção grave.",
     },
 
+    mode: { label: "Modo de exibição", simple: "Simples", detailed: "Detalhado" },
+    simple: {
+      politicalTitle: "Inclinação política",
+      favors: (side: string, how: string) => `Favorece ${how} ${side}`,
+      strength: { slight: "levemente", moderate: "moderadamente", strong: "fortemente" },
+      balanced: "Trata os lados da disputa de forma equilibrada",
+      axis: (axis: string, pos: string) => `${axis}: ${pos.toLowerCase()}`,
+      noLeaning: "Nenhuma inclinação política identificada.",
+      problemsTitle: "Principais problemas",
+      noProblems: "Nenhum problema relevante encontrado.",
+      level: { low: "leve", mid: "moderado", high: "forte" },
+      seeAll: "Ver análise completa",
+      seeAllHelp: "Todas as categorias, o texto inteiro com os trechos destacados, imagens e fontes.",
+    },
     axes: {
       title: "Inclinação política",
       countryNote: (country: string) => `Avaliada segundo o espectro político do país do texto (${country}). `,
