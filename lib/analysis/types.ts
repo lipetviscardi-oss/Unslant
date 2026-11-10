@@ -101,6 +101,8 @@ export interface DisputeResult {
   quote: string;
   start: number | null;
   end: number | null;
+  /** Ressalva: apoia um lado, mas critica parte dele (pode faltar em resultados antigos). */
+  caveat?: string;
 }
 
 /** Diagnóstico da busca "Para equilibrar sua leitura". */
@@ -163,6 +165,8 @@ export interface AnalysisResult {
   summary: string;
   summarySimple: string;
   omissions: { title: string; explanation: string }[];
+  /** O autor rebate críticas conhecidas: a resposta procede? (pode faltar em resultados antigos). */
+  rebuttals?: RebuttalResult[];
   rewrite: {
     evidenceId: string;
     original: string;
@@ -251,4 +255,15 @@ export interface ResultAccess {
   unlocked: boolean;
   /** Quantas restam hoje (null = sem limites). */
   remaining: { simple: number; detailed: number } | null;
+}
+
+export interface RebuttalResult {
+  criticism: string;
+  authorResponse: string;
+  verdict: "valid" | "partly_valid" | "not_valid";
+  assessment: string;
+  /** Trecho do texto com a resposta do autor (conferido; null se não encontrado). */
+  quote: string;
+  start: number | null;
+  end: number | null;
 }

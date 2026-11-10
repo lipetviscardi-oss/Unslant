@@ -176,8 +176,8 @@ Decisões: A) item 9 = intensidade por trecho; B) limite de imagens e PDF contar
 | R9-3 | Lixo por site (lib/extract/lixo-por-site.ts) + parágrafos duplicados | feito (Outras Palavras: boletim, apoio, tags e 2 parágrafos repetidos removidos; a repetição existe no HTML original) |
 | R9-4 | Versão neutra não repete número "sem fonte" como fato (regra + conferência) | feito (conferência testada: barra, aceita "segundo o autor" e "(sem fonte indicada)") |
 | R9-5 | Problemas das imagens entram nas notas das categorias (IMAGE_CATEGORY_IDS em visuals.ts; nota = maior entre texto e imagem); regra "mesmo critério para figuras parecidas" | feito (testado com dados simulados) |
-| R9-6 | "Respostas do autor às críticas" (avaliação: procede / em parte / não) | a fazer |
-| R9-7 | Disputa com ressalva no resumo simples | a fazer |
+| R9-6 | "Respostas do autor às críticas" (overview.rebuttals; seção nova no detalhado; a síntese avalia até onde procedem) | feito (falta conferir na tela e com IA de verdade) |
+| R9-7 | Disputa com ressalva (dispute.caveat) no resumo simples, no detalhado e na síntese | feito (falta conferir com IA de verdade) |
 | R9-8 | Veículos brasileiros + linha "especializado"; sem fonte = estimativa com aviso | a fazer |
 | R9-9 | Intensidade por trecho nos destaques | a fazer |
 | R9-11 | Casos Séralini (PDF) e Outras Palavras no teste automático | a fazer |

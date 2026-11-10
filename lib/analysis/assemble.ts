@@ -22,7 +22,7 @@ import type {
   VisualOutput,
 } from "./schemas";
 import type { VisualInput } from "./visuals";
-import type { AnalysisResult, AxisResult, CategoryResult, DisputeResult, Evidence, FigureResult, GroupResult, SourceInfo } from "./types";
+import type { AnalysisResult, AxisResult, CategoryResult, DisputeResult, Evidence, FigureResult, GroupResult, RebuttalResult, SourceInfo } from "./types";
 
 /** Respostas da IA para UMA parte do texto. */
 export interface RawPart {
@@ -36,6 +36,7 @@ export interface Findings {
   political: { economic: AxisResult; social: AxisResult; dispute: DisputeResult };
   factOpinion: { factPercent: number; explanation: string };
   omissions: { title: string; explanation: string }[];
+  rebuttals: RebuttalResult[];
   overall: { score: number; label: string; simpleLabel: string };
   discardedEvidence: number;
 }
@@ -543,6 +544,19 @@ export function buildFindings(
     }
   }
 
+  // Respostas do autor a críticas: confere o trecho e junta as partes (sem repetir a mesma crítica).
+  const rebuttals: RebuttalResult[] = [];
+  const seenCrit = new Set<string>();
+  for (const p of rawParts) {
+    for (const r of p.overview.rebuttals ?? []) {
+      const key = r.criticism.trim().toLowerCase();
+      if (!key || seenCrit.has(key)) continue;
+      seenCrit.add(key);
+      const pos = r.quote.trim() ? matcher.find(r.quote) : null;
+      rebuttals.push({ ...r, quote: pos ? r.quote : "", start: pos?.start ?? null, end: pos?.end ?? null });
+    }
+  }
+
   return {
     groups,
     political: {
@@ -552,6 +566,7 @@ export function buildFindings(
     },
     factOpinion: { factPercent, explanation: factExplanation },
     omissions: omissions.slice(0, 6),
+    rebuttals: rebuttals.slice(0, 4),
     overall: scoreOverall(groups, lang),
     discardedEvidence,
   };
@@ -621,10 +636,22 @@ export function findingsForSynthesis(triage: TriageOutput, findings: Findings, t
       inclinacao: {
         economica: axis(economic),
         social: axis(social),
-        ...(disputeText ? { disputa: { situacao: disputeText, justificativa: dispute.justification } } : {}),
+        ...(disputeText
+          ? { disputa: { situacao: disputeText, justificativa: dispute.justification, ...(dispute.caveat ? { ressalva: dispute.caveat } : {}) } }
+          : {}),
       },
       percentualFatos: findings.factOpinion.factPercent,
       omissoes: findings.omissions,
+      ...(findings.rebuttals.length
+        ? {
+            respostasDoAutorACriticas: findings.rebuttals.map((r) => ({
+              critica: r.criticism,
+              respostaDoAutor: r.authorResponse,
+              avaliacao: t.result.rebuttals.verdict[r.verdict],
+              ateOndeProcede: r.assessment,
+            })),
+          }
+        : {}),
       grupos: groups,
     },
     null,
@@ -725,6 +752,7 @@ export function finalizeResult(params: {
     summary: synthesis?.summary || triage.contentSummary,
     summarySimple: synthesis?.summarySimple || triage.contentSummary,
     omissions: findings.omissions,
+    rebuttals: findings.rebuttals,
     rewrite,
     figures: figuresResult(params.visual ?? null),
     // Sem trecho elegível, ou a IA não viu nenhum que valesse reescrever (com a síntese funcionando).

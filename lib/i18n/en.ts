@@ -207,6 +207,13 @@ export const en: Dict = {
     },
 
     mode: { label: "Display mode", simple: "Simple", detailed: "Detailed" },
+    rebuttals: {
+      title: "The author's replies to criticism",
+      lede: "The text rebuts known criticisms. For each one, we assess whether the reply holds up and how far.",
+      criticism: "Criticism",
+      response: "Author's reply",
+      verdict: { valid: "Holds up", partly_valid: "Partly holds up", not_valid: "Doesn't hold up" },
+    },
     references: {
       show: "Show references",
       hide: "Hide references",

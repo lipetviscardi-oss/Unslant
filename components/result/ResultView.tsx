@@ -21,7 +21,7 @@ import { ModeToggle, PoliticalLine, TopProblems } from "./SimpleView";
 import { readMode, saveMode, type ResultMode } from "@/lib/client/mode";
 import { browserTimeZone } from "@/lib/client/analyze";
 import { UnlockPanel } from "./UnlockPanel";
-import { CategoryDetails, FactOpinion, Omissions, Rewrite } from "./Sections";
+import { CategoryDetails, FactOpinion, Omissions, Rebuttals, Rewrite } from "./Sections";
 
 function Chip({ children, tone = "plain" }: { children: React.ReactNode; tone?: "plain" | "teal" }) {
   return (
@@ -383,6 +383,8 @@ export function ResultView({
           <References result={result} />
 
           <Figures result={result} />
+
+          <Rebuttals result={result} />
 
           <div className="grid gap-10 lg:grid-cols-2">
             <Omissions result={result} />

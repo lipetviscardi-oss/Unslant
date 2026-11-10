@@ -227,6 +227,7 @@ export const overview: OverviewOutput = {
     quote: "",
   },
   dispute: {
+    caveat: "",
     status: "favors_b",
     sideA: "Prefeitura de Vale Verde",
     sideB: "Oposição na Câmara",
@@ -241,6 +242,7 @@ export const overview: OverviewOutput = {
     explanation:
       "Os fatos (corte de 30%, valores, votação, explicação da Fazenda) dividem espaço com previsões, avaliações e apelos do próprio autor.",
   },
+  rebuttals: [],
   omissions: [
     {
       title: "Comparação corrigida pela inflação",

@@ -56,6 +56,47 @@ export function Omissions({ result }: { result: AnalysisResult }) {
   );
 }
 
+const VERDICT_STYLE = {
+  valid: "bg-teal-soft text-teal-deep",
+  partly_valid: "bg-amber-soft text-amber-ink",
+  not_valid: "bg-ember-soft text-ember-ink",
+} as const;
+
+/** "Respostas do autor às críticas": se a resposta do autor procede e até onde. */
+export function Rebuttals({ result }: { result: AnalysisResult }) {
+  const t = useDict().result.rebuttals;
+  const items = result.rebuttals ?? [];
+  if (items.length === 0) return null;
+  return (
+    <section aria-labelledby="rebuttals-title" className="grid content-start gap-4">
+      <div className="grid gap-1">
+        <h2 id="rebuttals-title" className="text-2xl font-medium">
+          {t.title}
+        </h2>
+        <p className="text-[15px] text-muted">{t.lede}</p>
+      </div>
+      <ul className="grid gap-4">
+        {items.map((r) => (
+          <li key={r.criticism} className="grid gap-2 rounded-[16px] bg-paper p-4 sm:p-5">
+            <p>
+              <span className="text-sm text-muted">{t.criticism}: </span>
+              {r.criticism}
+            </p>
+            <p>
+              <span className="text-sm text-muted">{t.response}: </span>
+              {r.authorResponse}
+            </p>
+            <p className="flex flex-wrap items-baseline gap-2">
+              <span className={`rounded-full px-2.5 py-0.5 text-sm font-medium ${VERDICT_STYLE[r.verdict]}`}>{t.verdict[r.verdict]}</span>
+              <span className="text-[15px] leading-relaxed">{r.assessment}</span>
+            </p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export function Rewrite({ result, onShow }: { result: AnalysisResult; onShow: (evidenceId: string) => void }) {
   const t = useDict();
   if (!result.rewrite) {

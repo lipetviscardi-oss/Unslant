@@ -112,7 +112,12 @@ function Dispute({ dispute }: { dispute: DisputeResult }) {
         wrap
       />
       <p className="text-[15px] leading-relaxed">
-        {favored && <span className="font-medium">{D.favors(favored)}. </span>}
+        {favored && (
+          <span className="font-medium">
+            {D.favors(favored)}
+            {dispute.caveat ? `, ${dispute.caveat}` : ""}.{" "}
+          </span>
+        )}
         {dispute.justification}
         {favored && <span className="text-muted"> ({t.labels.confidence[dispute.confidence]})</span>}
       </p>

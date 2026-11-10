@@ -41,7 +41,7 @@ export function PoliticalLine({ result }: { result: AnalysisResult }) {
   const parts: string[] = [];
   if (dispute?.status === "favors_a" || dispute?.status === "favors_b") {
     const side = dispute.status === "favors_a" ? dispute.sideA : dispute.sideB;
-    parts.push(ts.favors(side, ts.strength[dispute.strength ?? "slight"]));
+    parts.push(ts.favors(side, ts.strength[dispute.strength ?? "slight"]) + (dispute.caveat ? `, ${dispute.caveat}` : ""));
   } else if (dispute?.status === "balanced") {
     parts.push(ts.balanced);
   }

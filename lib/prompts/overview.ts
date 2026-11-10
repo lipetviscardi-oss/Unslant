@@ -28,11 +28,20 @@ export function overviewInstructions() {
    - strength: intensidade do favorecimento — "slight" (leve: o texto é quase equilibrado, mas pende um pouco), "moderate" (moderada: a inclinação é perceptível em vários pontos) ou "strong" (forte: o texto funciona como peça de um dos lados). Se o status não for favors_a/favors_b, use "slight".
    - COERÊNCIA: a justificativa deve descrever exatamente a classificação escolhida. Se você escrever que o texto "pende", "inclina" ou "favorece" algum lado, o status NÃO pode ser "balanced".
    - confidence, justification (1 a 3 frases) e quote (trecho EXATO que sustenta a classificação; "" se status não for "favors_a" ou "favors_b").
+   - caveat (ressalva): se o texto favorece um lado mas CRITICA uma parte desse mesmo lado (ex.: defende o governo Lula e o seu eleitorado, mas ataca a equipe econômica do próprio governo), descreva isso em até 15 palavras, começando com "mas" (ex.: "mas critica a equipe econômica do próprio governo"). Se não houver crítica relevante ao lado favorecido, use "". Também use "" se o status não for favors_a/favors_b.
    - Mesma régua para os dois lados: os critérios para "favors_a" e "favors_b" são idênticos. Faça o teste de inversão: com os lados trocados no texto, você daria a classificação oposta com a mesma confiança? Se não, use "unidentified".
 
 3) FATO VS. OPINIÃO: factPercent = estimativa de 0 a 100 da parcela do texto composta por afirmações factuais verificáveis (o restante é opinião, interpretação ou previsão). explanation: 1 a 2 frases.
 
 4) O QUE O TEXTO PODE ESTAR OMITINDO: até 5 itens (omissions), cada um com "title" (curto) e "explanation" (1 a 2 frases). Pense em: dados de comparação, versão de partes envolvidas, contexto histórico, consequências para outros grupos, incertezas. Baseie-se em conhecimento geral amplamente aceito; não invente fatos específicos. Lista vazia se nada relevante faltar.
+
+5) RESPOSTAS DO AUTOR A CRÍTICAS ("rebuttals"): quando o próprio texto rebate uma crítica conhecida ao seu argumento ou ao seu estudo (ex.: "a Monsanto usou o mesmo número de ratos"), avalie a resposta com equilíbrio: até 4 itens, cada um com
+   - criticism: a crítica, em 1 frase;
+   - authorResponse: o que o autor responde, em 1 frase;
+   - verdict: "valid" (a resposta procede), "partly_valid" (procede em parte) ou "not_valid" (não procede);
+   - assessment: 1 a 3 frases dizendo ATÉ ONDE a resposta procede e o que ela não resolve (ex.: "Procede como comparação com o estudo de referência, mas não resolve o baixo poder estatístico de 10 ratos por grupo para tumores");
+   - quote: trecho EXATO do texto com a resposta do autor.
+   Use o conhecimento geral amplamente aceito sobre o tema e a mesma régua para qualquer lado. Lista vazia se o texto não rebate nenhuma crítica.
 
 Muitos textos não têm inclinação em nenhum eixo nem favorecem lado algum. Isso é normal: não force classificações.
 `;

@@ -115,6 +115,17 @@ const DisputeSchema = z.object({
   confidence: ConfidenceSchema,
   justification: z.string(),
   quote: z.string(),
+  /** Ressalva: o texto apoia um lado, mas critica parte dele ("" se não houver). */
+  caveat: z.string(),
+});
+
+/** O autor rebate uma crítica conhecida: a resposta procede? */
+const RebuttalSchema = z.object({
+  criticism: z.string(),
+  authorResponse: z.string(),
+  verdict: z.enum(["valid", "partly_valid", "not_valid"]),
+  assessment: z.string(),
+  quote: z.string(),
 });
 
 export const OverviewSchema = z.object({
@@ -131,6 +142,7 @@ export const OverviewSchema = z.object({
       explanation: z.string(),
     }),
   ),
+  rebuttals: z.array(RebuttalSchema),
 });
 export type OverviewOutput = z.infer<typeof OverviewSchema>;
 

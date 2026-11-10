@@ -186,6 +186,7 @@ export const overview: OverviewOutput = {
     quote: "",
   },
   dispute: {
+    caveat: "",
     status: "not_applicable",
     sideA: "",
     sideB: "",
@@ -198,6 +199,7 @@ export const overview: OverviewOutput = {
     factPercent: 5,
     explanation: "É quase toda opinião: uma impressão sobre a vontade de uma geração, sem nenhum dado.",
   },
+  rebuttals: [],
   omissions: [
     { title: "Dados de emprego por idade", explanation: "Se os jovens procuram trabalho e não encontram, a explicação é outra." },
     { title: "Mudanças no mercado de trabalho", explanation: "Informalidade, trabalho por aplicativos e exigência de experiência afetam mais quem está começando." },

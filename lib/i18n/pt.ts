@@ -208,6 +208,13 @@ export const pt = {
     },
 
     mode: { label: "Modo de exibição", simple: "Simples", detailed: "Detalhado" },
+    rebuttals: {
+      title: "Respostas do autor às críticas",
+      lede: "O texto rebate críticas conhecidas. Para cada uma, avaliamos se a resposta procede e até onde.",
+      criticism: "Crítica",
+      response: "Resposta do autor",
+      verdict: { valid: "Procede", partly_valid: "Procede em parte", not_valid: "Não procede" },
+    },
     references: {
       show: "Mostrar referências",
       hide: "Esconder referências",

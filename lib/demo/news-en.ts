@@ -231,6 +231,7 @@ export const overview: OverviewOutput = {
     quote: "",
   },
   dispute: {
+    caveat: "",
     status: "favors_b",
     sideA: "Millbrook City Council majority",
     sideB: "Opponents of the mandate",
@@ -245,6 +246,7 @@ export const overview: OverviewOutput = {
     explanation:
       "The facts (the 5-4 vote, the 2030 deadline, the rule for homes sold after 2027) share space with predictions, judgments and appeals from the author.",
   },
+  rebuttals: [],
   omissions: [
     {
       title: "Typical cost after rebates",
