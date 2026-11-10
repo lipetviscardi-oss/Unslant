@@ -35,6 +35,8 @@ const RequestSchema = z.object({
     })
     .optional(),
   demoId: z.string().max(50).optional(),
+  /** true = ignora o resultado guardado e analisa de novo (botão "Analisar de novo"). */
+  fresh: z.boolean().optional(),
   /** Tipo de texto escolhido pelo usuário (opcional; sem ele, a IA identifica). */
   contentType: z
     .enum(["news", "feature", "analysis", "opinion", "editorial", "academic_paper", "press_release", "blog", "other"])
@@ -114,7 +116,7 @@ export async function POST(request: Request) {
         // 2. Já analisamos este texto antes? (cache)
         // Cada campo entra separado (JSON), para que textos diferentes nunca gerem a mesma chave.
         const key = cacheKey(JSON.stringify({ mode: body.mode, source, text }), lang, promptVersion());
-        const cached = dev?.noCache ? null : await readCache(key);
+        const cached = dev?.noCache || body.fresh ? null : await readCache(key);
         if (cached) {
           cached.stats.fromCache = true;
           send({ type: "result", result: cached });

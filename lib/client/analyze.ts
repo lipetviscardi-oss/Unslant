@@ -19,12 +19,16 @@ export type DeclaredType =
   | "blog"
   | "other";
 
-export type AnalyzeRequest =
+export type AnalyzeRequest = (
   | { mode: "url"; url: string; lang: Lang; contentType?: DeclaredType }
   | { mode: "text"; text: string; lang: Lang; contentType?: DeclaredType }
   | { mode: "pdf"; text: string; meta: { title?: string; author?: string }; lang: Lang; contentType?: DeclaredType }
   | { mode: "claim"; text: string; meta: { context?: string }; lang: Lang }
-  | { mode: "demo"; demoId: string; lang: Lang };
+  | { mode: "demo"; demoId: string; lang: Lang }
+) & {
+  /** true = ignora o resultado guardado e analisa de novo. */
+  fresh?: boolean;
+};
 
 export class AnalyzeError extends Error {
   constructor(

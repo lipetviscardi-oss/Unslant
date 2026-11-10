@@ -18,7 +18,7 @@ import { useDict } from "@/lib/i18n";
 type View =
   | { kind: "form"; error?: string }
   | { kind: "running"; progress: ProgressState }
-  | { kind: "result"; result: AnalysisResult };
+  | { kind: "result"; result: AnalysisResult; request: AnalyzeRequest };
 
 export function Home() {
   const t = useDict();
@@ -40,7 +40,7 @@ export function Home() {
         },
         controller.signal,
       );
-      setView({ kind: "result", result });
+      setView({ kind: "result", result, request: req });
       window.scrollTo({ top: 0 });
     } catch (err) {
       if (controller.signal.aborted) {
@@ -64,7 +64,16 @@ export function Home() {
     window.scrollTo({ top: 0 });
   }
 
-  if (view.kind === "result") return <ResultView result={view.result} onReset={reset} />;
+  if (view.kind === "result") {
+    const { result, request } = view;
+    return (
+      <ResultView
+        result={result}
+        onReset={reset}
+        onReanalyze={result.stats.fromCache ? () => start({ ...request, fresh: true }) : undefined}
+      />
+    );
+  }
 
   if (view.kind === "running") {
     return (

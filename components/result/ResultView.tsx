@@ -58,7 +58,7 @@ function Stats({ result }: { result: AnalysisResult }) {
           <>
             <div>
               <dt className="inline">{t.result.stats.cost}</dt>
-              <dd className="inline text-ink">{s.fromCache ? t.result.stats.costCached : `US$ ${cost}`}</dd>
+              <dd className="inline text-ink">{s.fromCache ? t.result.stats.costCached(cost) : `US$ ${cost}`}</dd>
             </div>
             {s.webSearches ? (
               <div>
@@ -76,13 +76,28 @@ function Stats({ result }: { result: AnalysisResult }) {
           <dt className="inline">{t.result.stats.discarded}</dt>
           <dd className="inline text-ink">{s.discardedEvidence}</dd>
         </div>
+        {!result.demo && (
+          <div>
+            <dt className="inline">{t.result.stats.version}</dt>
+            <dd className="inline text-ink">{result.promptVersion}</dd>
+          </div>
+        )}
       </dl>
       {s.parts > 1 && <p className="mt-2">{t.result.stats.parts(s.parts)}</p>}
     </section>
   );
 }
 
-export function ResultView({ result, onReset }: { result: AnalysisResult; onReset: () => void }) {
+export function ResultView({
+  result,
+  onReset,
+  onReanalyze,
+}: {
+  result: AnalysisResult;
+  onReset: () => void;
+  /** Só aparece quando o resultado veio do cache: refaz a análise do zero. */
+  onReanalyze?: () => void;
+}) {
   const t = useDict();
   const lang = useLang();
   const index = useMemo(() => buildEvidenceIndex(result), [result]);
@@ -141,7 +156,24 @@ export function ResultView({ result, onReset }: { result: AnalysisResult; onRese
           </button>
           <div className="grid gap-1 text-right text-sm text-muted">
             {result.demo && <p>{t.result.demoNote}</p>}
-            {result.stats.fromCache && <p>{t.result.cacheNote}</p>}
+            {result.stats.fromCache && (
+              <p>
+                {t.result.cacheNote}
+                {onReanalyze && (
+                  <>
+                    {" "}
+                    <button
+                      type="button"
+                      onClick={onReanalyze}
+                      className="font-medium text-teal-deep underline underline-offset-2 hover:no-underline"
+                    >
+                      {t.result.reanalyze}
+                    </button>{" "}
+                    <span>{t.result.reanalyzeCost}</span>
+                  </>
+                )}
+              </p>
+            )}
             {otherLanguage && <p>{t.result.languageNote(t.labels.languageName[result.language])}</p>}
           </div>
         </div>

@@ -38,7 +38,7 @@ Faixas da nota, dados/estatística, versão neutra no estilo de notícia, bug vi
 | Item | O quê | Status |
 |---|---|---|
 | 5 | Bug visual em "Outras sugestões" (grid → flex) | feito |
-| 1 | Cache: versão da análise, custo original, botão "Analisar de novo" | em andamento |
-| 2 | Versão neutra: só trechos elegíveis (fora das aspas, sem atribuição, ≥ moderado) | a fazer |
+| 1 | Cache: versão da análise, custo original, botão "Analisar de novo" | feito |
+| 2 | Versão neutra: só trechos elegíveis (fora das aspas, sem atribuição, ≥ moderado) | em andamento |
 | 4 | Escala única leve/moderado/forte (0–3,4 / 3,5–6,4 / 6,5–10) + resumo natural | a fazer |
 | 3 | 50 veículos com fonte conferida; órgãos públicos = "Oficial" | a fazer |
