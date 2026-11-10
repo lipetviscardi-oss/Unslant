@@ -181,6 +181,9 @@ Decisões: A) item 9 = intensidade por trecho; B) limite de imagens e PDF contar
 | R9-8 | Veículos: + Gazeta do Povo (direita), Veja (direita), Revista Fórum (esquerda), Jovem Pan News (direita) pela Wikipédia; Retraction Watch e Science Media Centre como "especializado". MBFC não avalia os brasileiros (perfil do país é pago). Sem fonte (estimativa da IA com aviso ⚠️): UOL, Metrópoles, Poder360, CNN Brasil, Correio Braziliense, Nexo, Outras Palavras, piauí, Valor, Intercept Brasil | feito |
 | R9-9 | Intensidade por trecho (evidence.strength weak/medium/strong); cor = peso do trecho limitado pela faixa da categoria; filtro padrão esconde sinais leves; legenda nova | feito (conferido na tela com dados simulados) |
 | R9-11 | Casos Séralini (fixtures/seralini.json, capturado pelo navegador: 9 páginas com figuras) e Outras Palavras (fixtures/outras-palavras.json) no teste; novas conferências: academicoMin, eixoEconomico; informações da Rodada 9 | feito |
-| R9-V | Validação com IA de verdade (≤ US$ 2) | a fazer |
+| R9-V | Validação com IA de verdade (≤ US$ 2): o usuário roda no computador dele (não há chave da IA neste ambiente): seralini, outras-palavras, mother-jones, brasil-de-fato, reuters (~US$ 1). Teste com IA falsa: tudo funcionou de ponta a ponta | esperando o usuário |
 
 Lembrete para a fase final: limite de imagens por PDF (priorizar gráficos/fotos) e PDF longo contar como 2 análises no plano grátis — **avisar o usuário**.
+
+### Onde paramos (Rodada 9, 10/11/2026 à noite)
+- Itens R9-1 a R9-11 feitos e publicados (a Vercel atualiza sozinha). Falta só a validação com IA de verdade, que o usuário roda no computador dele (instruções enviadas). Depois: analisar os resultados, ajustar se precisar e seguir para o convite (passo 10).
