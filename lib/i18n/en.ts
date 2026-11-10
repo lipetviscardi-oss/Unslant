@@ -28,6 +28,23 @@ export const en: Dict = {
     menu: "Site menu",
     otherLanguage: "Português",
     otherLanguageAria: "Ler este site em português",
+    login: "Sign in",
+    account: "My account",
+    myAnalyses: "My analyses",
+    logout: "Sign out",
+  },
+
+  login: {
+    title: "Sign in",
+    lede: "No password: enter your email and we'll send you a sign-in link. The first time, your account is created automatically.",
+    email: "Your email",
+    submit: "Send sign-in link",
+    sending: "Sending…",
+    sent: (email: string) => `Done! We sent a link to ${email}. Open the email and click the link to sign in (check your spam folder too).`,
+    error: "We couldn't send the link right now. Check the email address and try again in a few minutes.",
+    linkError: "The sign-in link is invalid or has expired. Request a new one below.",
+    unavailable: "Sign-in is not available on this site yet.",
+    why: "With an account you get 3 simple analyses and 1 detailed analysis per day, and your analyses are saved under \"My analyses\".",
   },
 
   footer: {

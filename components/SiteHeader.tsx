@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 import { LOCALE_COOKIE, type Locale } from "@/lib/i18n/config";
 import { useDict, useLang } from "@/lib/i18n";
 import { Logo } from "@/components/Logo";
+import { AccountMenu } from "@/components/AccountMenu";
 
 /** Mesmo endereço, no outro idioma (ex.: /pt/methodology → /en/methodology). */
 function swapLocale(pathname: string, target: Locale) {
@@ -81,6 +82,7 @@ export function SiteHeader() {
         <nav aria-label={t.nav.menu} className="flex items-center gap-5">
           <NavLinks className="hidden items-center gap-5 text-[15px] text-muted md:flex" />
           <LanguageSwitch />
+          <AccountMenu />
         </nav>
       </div>
     </header>

@@ -91,8 +91,8 @@ pode instalar @supabase/supabase-js e @supabase/ssr.
 | P1 | Instalar @supabase/supabase-js e @supabase/ssr (aprovado) | feito |
 | P2 | Clientes do Supabase (navegador, servidor, admin) + sessão no proxy.ts | feito |
 | P3 | Tabelas e regras de acesso (supabase/migrations) | feito (usuário roda o SQL no Supabase) |
-| P4 | Login por link no e-mail: página Entrar, /auth/callback, menu da conta | em andamento |
-| P5 | Limites: visitante 1 simples; grátis 3 simples + 1 detalhada por dia (meia-noite local); cache não conta | a fazer |
+| P4 | Login por link no e-mail: página Entrar, /auth/callback, menu da conta | feito |
+| P5 | Limites: visitante 1 simples; grátis 3 simples + 1 detalhada por dia (meia-noite local); cache não conta | em andamento |
 | P6 | Minhas análises (histórico, abrir, apagar) + página da análise salva | a fazer |
 | P7 | Análise em segundo plano (etapas salvas no banco) | a fazer |
 | P8 | Privacidade, README, testes | a fazer |

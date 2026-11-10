@@ -28,6 +28,23 @@ export const pt = {
     menu: "Menu do site",
     otherLanguage: "English",
     otherLanguageAria: "Read this site in English",
+    login: "Entrar",
+    account: "Minha conta",
+    myAnalyses: "Minhas análises",
+    logout: "Sair",
+  },
+
+  login: {
+    title: "Entrar",
+    lede: "Sem senha: digite seu e-mail e enviamos um link de acesso. Na primeira vez, sua conta é criada automaticamente.",
+    email: "Seu e-mail",
+    submit: "Enviar link de acesso",
+    sending: "Enviando…",
+    sent: (email: string) => `Pronto! Enviamos um link para ${email}. Abra o e-mail e clique no link para entrar (confira também a caixa de spam).`,
+    error: "Não foi possível enviar o link agora. Confira o e-mail digitado e tente de novo em alguns minutos.",
+    linkError: "O link de acesso é inválido ou já expirou. Peça um novo abaixo.",
+    unavailable: "O login ainda não está disponível neste site.",
+    why: "Com uma conta, você tem 3 análises simples e 1 detalhada por dia, e suas análises ficam guardadas em \"Minhas análises\".",
   },
 
   footer: {
