@@ -295,8 +295,8 @@ export function MethodologyPt() {
       </ul>
       <p>
         <strong>Limitações:</strong> a IA sabe mais sobre períodos e lugares muito documentados do que sobre os pouco
-        documentados, e pode errar a época de textos sem data. Documentos escaneados sem texto selecionável ainda não
-        podem ser analisados. O resultado é um ponto de partida para a crítica de fontes, não substitui o trabalho do
+        documentados, e pode errar a época de textos sem data. Em documentos escaneados, o texto é transcrito pela IA a
+        partir das imagens das páginas (até {config.ocr.maxPages}) e pode ter erros de leitura; o resultado avisa isso. O resultado é um ponto de partida para a crítica de fontes, não substitui o trabalho do
         historiador.
       </p>
 
@@ -609,8 +609,8 @@ export function MethodologyEn() {
       </ul>
       <p>
         <strong>Limitations:</strong> the AI knows more about well-documented periods and places than about poorly
-        documented ones, and it may get the period of undated texts wrong. Scanned documents without selectable text
-        cannot be analyzed yet. The result is a starting point for source criticism, not a substitute for the
+        documented ones, and it may get the period of undated texts wrong. For scanned documents, the text is transcribed by the AI
+        from the page images (up to {config.ocr.maxPages}) and may contain reading errors; the result says so. The result is a starting point for source criticism, not a substitute for the
         historian&rsquo;s work.
       </p>
 

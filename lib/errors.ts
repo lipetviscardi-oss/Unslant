@@ -24,6 +24,8 @@ export type ErrorCode =
   | "CLAIM_TOO_LONG"
   | "PDF_INVALID"
   | "PDF_SCANNED"
+  | "OCR_LIMIT"
+  | "OCR_FAILED"
   | "MISSING_API_KEY"
   | "AI_AUTH"
   | "AI_NO_CREDIT"
@@ -104,6 +106,14 @@ export const ERROR_MESSAGES: Record<ErrorCode, Record<Lang, string>> = {
   PDF_INVALID: {
     pt: "Não conseguimos abrir esse PDF. Ele pode estar corrompido ou protegido por senha.",
     en: "We couldn't open that PDF. It may be corrupted or password-protected.",
+  },
+  OCR_LIMIT: {
+    pt: "Você atingiu o limite de páginas escaneadas que a IA pode transcrever em 24 horas (proteção contra gastos). Tente amanhã ou cole o texto na aba \"Texto\".",
+    en: "You've reached the limit of scanned pages the AI can transcribe in 24 hours (cost protection). Try again tomorrow or paste the text.",
+  },
+  OCR_FAILED: {
+    pt: "Não foi possível transcrever as páginas escaneadas agora. Tente de novo em instantes ou cole o texto na aba \"Texto\".",
+    en: "The scanned pages couldn't be transcribed right now. Try again shortly or paste the text.",
   },
   PDF_SCANNED: {
     pt: "Esse PDF parece ser uma imagem escaneada, sem texto selecionável. Tente um PDF com texto ou cole o texto na aba \"Texto\".",

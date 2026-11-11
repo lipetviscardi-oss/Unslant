@@ -12,10 +12,13 @@ import { readMode, saveMode, subscribeMode, type ResultMode } from "@/lib/client
 import { CLAIM_EXAMPLES, EXAMPLES } from "@/lib/examples";
 import { AppError, errorMessage } from "@/lib/errors";
 import { countWords } from "@/lib/text";
+import { config } from "@/lib/config";
 import { useDict, useLang } from "@/lib/i18n";
 
 type Tab = "url" | "text" | "pdf" | "claim";
 const TAB_IDS: Tab[] = ["url", "text", "pdf", "claim"];
+const OCR_MAX_PAGES = config.ocr.maxPages;
+
 const GENRES: DeclaredType[] = [
   "news",
   "feature",
@@ -34,7 +37,12 @@ const GENRES: DeclaredType[] = [
 ];
 
 interface PdfState {
-  status: "idle" | "reading" | "ready" | "error";
+  status: "idle" | "reading" | "ready" | "scanned" | "transcribing" | "error";
+  /** PDF escaneado: o arquivo (para transcrever ao analisar) e o número de páginas. */
+  file?: File;
+  pageCount?: number;
+  /** Progresso da transcrição. */
+  progress?: { phase: "rendering" | "transcribing"; done: number; total: number };
   fileName?: string;
   text?: string;
   title?: string;
@@ -94,6 +102,10 @@ export function AnalyzeForm({ onSubmit }: { onSubmit: (req: AnalyzeRequest) => v
     try {
       const { extractFromPdf } = await import("@/lib/extract/pdf-client");
       const out = await extractFromPdf(file);
+      if (out.source.scanned) {
+        setPdf({ status: "scanned", fileName: file.name, file, pageCount: out.source.pageCount });
+        return;
+      }
       setPdf({ status: "ready", fileName: file.name, text: out.text, title: out.source.title, author: out.source.author, outlet: out.source.outlet, publishedAt: out.source.publishedAt, images: out.images });
     } catch (err) {
       const code = err instanceof AppError ? err.code : "PDF_INVALID";
@@ -104,12 +116,45 @@ export function AnalyzeForm({ onSubmit }: { onSubmit: (req: AnalyzeRequest) => v
   const canSubmit =
     (tab === "url" && url.trim().length > 0) ||
     (tab === "text" && words > 0) ||
-    (tab === "pdf" && pdf.status === "ready") ||
+    (tab === "pdf" && (pdf.status === "ready" || pdf.status === "scanned")) ||
     (tab === "claim" && claimWords > 0);
+
+  /** PDF escaneado: a IA transcreve as páginas e depois a análise segue com o texto. */
+  async function transcribeAndSend(contentType: DeclaredType | undefined) {
+    if (!pdf.file) return;
+    // Sem análise disponível hoje, não gasta com a transcrição.
+    const left = usage?.limitsOn && usage.remaining ? usage.remaining[view] : undefined;
+    if (left === 0) {
+      setPdf((p) => ({ ...p, status: "scanned", error: errorMessage(usage?.loggedIn ? (view === "detailed" ? "LIMIT_DETAILED" : "LIMIT_SIMPLE") : "LIMIT_ANON", lang) }));
+      return;
+    }
+    const file = pdf.file;
+    setPdf((p) => ({ ...p, status: "transcribing", error: undefined, progress: { phase: "rendering", done: 0, total: 0 } }));
+    try {
+      const { transcribePdf } = await import("@/lib/client/transcribe");
+      const out = await transcribePdf(file, lang, (progress) => setPdf((p) => ({ ...p, progress })));
+      if (!out.text.trim()) throw new AppError("OCR_FAILED");
+      setPdf((p) => ({ ...p, status: "scanned", text: out.text }));
+      send({
+        mode: "pdf",
+        text: out.text,
+        meta: { title: file.name.replace(/\.pdf$/i, ""), transcribed: true, pages: out.transcribedPages, totalPages: out.totalPages },
+        lang,
+        contentType,
+      });
+    } catch (err) {
+      const message = err instanceof Error && "code" in err ? err.message : errorMessage("OCR_FAILED", lang);
+      setPdf((p) => ({ ...p, status: "scanned", error: message }));
+    }
+  }
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
+    if (tab === "pdf" && pdf.status === "scanned") {
+      void transcribeAndSend(genre || undefined);
+      return;
+    }
     const contentType = genre || undefined;
     if (tab === "url") send({ mode: "url", url: url.trim(), lang, contentType });
     else if (tab === "text") send({ mode: "text", text, lang, contentType });
@@ -253,6 +298,22 @@ export function AnalyzeForm({ onSubmit }: { onSubmit: (req: AnalyzeRequest) => v
                     <span className="text-muted"> {t.home.pdf.extracted(countWords(pdf.text ?? ""))}</span>
                     {pdf.images?.length ? <span className="block text-muted">{t.home.pdf.figures(pdf.images.length)}</span> : null}
                   </p>
+                )}
+                {(pdf.status === "scanned" || pdf.status === "transcribing") && (
+                  <div className="grid gap-1">
+                    <p>
+                      <strong>{pdf.fileName}</strong>
+                    </p>
+                    <p className="text-muted">{t.home.pdf.scanned(pdf.pageCount ?? 0, Math.min(pdf.pageCount ?? 0, OCR_MAX_PAGES))}</p>
+                    {pdf.status === "transcribing" && pdf.progress && (
+                      <p className="font-medium text-teal-deep">
+                        {pdf.progress.phase === "rendering"
+                          ? t.home.pdf.rendering(pdf.progress.done, pdf.progress.total)
+                          : t.home.pdf.transcribing(pdf.progress.done, pdf.progress.total)}
+                      </p>
+                    )}
+                    {pdf.error && <p className="text-ember-ink">{pdf.error}</p>}
+                  </div>
                 )}
                 {pdf.status === "error" && <p className="text-ember-ink">{pdf.error}</p>}
               </div>

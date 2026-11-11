@@ -117,6 +117,10 @@ export const pt = {
       reading: (name: string) => `Lendo ${name}…`,
       extracted: (n: number) => `(${num(n)} palavras extraídas)`,
       figures: (n: number) => `${n === 1 ? "1 página com figura ou tabela será analisada" : `${n} páginas com figuras ou tabelas serão analisadas`} também como imagem.`,
+      scanned: (total: number, used: number) =>
+        `PDF escaneado (sem texto selecionável), ${total} ${total === 1 ? "página" : "páginas"}. Ao clicar em Analisar, a IA vai transcrever ${used < total ? `as primeiras ${used} páginas` : used === 1 ? "a página" : `as ${used} páginas`} antes da análise (leva 1 a 2 minutos). A transcrição pode ter erros de leitura.`,
+      rendering: (done: number, total: number) => `Preparando as páginas… ${done} de ${total}`,
+      transcribing: (done: number, total: number) => `A IA está transcrevendo… ${done} de ${total} páginas`,
       notPdf: "Esse arquivo não é um PDF.",
     },
     claim: {
@@ -196,6 +200,8 @@ export const pt = {
     claimSeenAt: "Vista ou ouvida em:",
     summaryTitle: "Resumo da análise",
     contextConsidered: "Contexto considerado: ",
+    transcribedNote: (done: number, total: number) =>
+      `PDF escaneado: o texto foi transcrito pela IA a partir das imagens${done && total > done ? ` (só as primeiras ${done} de ${total} páginas)` : ""}. Pode haver erros de leitura; confira os trechos importantes no original.`,
     languageNote: (lang: string) => `Este resultado foi gerado em ${lang}.`,
 
     score: {

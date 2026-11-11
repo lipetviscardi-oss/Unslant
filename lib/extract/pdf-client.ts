@@ -403,8 +403,17 @@ export async function extractFromPdf(file: File): Promise<{ text: string; source
   }
   const paragraphs = removeRepeatedHeaders(pages).flatMap(linesToParagraphs);
 
-  // Pouquíssimo texto por página = provavelmente um PDF escaneado (imagem).
-  if (chars / Math.max(1, pdf.numPages) < 100) throw new AppError("PDF_SCANNED");
+  // Pouquíssimo texto por página = PDF escaneado (imagem): o texto será transcrito pela IA.
+  if (chars / Math.max(1, pdf.numPages) < 100) {
+    const pageCount = pdf.numPages;
+    await pdf.cleanup();
+    if (!config.ocr.enabled) throw new AppError("PDF_SCANNED");
+    return {
+      text: "",
+      source: { type: "pdf", title: file.name.replace(/\.pdf$/i, ""), scanned: true, pageCount },
+      images: [],
+    };
+  }
 
   let title: string | undefined;
   let author: string | undefined;
@@ -434,4 +443,30 @@ export async function extractFromPdf(file: File): Promise<{ text: string; source
     },
     images,
   };
+}
+
+/** Uma página escaneada em imagem, para a transcrição. */
+export interface ScannedPage {
+  page: number;
+  /** JPEG em base64 (sem o prefixo "data:"). */
+  data: string;
+}
+
+/**
+ * PDF ESCANEADO: transforma as primeiras páginas (até config.ocr.maxPages)
+ * em imagens JPEG, uma por vez, para a IA transcrever. Roda no navegador.
+ */
+export async function renderScannedPages(file: File, onProgress?: (done: number, total: number) => void): Promise<{ pages: ScannedPage[]; totalPages: number }> {
+  const { getDocumentProxy } = await import("unpdf");
+  const pdf = await getDocumentProxy(new Uint8Array(await file.arrayBuffer()));
+  const total = Math.min(pdf.numPages, config.ocr.maxPages);
+  const pages: ScannedPage[] = [];
+  for (let i = 1; i <= total; i++) {
+    const canvas = await renderPage(await pdf.getPage(i), config.ocr.longSide);
+    pages.push({ page: i, data: jpeg(canvas, config.ocr.jpegQuality).replace(/^data:image\/jpeg;base64,/, "") });
+    onProgress?.(i, total);
+  }
+  const totalPages = pdf.numPages;
+  await pdf.cleanup();
+  return { pages, totalPages };
 }

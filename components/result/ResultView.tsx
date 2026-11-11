@@ -262,6 +262,11 @@ export function ResultView({
               </p>
             )}
             {otherLanguage && <p>{t.result.languageNote(t.labels.languageName[result.language])}</p>}
+            {source.transcribed && (
+              <p>
+                {t.result.transcribedNote(source.transcribedPages ?? 0, source.pageCount ?? source.transcribedPages ?? 0)}
+              </p>
+            )}
           </div>
         </div>
 

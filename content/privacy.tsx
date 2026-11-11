@@ -59,7 +59,8 @@ export function PrivacyPt() {
         <li>
           <strong>PDFs:</strong> o arquivo é lido no seu próprio navegador e não é enviado inteiro ao nosso servidor.
           Seguem para análise o texto extraído e imagens das páginas que têm figuras, gráficos ou tabelas (no máximo{" "}
-          {config.visual.maxPdfPages}), para que a IA possa examiná-los.
+          {config.visual.maxPdfPages}), para que a IA possa examiná-los. Se o PDF for escaneado (sem texto
+          selecionável), as imagens das primeiras {config.ocr.maxPages} páginas são enviadas para a IA transcrever o texto.
         </li>
       </ul>
       <p>
@@ -196,7 +197,8 @@ export function PrivacyEn() {
         <li>
           <strong>PDFs:</strong> the file is read in your own browser and is not sent to our server in full. What is sent
           for analysis is the extracted text and images of the pages that contain figures, charts or tables (at most{" "}
-          {config.visual.maxPdfPages}), so the AI can examine them.
+          {config.visual.maxPdfPages}), so the AI can examine them. If the PDF is scanned (no selectable text), images of the
+          first {config.ocr.maxPages} pages are sent to the AI to transcribe the text.
         </li>
       </ul>
       <p>

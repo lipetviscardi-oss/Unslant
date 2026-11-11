@@ -31,6 +31,14 @@ export interface SourceInfo {
   section?: string;
   /** Tipo de texto escolhido pelo usuário no formulário (se escolheu). */
   declaredType?: ContentType;
+  /** PDF escaneado (sem texto): o texto é transcrito pela IA a partir das imagens das páginas. */
+  scanned?: boolean;
+  /** Número de páginas do PDF. */
+  pageCount?: number;
+  /** true = o texto analisado foi transcrito pela IA (pode ter erros de leitura). */
+  transcribed?: boolean;
+  /** Quantas páginas foram transcritas (as primeiras; o limite está em config.ocr.maxPages). */
+  transcribedPages?: number;
   /** Lista de referências do paper, separada do texto (não vai para a análise; aparece recolhida na tela). */
   references?: string;
 }

@@ -214,7 +214,7 @@ Plano: quando o PDF não tem texto, o navegador transforma as páginas (até 30)
 
 | # | Item | Status |
 |---|---|---|
-| O1 | Navegador: detectar escaneado e gerar imagens das páginas | a fazer |
-| O2 | /api/transcribe + prompt + limites (ocr_events) | a fazer |
-| O3 | Formulário (progresso), análise (aviso à IA e na tela), Privacidade e Metodologia | a fazer |
+| O1 | Navegador: detectar escaneado e gerar imagens das páginas | feito |
+| O2 | /api/transcribe + prompt + limites (ocr_events) | feito (SQL: tabela ocr_events — o usuário precisa rodar o SQL de novo) |
+| O3 | Formulário (progresso), análise (aviso à IA e na tela), Privacidade e Metodologia | feito |
 | O4 | Testes (IA falsa, navegador) + caso do telegrama no teste:beta e no checar-pdfs | a fazer |

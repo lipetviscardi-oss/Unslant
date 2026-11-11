@@ -45,6 +45,11 @@ export function buildDocumentBlock(
     claim: "afirmação curta enviada pelo usuário (algo que alguém disse ou que circula)",
   }[source.type];
   meta.push(`Origem: ${origin}`);
+  if (source.transcribed) {
+    meta.push(
+      "Observação: este documento é um PDF ESCANEADO; o texto abaixo foi transcrito por IA a partir das imagens das páginas e pode ter erros de leitura ([ilegível], [?], palavras trocadas). NÃO trate erros de transcrição, grafia antiga ou marcas como [carimbo: ...] e [anotação manuscrita: ...] como problemas do autor.",
+    );
+  }
   if (source.references) {
     meta.push(
       "Observação: a lista de referências do fim do documento foi separada automaticamente e não aparece abaixo. NÃO trate a ausência dela como falta de referências; as citações dentro do texto continuam valendo.",

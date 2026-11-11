@@ -148,6 +148,26 @@ export const config = {
     maxTokens: 8_000,
   },
 
+  /**
+   * PDFs ESCANEADOS (sem texto selecionável): o navegador transforma as
+   * páginas em imagens e a IA leve transcreve o texto, em lotes.
+   * Custo aproximado: US$ 0,005 por página.
+   */
+  ocr: {
+    enabled: true,
+    /** No máximo quantas páginas são transcritas (as primeiras). */
+    maxPages: 30,
+    /** Páginas por pedido (cada pedido precisa ficar abaixo de ~4 MB na Vercel). */
+    batchPages: 4,
+    /** Tamanho da imagem: lado maior em pixels e qualidade do JPEG. */
+    longSide: 1568,
+    jpegQuality: 0.72,
+    /** Proteção contra gastos: páginas transcritas em 24 horas. */
+    pagesPer24h: { anonymous: 15, free: 60 },
+    sitePagesPer24h: 600,
+    maxTokens: 8_000,
+  },
+
   balance: {
     /** Liga ou desliga a busca (false = a seção não aparece e não há custo de busca). */
     enabled: true,

@@ -109,3 +109,19 @@ create index if not exists feedback_created on public.feedback (created_at);
 
 alter table public.feedback enable row level security;
 -- (sem políticas: só o servidor lê e grava)
+
+-- Páginas de PDFs escaneados transcritas pela IA (proteção contra gastos:
+-- limite de páginas por pessoa e no site inteiro, em 24 horas).
+create table if not exists public.ocr_events (
+  id bigint generated always as identity primary key,
+  created_at timestamptz not null default now(),
+  user_id uuid references auth.users (id) on delete set null,
+  -- Visitante: códigos anônimos (resumo do cookie e do endereço), nunca o endereço em si.
+  anon_key text,
+  ip_key text,
+  pages integer not null
+);
+create index if not exists ocr_events_created on public.ocr_events (created_at);
+
+alter table public.ocr_events enable row level security;
+-- (sem políticas: só o servidor lê e grava)

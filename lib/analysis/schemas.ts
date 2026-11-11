@@ -275,3 +275,10 @@ export const BalanceSchema = z.object({
   ),
 });
 export type BalanceOutput = z.infer<typeof BalanceSchema>;
+
+/* PDFs escaneados — transcrição das páginas */
+export const TranscriptionSchema = z.object({
+  pages: z.array(z.object({ page: z.number(), text: z.string() })),
+  quality: z.enum(["good", "partial", "poor"]),
+});
+export type TranscriptionOutput = z.infer<typeof TranscriptionSchema>;

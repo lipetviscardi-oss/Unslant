@@ -116,6 +116,10 @@ export const en: Dict = {
       reading: (name: string) => `Reading ${name}…`,
       extracted: (n: number) => `(${num(n)} words extracted)`,
       figures: (n: number) => `${n === 1 ? "1 page with a figure or table" : `${n} pages with figures or tables`} will also be analyzed as images.`,
+      scanned: (total: number, used: number) =>
+        `Scanned PDF (no selectable text), ${total} ${total === 1 ? "page" : "pages"}. When you click Analyze, the AI will transcribe ${used < total ? `the first ${used} pages` : used === 1 ? "the page" : `the ${used} pages`} before the analysis (takes 1 to 2 minutes). The transcription may contain reading errors.`,
+      rendering: (done: number, total: number) => `Preparing pages… ${done} of ${total}`,
+      transcribing: (done: number, total: number) => `The AI is transcribing… ${done} of ${total} pages`,
       notPdf: "That file is not a PDF.",
     },
     claim: {
@@ -195,6 +199,8 @@ export const en: Dict = {
     claimSeenAt: "Seen or heard at:",
     summaryTitle: "Summary",
     contextConsidered: "Context considered: ",
+    transcribedNote: (done: number, total: number) =>
+      `Scanned PDF: the text was transcribed by the AI from the page images${done && total > done ? ` (only the first ${done} of ${total} pages)` : ""}. There may be reading errors; check important passages against the original.`,
     languageNote: (lang: string) => `This result was generated in ${lang}.`,
 
     score: {

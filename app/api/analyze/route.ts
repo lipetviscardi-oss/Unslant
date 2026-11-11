@@ -42,6 +42,10 @@ const RequestSchema = z.object({
       /** PDFs: revista/veículo e data lidos da primeira página. */
       outlet: z.string().max(300).optional(),
       publishedAt: z.string().max(100).optional(),
+      /** PDF escaneado: o texto foi transcrito pela IA (pages = transcritas, totalPages = do arquivo). */
+      transcribed: z.boolean().optional(),
+      pages: z.number().int().min(1).max(10_000).optional(),
+      totalPages: z.number().int().min(1).max(10_000).optional(),
       /** Afirmações: onde a pessoa viu ou ouviu. */
       context: z.string().max(300).optional(),
     })
@@ -191,6 +195,9 @@ export async function POST(request: Request) {
                   author: body.meta?.author || undefined,
                   outlet: body.meta?.outlet || undefined,
                   publishedAt: body.meta?.publishedAt || undefined,
+                  ...(body.meta?.transcribed
+                    ? { transcribed: true, scanned: true, pageCount: body.meta.totalPages, transcribedPages: body.meta.pages }
+                    : {}),
                 }
               : body.mode === "claim"
                 ? { type: "claim", claimContext: body.meta?.context?.trim() || undefined }
