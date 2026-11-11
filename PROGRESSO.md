@@ -222,3 +222,9 @@ Plano: quando o PDF não tem texto, o navegador transforma as páginas (até 30)
 ### Onde paramos (Rodada 10b, 11/11/2026)
 - Leitura de escaneados COMPLETA (inclui preto e branco/JBIG2): usuário aprovou instalar pdfjs-dist@6.4.299 (oficial, Mozilla). Ele desenha as páginas escaneadas no navegador; worker e decodificadores copiados para public/pdfjs/ pelo postinstall (scripts/copiar-pdfjs.mjs, fora do git). Cuidados: tirar globalThis.pdfjsWorker do unpdf antes; @napi-rs/canvas (vem com o pdfjs-dist) apontado para lib/vazio/sem-canvas.js no next.config. Lotes por tamanho (≤ 3 MB). Telegrama de 1964: 12 páginas legíveis; caso hist-gordon no teste:beta (13 casos, ~US$ 2,90).
 - SQL (ocr_events) já rodado pelo usuário em 11/11. Próximo: o usuário roda git pull, npm install, checar-beta e teste:beta, e anexa os resultados.
+
+### Onde paramos (11/11/2026)
+- Rodadas 10 e 10b concluídas e validadas com IA de verdade: teste:beta 13/13 casos aprovados (o telegrama precisou de 2 correções: o teste esbarrava no limite de páginas de visitante; lote recusado pela Anthropic → tentativa página por página). Checklist preenchida com as evidências (CHECKLIST-ANTES-DO-BETA.md).
+- Metodologia atualizada + tabela dos veículos da lista fixa (gerada de lib/veiculos.ts).
+- Revisão final do site publicado: páginas, APIs, leitor de PDF e transcrição OK.
+- Próximo: o usuário decide créditos/teto diário para mais testadores e manda o convite (rascunho enviado). Depois do envio: apagar a tarefa agendada de retomada (trig_012JenRM1Skk63gL9CxXSnbV).

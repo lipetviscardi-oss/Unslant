@@ -66,12 +66,15 @@ Se algo der ❌, anexe no chat o arquivo `…-completo.json` e o relatório `tes
 - ✅ quando, no `teste:beta`, os 3 casos históricos têm: época identificada corretamente, reconhecido como histórico, nenhum partido ou figura atual na análise e (Nabuco) eixos "não se aplica".
 - Para ampliar a trava de anacronismo: `lib/historico.ts` (nome + ano a partir do qual faz sentido).
 
-## Resultado da última verificação (Rodada 10, 10/11/2026)
+## Resultado da última verificação (11/11/2026, antes do beta com professores e historiadores)
 
 | Item | Status | Evidência |
 |---|---|---|
-| 1. Veículos | ✅ OK | 92 domínios: 73 conferidos na fonte, 0 errados, 19 sem classificação política. CBS = RIGHT-CENTER no MBFC (atualizado em 28/04/2026), igual à lista. 3 notas corrigidas para o texto exato da fonte (Gazeta do Povo, Brasil de Fato, Aos Fatos). |
-| 2. Contradições | ⏳ Falta IA de verdade | Verificador testado: 7 tipos detectados em casos montados, 0 alarmes falsos nos 3 exemplos prontos; correção testada com IA falsa (resumo refeito; frase retirada). Falta o `teste:beta`. |
-| 3. Lixo | ⏳ Parcial | Outras Palavras: boletim, "Receba por email", Apoia.se, tags e 2 parágrafos repetidos (estão no HTML do site) removidos; Séralini: anúncio da Springer e 2.501 palavras de referências separadas; nada de conteúdo removido. Falta rodar `checar-lixo` com os links guardados no computador do usuário. |
-| 4. PDFs | ⚠️ 4 de 5 | Séralini, NEJM e 2 sintéticos: título, autores, revista e data certos. Telegrama de 1964 (escaneado): o site ainda não lê PDFs escaneados. |
-| 5. Históricos | ⏳ Falta IA de verdade | Trava de anacronismo testada (6 casos certos, ex.: Lula barrado em 1964 e aceito em 1989); rodada com IA falsa sem erros. Falta o `teste:beta`. |
+| 1. Veículos | ✅ OK | `conferir-veiculos`: 73 conferidos na fonte, 0 errados, 19 sem classificação política. CBS = RIGHT-CENTER no MBFC (28/04/2026). Lista publicada na Metodologia. |
+| 2. Contradições | ✅ OK | `teste:beta`: 13 análises, nenhuma contradição sobrou. O site achou e corrigiu 7 sozinho (Federalist, Reuters, Séralini, Truman ×2 — 1 frase retirada —, telegrama ×2). |
+| 3. Lixo | ✅ OK | `checar-lixo`: 12 de 12 links e PDFs limpos, nenhum conteúdo removido por engano (ex.: CNN "Leia Mais" + 3 manchetes; Federalist 13 tags; Mother Jones newsletter; Outras Palavras boletim, apoio, tags e 2 parágrafos repetidos; Séralini anúncio da Springer e 2.501 palavras de referências). |
+| 4. PDFs | ✅ OK | `checar-pdfs`: 6 de 6 (Séralini e NEJM com título, autores, revista e data certos; escaneados reconhecidos). |
+| 4b. Escaneados | ✅ OK | Sintético e telegrama de Gordon (12 páginas, preto e branco) transcritos pela IA com os trechos esperados. Observação: 1 lote de 4 páginas do telegrama foi recusado pela Anthropic (erro 400) e a nova tentativa página por página resolveu. |
+| 5. Históricos | ✅ OK | AI-5 (13/12/1968), Truman (12/03/1947, sem data no texto), Nabuco (1880; eixos "não se aplica"), Gordon (27/03/1964): época certa, reconhecidos como históricos, nenhuma figura atual. |
+| Notas e simetria | ✅ OK | 8 artigos dentro da faixa; Brasil de Fato × Terra 0,2 de diferença; Mother Jones × Federalist 0,7; lados opostos. |
+| Custo | ℹ️ | Média US$ 0,20 por análise; papers ~US$ 0,45; escaneado de 12 páginas ~US$ 0,32. |
