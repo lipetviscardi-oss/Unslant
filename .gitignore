@@ -52,3 +52,6 @@ next-env.d.ts
 
 # PDFs com direitos autorais: só no computador de quem testa (npm run checar-pdfs)
 /testes/pdfs/privados/
+
+# Arquivos do leitor de PDF, copiados de node_modules/pdfjs-dist a cada npm install
+/public/pdfjs/

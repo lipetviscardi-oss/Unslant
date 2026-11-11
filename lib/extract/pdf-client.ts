@@ -473,13 +473,20 @@ export interface ScannedPage {
  * em imagens JPEG, uma por vez, para a IA transcrever. Roda no navegador.
  */
 export async function renderScannedPages(file: File, onProgress?: (done: number, total: number) => void): Promise<{ pages: ScannedPage[]; totalPages: number }> {
-  const { getDocumentProxy } = await import("unpdf");
-  const pdf = await getDocumentProxy(new Uint8Array(await file.arrayBuffer()));
+  // Leitor de PDF oficial completo (pdfjs-dist): diferente da versão reduzida do "unpdf", ele sabe
+  // desenhar as imagens em preto e branco (JBIG2) comuns em documentos de arquivo escaneados.
+  const pdfjs = await import("pdfjs-dist");
+  pdfjs.GlobalWorkerOptions.workerSrc = "/pdfjs/pdf.worker.min.mjs";
+  // O "unpdf" (usado para ler o texto) deixa o ajudante reduzido dele em globalThis.pdfjsWorker; com
+  // ele ali, o leitor completo usaria esse ajudante, que não tem os decodificadores. Tira da frente.
+  const g = globalThis as { pdfjsWorker?: unknown };
+  delete g.pdfjsWorker;
+  const pdf = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()), wasmUrl: `${window.location.origin}/pdfjs/wasm/`, useWasm: true }).promise;
   const total = Math.min(pdf.numPages, config.ocr.maxPages);
   const pages: ScannedPage[] = [];
   let blank = 0;
   for (let i = 1; i <= total; i++) {
-    const canvas = await renderPage(await pdf.getPage(i), config.ocr.longSide);
+    const canvas = await renderPage((await pdf.getPage(i)) as unknown as PdfPage, config.ocr.longSide);
     // Página em branco (ex.: imagem num formato que o navegador não conseguiu desenhar): não vale pagar a IA por ela.
     if (isBlank(canvas)) blank++;
     else pages.push({ page: i, data: jpeg(canvas, config.ocr.jpegQuality).replace(/^data:image\/jpeg;base64,/, "") });

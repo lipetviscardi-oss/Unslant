@@ -28,13 +28,13 @@ Ele roda, um depois do outro:
 | `npm run checar-contradicoes` | Contradições nas análises já feitas (resumo × tipo de texto, × disputa, × notas; versão neutra × "sem fonte") |
 | `npm run conferir-veiculos` | Cada veículo da lista fixa × a página da fonte (Media Bias/Fact Check, Wikipédia); grava a tabela em `docs/veiculos-conferidos.md` |
 
-**2. Teste com a IA de verdade (~US$ 2,50, ~30 minutos):**
+**2. Teste com a IA de verdade (~US$ 2,90, ~35 minutos):**
 
 ```bash
 npm run teste:beta
 ```
 
-Roda 12 casos: Séralini (PDF), Outras Palavras, Mother Jones, Federalist, Brasil de Fato, Terra, CNN Brasil, Reuters, 3 textos históricos (AI-5 de 1968, Doutrina Truman de 1947, Nabuco de 1883) e 1 PDF escaneado (transcrição pela IA). No fim, mostra as **REGRAS** (✅/❌) e grava os resultados completos em `testes/resultados/…-completo.json`.
+Roda 13 casos: Séralini (PDF), Outras Palavras, Mother Jones, Federalist, Brasil de Fato, Terra, CNN Brasil, Reuters, 3 textos históricos (AI-5 de 1968, Doutrina Truman de 1947, Nabuco de 1883) 1 PDF escaneado sintético e o telegrama escaneado de Lincoln Gordon (1964), os dois com transcrição pela IA. No fim, mostra as **REGRAS** (✅/❌) e grava os resultados completos em `testes/resultados/…-completo.json`.
 
 Se algo der ❌, anexe no chat o arquivo `…-completo.json` e o relatório `testes/resultados/lixo-….md`.
 

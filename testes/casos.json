@@ -194,6 +194,22 @@
       ],
       "titulo": "Ato de teste nº 1, de 1968 (sintético)",
       "link": ""
+    },
+    {
+      "id": "hist-gordon",
+      "nome": "Histórico: telegrama de Gordon (1964, escaneado)",
+      "arquivo": "fixtures/hist-gordon.json",
+      "historico": true,
+      "epoca": [
+        1964,
+        1964
+      ],
+      "transcricaoContem": [
+        "GOULART",
+        "GORDON"
+      ],
+      "titulo": "Telegrama do embaixador Lincoln Gordon, março de 1964",
+      "link": ""
     }
   ],
   "simetria": [

@@ -15,8 +15,9 @@
     "checar-lixo": "node --no-warnings --experimental-transform-types --import ./scripts/lib/carregar-ts.mjs scripts/checar-lixo.mjs",
     "checar-pdfs": "node --no-warnings --experimental-transform-types --import ./scripts/lib/carregar-ts.mjs scripts/checar-pdfs.mjs",
     "checar-contradicoes": "node --no-warnings --experimental-transform-types --import ./scripts/lib/carregar-ts.mjs scripts/checar-contradicoes.mjs",
-    "teste:beta": "node scripts/teste.mjs --so seralini,outras-palavras,mother-jones,federalist,brasil-de-fato,terra-brasil,cnn,reuters,hist-ai5,hist-truman,hist-nabuco,escaneado-sintetico",
-    "checar-beta": "node scripts/checar-beta.mjs"
+    "teste:beta": "node scripts/teste.mjs --so seralini,outras-palavras,mother-jones,federalist,brasil-de-fato,terra-brasil,cnn,reuters,hist-ai5,hist-truman,hist-nabuco,escaneado-sintetico,hist-gordon",
+    "checar-beta": "node scripts/checar-beta.mjs",
+    "postinstall": "node scripts/copiar-pdfjs.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.6.0",
@@ -28,6 +29,7 @@
     "@supabase/supabase-js": "^2.119.0",
     "jsdom": "^31.0.0",
     "next": "16.4.5",
+    "pdfjs-dist": "6.4.299",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "server-only": "^0.0.1",

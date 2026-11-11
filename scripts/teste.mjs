@@ -117,11 +117,19 @@ async function analyze(body) {
 /** PDF escaneado guardado como imagens: transcreve em lotes (como o navegador faz) e devolve o texto. */
 async function transcribe(saved) {
   const texts = [];
-  for (let i = 0; i < saved.pages.length; i += 4) {
+  // Lotes como os do navegador: até 4 páginas e até ~3 MB.
+  const batches = [];
+  for (const p of saved.pages) {
+    const last = batches[batches.length - 1];
+    const size = last ? last.reduce((n, x) => n + x.data.length, 0) : Infinity;
+    if (!last || last.length >= 4 || size + p.data.length > 3_000_000) batches.push([p]);
+    else last.push(p);
+  }
+  for (const batch of batches) {
     const res = await fetch(`${base}/api/transcribe`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lang: saved.lang ?? "pt", pages: saved.pages.slice(i, i + 4) }),
+      body: JSON.stringify({ lang: saved.lang ?? "pt", pages: batch }),
     });
     const data = await res.json().catch(() => null);
     if (!res.ok) throw Object.assign(new Error(data?.message ?? `transcrição: HTTP ${res.status}`), { code: data?.code ?? "OCR_FAILED" });

@@ -8,6 +8,8 @@ const nextConfig: NextConfig = {
   transpilePackages: ["jsdom"],
   partialPrefetching: true,
   turbopack: {
+    // Ver lib/vazio/sem-canvas.js.
+    resolveAlias: { "@napi-rs/canvas": "./lib/vazio/sem-canvas.js" },
     rules: {
       "*.css": {
         loaders: ["@tailwindcss/turbopack"],
