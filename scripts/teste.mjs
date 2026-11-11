@@ -125,15 +125,28 @@ async function transcribe(saved) {
     if (!last || last.length >= 4 || size + p.data.length > 3_000_000) batches.push([p]);
     else last.push(p);
   }
-  for (const batch of batches) {
+  const send = async (pages) => {
     const res = await fetch(`${base}/api/transcribe`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lang: saved.lang ?? "pt", pages: batch, devTest: true }),
+      body: JSON.stringify({ lang: saved.lang ?? "pt", pages, devTest: true }),
     });
     const data = await res.json().catch(() => null);
     if (!res.ok) throw Object.assign(new Error(data?.message ?? `transcrição: HTTP ${res.status}`), { code: data?.code ?? "OCR_FAILED" });
-    for (const p of data.pages) if (p.text) texts.push(p.text);
+    return data.pages;
+  };
+  for (const batch of batches) {
+    let pages;
+    try {
+      pages = await send(batch);
+    } catch (err) {
+      // Como o navegador: se um lote falhar, tenta uma página por vez.
+      if (err.code !== "OCR_FAILED" || batch.length === 1) throw err;
+      console.log(`\n   lote falhou (${err.message.slice(0, 200)}); tentando página por página`);
+      pages = [];
+      for (const p of batch) pages.push(...(await send([p])));
+    }
+    for (const p of pages) if (p.text) texts.push(p.text);
     process.stdout.write("t");
   }
   return texts.join("\n\n");

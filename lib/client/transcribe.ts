@@ -9,6 +9,32 @@ import { renderScannedPages } from "@/lib/extract/pdf-client";
 import { AnalyzeError, browserTimeZone } from "./analyze";
 import type { Lang } from "@/lib/taxonomy";
 
+type Quality = "good" | "partial" | "poor";
+interface TranscribedBatch {
+  pages: { page: number; text: string }[];
+  quality: Quality;
+}
+
+/** Manda um lote para /api/transcribe. retryable = vale tentar de novo página por página. */
+async function sendBatch(batch: { page: number; data: string }[], lang: Lang): Promise<TranscribedBatch | { error: AnalyzeError; retryable: boolean }> {
+  let res: Response;
+  try {
+    res = await fetch("/api/transcribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lang, tz: browserTimeZone(), pages: batch }),
+    });
+  } catch {
+    return { error: new AnalyzeError("NETWORK", errorMessage("OCR_FAILED", lang)), retryable: true };
+  }
+  const data = await res.json().catch(() => null);
+  if (!res.ok || !data?.pages) {
+    const code = data?.code ?? "OCR_FAILED";
+    return { error: new AnalyzeError(code, data?.message ?? errorMessage("OCR_FAILED", lang)), retryable: code === "OCR_FAILED" };
+  }
+  return { pages: data.pages, quality: data.quality };
+}
+
 export interface TranscribeProgress {
   phase: "rendering" | "transcribing";
   done: number;
@@ -23,7 +49,7 @@ export async function transcribePdf(
   const { pages, totalPages } = await renderScannedPages(file, (done, total) => onProgress({ phase: "rendering", done, total }));
   const texts: string[] = [];
   const rank = { good: 0, partial: 1, poor: 2 } as const;
-  let quality: "good" | "partial" | "poor" = "good";
+  let quality: Quality = "good";
   // Lotes de até config.ocr.batchPages páginas E até ~3 MB (a Vercel recusa pedidos acima de ~4,5 MB).
   const batches: (typeof pages)[] = [];
   for (const p of pages) {
@@ -36,20 +62,20 @@ export async function transcribePdf(
   for (const batch of batches) {
     onProgress({ phase: "transcribing", done: i, total: pages.length });
     i += batch.length;
-    let res: Response;
-    try {
-      res = await fetch("/api/transcribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lang, tz: browserTimeZone(), pages: batch }),
-      });
-    } catch {
-      throw new AnalyzeError("NETWORK", errorMessage("OCR_FAILED", lang));
+    let out = await sendBatch(batch, lang);
+    // Lote com várias páginas falhou: tenta uma página por vez (uma só quase nunca falha).
+    if ("error" in out && out.retryable && batch.length > 1) {
+      const parts: TranscribedBatch[] = [];
+      for (const page of batch) {
+        const one = await sendBatch([page], lang);
+        if ("error" in one) throw one.error;
+        parts.push(one);
+      }
+      out = { pages: parts.flatMap((p) => p.pages), quality: parts.reduce((q, p) => (rank[p.quality] > rank[q] ? p.quality : q), "good" as Quality) };
     }
-    const data = await res.json().catch(() => null);
-    if (!res.ok || !data?.pages) throw new AnalyzeError(data?.code ?? "OCR_FAILED", data?.message ?? errorMessage("OCR_FAILED", lang));
-    for (const p of data.pages as { page: number; text: string }[]) if (p.text) texts.push(p.text);
-    if (rank[data.quality as keyof typeof rank] > rank[quality]) quality = data.quality;
+    if ("error" in out) throw out.error;
+    for (const p of out.pages) if (p.text) texts.push(p.text);
+    if (rank[out.quality] > rank[quality]) quality = out.quality;
   }
   onProgress({ phase: "transcribing", done: pages.length, total: pages.length });
   return { text: texts.join("\n\n"), transcribedPages: pages.length, totalPages, quality };

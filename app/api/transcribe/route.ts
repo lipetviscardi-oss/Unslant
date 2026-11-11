@@ -75,6 +75,9 @@ export async function POST(request: Request) {
     const beforeSpending = ["MISSING_API_KEY", "AI_AUTH", "AI_NO_CREDIT", "AI_RATE_LIMIT"].includes(e.code);
     if (beforeSpending && typeof reservation === "number") await releaseOcrPages(reservation).catch(() => undefined);
     console.error(`[unslant] transcrição falhou: ${e.code}`, e.detail ?? "");
-    return fail(e.code === "AI_AUTH" || e.code === "AI_NO_CREDIT" || e.code === "AI_RATE_LIMIT" ? e.code : "OCR_FAILED", 502);
+    const code = e.code === "AI_AUTH" || e.code === "AI_NO_CREDIT" || e.code === "AI_RATE_LIMIT" ? e.code : "OCR_FAILED";
+    // No computador de desenvolvimento, o detalhe técnico vai junto (no site publicado, só no registro do servidor).
+    const detail = process.env.NODE_ENV === "development" ? ` [detalhe: ${e.code} ${(e.detail ?? "").slice(0, 300)}]` : "";
+    return Response.json({ code, message: errorMessage(code, lang) + detail }, { status: 502 });
   }
 }
