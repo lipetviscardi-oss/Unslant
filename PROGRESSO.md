@@ -208,3 +208,13 @@ Decisões: chave da IA neste ambiente via formulário seguro (sim); gasto máxim
 
 ### Onde paramos (Rodada 10, 10/11/2026 à noite)
 - Tudo implementado e testado sem IA. Falta: (1) o usuário rodar `npm run checar-beta` e `npm run teste:beta` (a chave da Anthropic não pode ficar neste ambiente) e anexar `testes/resultados/…-completo.json` e `lixo-….md`; (2) decisão do usuário sobre ler PDFs escaneados com a IA (telegrama 1964).
+
+## Rodada 10b — Leitura de PDFs escaneados (aprovada em 11/11/2026)
+Plano: quando o PDF não tem texto, o navegador transforma as páginas (até 30) em imagens e manda em lotes para /api/transcribe; a IA leve transcreve; o texto segue para a análise normal, marcado como "transcrito pela IA". Limites contra abuso (páginas por pessoa e no site, em 24 h; tabela ocr_events no SQL). Custo estimado: US$ 0,05–0,10 por documento de 12 páginas. O usuário espera o aviso para rodar checar-beta e teste:beta.
+
+| # | Item | Status |
+|---|---|---|
+| O1 | Navegador: detectar escaneado e gerar imagens das páginas | a fazer |
+| O2 | /api/transcribe + prompt + limites (ocr_events) | a fazer |
+| O3 | Formulário (progresso), análise (aviso à IA e na tela), Privacidade e Metodologia | a fazer |
+| O4 | Testes (IA falsa, navegador) + caso do telegrama no teste:beta e no checar-pdfs | a fazer |
