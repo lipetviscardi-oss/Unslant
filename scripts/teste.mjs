@@ -129,7 +129,7 @@ async function transcribe(saved) {
     const res = await fetch(`${base}/api/transcribe`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lang: saved.lang ?? "pt", pages: batch }),
+      body: JSON.stringify({ lang: saved.lang ?? "pt", pages: batch, devTest: true }),
     });
     const data = await res.json().catch(() => null);
     if (!res.ok) throw Object.assign(new Error(data?.message ?? `transcrição: HTTP ${res.status}`), { code: data?.code ?? "OCR_FAILED" });

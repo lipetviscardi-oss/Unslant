@@ -26,6 +26,8 @@ const Body = z.object({
     .array(z.object({ page: z.number().int().min(1).max(config.ocr.maxPages), data: z.string().min(100).max(1_200_000).regex(/^[A-Za-z0-9+/=]+$/) }))
     .min(1)
     .max(config.ocr.batchPages),
+  /** Só o teste automático (npm run teste), no computador de desenvolvimento: não conta no limite de páginas. */
+  devTest: z.boolean().optional(),
 });
 
 export async function POST(request: Request) {
@@ -36,10 +38,12 @@ export async function POST(request: Request) {
   if (!config.ocr.enabled || config.ai.provider !== "anthropic") return fail("PDF_SCANNED", 400);
   const { pages, tz } = parsed.data;
 
+  // Como nas análises: o teste automático no computador de desenvolvimento não conta no limite.
+  const skipLimits = process.env.NODE_ENV === "development" && parsed.data.devTest === true;
   const viewer = await identifyViewer(tz);
   let reservation: number | "limit" | null = null;
   try {
-    reservation = await reserveOcrPages(viewer, pages.length);
+    reservation = skipLimits ? null : await reserveOcrPages(viewer, pages.length);
   } catch (err) {
     console.warn("[unslant] limite de transcrição indisponível:", err);
     return fail("UNKNOWN", 500);
