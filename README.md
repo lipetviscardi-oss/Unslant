@@ -36,7 +36,7 @@ O unslant analisa um texto (link de matéria, texto colado, PDF ou uma afirmaç�
 - **Para equilibrar sua leitura:** depois da análise, a IA busca na web outras coberturas do mesmo assunto, de perspectivas diferentes, e explica o que cada uma acrescenta. Só aparecem links que vieram de fato da busca (o site confere).
 - **Dois exemplos prontos** (uma notícia e uma afirmação), que funcionam sem chave e sem custo.
 - **Imagens, gráficos e tabelas:** a IA vê as figuras do PDF e as imagens da matéria e aponta gráficos enganosos.
-- **Contas por e-mail** (link de acesso, sem senha), **Minhas análises** (abrir e apagar) e **limites por dia**: visitante sem conta, 1 análise simples; conta grátis, 4 por semana, simples ou detalhadas, durante a fase de testes (depois, 3 simples e 1 detalhada). Numa análise simples, "Usar minha análise detalhada do dia" libera tudo sem chamar a IA de novo.
+- **Contas por e-mail** (link de acesso, sem senha), **Minhas análises** (abrir e apagar) e **limites por dia**: visitante sem conta, 1 análise simples; conta grátis, 4 no total (simples ou detalhadas) durante a fase de testes (depois, 3 simples e 1 detalhada). Numa análise simples, "Usar minha análise detalhada do dia" libera tudo sem chamar a IA de novo.
 - **Análise em segundo plano:** com conta, você pode fechar a página; a análise continua e aparece em Minhas análises.
 
 ---
@@ -200,7 +200,7 @@ Sem o Supabase configurado, o site funciona normalmente, só que sem login, sem 
 
 **Sugestões dos testadores:** o botão "Enviar sugestão" (canto da tela) guarda as mensagens no banco. Para ler, abra o painel do Supabase → **Table Editor** → tabela **feedback**. Elas são apagadas sozinhas depois de 12 meses.
 
-**Os limites** ficam em `lib/config.ts`, seção `limits.perDay`. Na fase de testes: 4 por semana, simples ou detalhadas (campos `total` e `windowDays`). Depois dos testes, volte para `{ simple: 3, detailed: 1 }`. O dia de quem tem conta zera à meia-noite no fuso horário da pessoa (fixado na primeira análise); para visitantes, vale uma janela de 24 horas. Resultados reaproveitados (o mesmo texto já analisado) não contam no limite.
+**Os limites** ficam em `lib/config.ts`, seção `limits.perDay`. Na fase de testes: 4 no total por pessoa, simples ou detalhadas (campos `total`, `windowDays: 30` e `testPhase`; a contagem vale por 30 dias porque os registros de uso são apagados depois disso). Depois dos testes, volte para `{ simple: 3, detailed: 1 }`. O dia de quem tem conta zera à meia-noite no fuso horário da pessoa (fixado na primeira análise); para visitantes, vale uma janela de 24 horas. Resultados reaproveitados (o mesmo texto já analisado) não contam no limite.
 
 **Prazos de guarda** (cache compartilhado e registros de uso: 30 dias) e o **e-mail de contato** da página Privacidade ficam em `lib/config.ts`, seção `privacy`. **Preencha `contactEmail` antes de publicar o site.**
 
@@ -303,7 +303,7 @@ Cada arquivo tem comentários explicando o que pode ser mudado. Depois de salvar
 - **Imagens e gráficos** somam cerca de US$ 0,02–0,04 numa matéria com imagens e US$ 0,05–0,15 num paper com gráficos (só quando há imagens).
 - **Textos longos:** um paper de 10 mil palavras deve custar US$ 0,25–0,35; de 30 mil, US$ 0,60–0,90 (estimativas). Eles são analisados em fila para respeitar o limite por minuto da conta (`lib/config.ts`, `rateLimit`); a tela avisa quando isso acontece.
 - O exemplo pronto e as análises repetidas (cache) são grátis.
-- **Proteção:** o site recusa novas análises depois de 15 por dia (ajuste em `lib/config.ts`, `globalDailyAnalyses`). Configure também o limite mensal na conta da Anthropic, como explicado acima.
+- **Proteção:** o site recusa novas análises depois de 20 por dia (ajuste em `lib/config.ts`, `globalDailyAnalyses`). Configure também o limite mensal na conta da Anthropic, como explicado acima.
 
 ---
 

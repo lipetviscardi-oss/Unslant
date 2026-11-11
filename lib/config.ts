@@ -201,7 +201,7 @@ export const config = {
      * somados). Análises repetidas que vêm do cache não contam.
      * Na Fase 4 isso passa a ser controlado pelo banco de dados.
      */
-    globalDailyAnalyses: 15,
+    globalDailyAnalyses: 20,
     /**
      * Análises por dia (zera à meia-noite no horário de cada pessoa).
      * Resultados reaproveitados (texto já analisado) e exemplos prontos não contam.
@@ -216,7 +216,7 @@ export const config = {
        * (a ideia é 2 papers + 2 notícias por pessoa).
        * Plano normal, depois dos testes: { simple: 3, detailed: 1 } (sem total nem windowDays).
        */
-      free: { simple: 4, detailed: 4, total: 4, windowDays: 7 } as DayLimits,
+      free: { simple: 4, detailed: 4, total: 4, windowDays: 30, testPhase: true } as DayLimits,
     },
   },
 
@@ -284,4 +284,10 @@ export interface DayLimits {
   total?: number;
   /** O limite vale para os últimos N dias, e não para o dia de hoje (opcional). */
   windowDays?: number;
+  /**
+   * Fase de testes: o limite é "no total" (não se renova) e as frases dizem isso.
+   * Na prática, vale por windowDays (os registros de uso são apagados depois de
+   * config.privacy.usageDays dias; por isso windowDays não deve passar disso).
+   */
+  testPhase?: boolean;
 }

@@ -228,3 +228,4 @@ Plano: quando o PDF não tem texto, o navegador transforma as páginas (até 30)
 - Metodologia atualizada + tabela dos veículos da lista fixa (gerada de lib/veiculos.ts).
 - Revisão final do site publicado: páginas, APIs, leitor de PDF e transcrição OK.
 - Próximo: o usuário decide créditos/teto diário para mais testadores e manda o convite (rascunho enviado). Depois do envio: apagar a tarefa agendada de retomada (trig_012JenRM1Skk63gL9CxXSnbV).
+- 11/11: usuário vai mandar para 4 ex-professores; créditos: US$ 11 + 4 = US$ 15. Limite mudado para 4 análises por pessoa NO TOTAL na fase de testes (testPhase; vale por 30 dias por causa da retenção dos registros de uso); teto do site 20 por dia.

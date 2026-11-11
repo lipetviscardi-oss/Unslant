@@ -7,23 +7,32 @@ import { config } from "@/lib/config";
 
 const FREE = config.limits.perDay.free;
 const DAYS = FREE.windowDays;
+const TEST = FREE.testPhase === true;
 
-/** "por dia" / "por semana" / "a cada N dias". */
+/** "por dia" / "por semana" / "a cada N dias" / "na fase de testes". */
 const PER = {
-  pt: !DAYS ? "por dia" : DAYS === 7 ? "por semana" : `a cada ${DAYS} dias`,
-  en: !DAYS ? "per day" : DAYS === 7 ? "per week" : `every ${DAYS} days`,
+  pt: TEST ? "na fase de testes" : !DAYS ? "por dia" : DAYS === 7 ? "por semana" : `a cada ${DAYS} dias`,
+  en: TEST ? "during the testing phase" : !DAYS ? "per day" : DAYS === 7 ? "per week" : `every ${DAYS} days`,
 };
 
-/** Período em que o limite vale: "hoje" / "nesta semana". */
+/** Período em que o limite vale: "hoje" / "nesta semana" / "nesta fase de testes". */
 export const PERIOD = {
-  pt: !DAYS ? "hoje" : DAYS === 7 ? "nesta semana" : `nos últimos ${DAYS} dias`,
-  en: !DAYS ? "today" : DAYS === 7 ? "this week" : `in the last ${DAYS} days`,
+  pt: TEST ? "nesta fase de testes" : !DAYS ? "hoje" : DAYS === 7 ? "nesta semana" : `nos últimos ${DAYS} dias`,
+  en: TEST ? "in this testing phase" : !DAYS ? "today" : DAYS === 7 ? "this week" : `in the last ${DAYS} days`,
 };
 
-/** Quando um uso volta: "amanhã, à meia-noite no seu horário" / "7 dias depois de usada". */
+/** Quando um uso volta: "amanhã" / "7 dias depois de usada" / fase de testes: não volta. */
 export const COMES_BACK = {
-  pt: !DAYS ? "Amanhã (à meia-noite no seu horário) elas voltam." : `Cada uma volta ${DAYS} dias depois de usada.`,
-  en: !DAYS ? "They come back tomorrow (at midnight your time)." : `Each one comes back ${DAYS} days after it was used.`,
+  pt: TEST
+    ? "Se quiser fazer mais, fale com quem te convidou."
+    : !DAYS
+      ? "Amanhã (à meia-noite no seu horário) elas voltam."
+      : `Cada uma volta ${DAYS} dias depois de usada.`,
+  en: TEST
+    ? "If you'd like to run more, ask the person who invited you."
+    : !DAYS
+      ? "They come back tomorrow (at midnight your time)."
+      : `Each one comes back ${DAYS} days after it was used.`,
 };
 
 /** O que a conta grátis dá, ex.: "4 análises por semana (simples ou detalhadas)". */
