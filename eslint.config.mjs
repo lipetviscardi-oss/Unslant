@@ -7,6 +7,8 @@ const eslintConfig = defineConfig([
   ...nextTs,
   // Override default ignores of eslint-config-next.
   globalIgnores([
+    // Arquivos do leitor de PDF da Mozilla, copiados de node_modules (não são nossos).
+    "public/pdfjs/**",
     // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",
