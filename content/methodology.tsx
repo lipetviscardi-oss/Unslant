@@ -11,6 +11,7 @@
 import Link from "next/link";
 import { SCORING, TAXONOMY } from "@/lib/taxonomy";
 import { activeModelName, config } from "@/lib/config";
+import { OUTLETS } from "@/lib/veiculos";
 
 const pct = (n: number) => `${Math.round(n * 100)}%`;
 const fmt = (n: number, lang: "pt" | "en") => n.toLocaleString(lang === "pt" ? "pt-BR" : "en-US");
@@ -40,6 +41,79 @@ function Bands({ lang }: { lang: "pt" | "en" }) {
   );
 }
 
+const LINE: Record<string, { pt: string; en: string }> = {
+  left: { pt: "esquerda", en: "left" },
+  center_left: { pt: "centro-esquerda", en: "center-left" },
+  center: { pt: "centro", en: "center" },
+  center_right: { pt: "centro-direita", en: "center-right" },
+  right: { pt: "direita", en: "right" },
+  wire: { pt: "agência de notícias", en: "news agency" },
+  fact_check: { pt: "checagem", en: "fact-checking" },
+  legal: { pt: "jurídico", en: "legal" },
+  academic: { pt: "acadêmico", en: "academic" },
+  specialized: { pt: "especializado", en: "specialized" },
+  international: { pt: "internacional", en: "international" },
+  institutional: { pt: "oficial", en: "official" },
+};
+const ORDER = ["left", "center_left", "center", "center_right", "right", "wire", "fact_check", "legal", "academic", "specialized", "international", "institutional"];
+
+/** Veículos da lista fixa (lib/veiculos.ts), com a classificação e a fonte. Gerada da própria lista. */
+function OutletsTable({ lang }: { lang: "pt" | "en" }) {
+  const seen = new Set<string>();
+  const rows = Object.values(OUTLETS)
+    .filter((o) => {
+      const k = `${o.name}|${o.line}`;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    })
+    .sort((a, b) => ORDER.indexOf(a.line) - ORDER.indexOf(b.line) || a.name.localeCompare(b.name));
+  const month = (u?: string) => {
+    if (!u) return "";
+    const [y, m] = u.split("-").map(Number);
+    return ` (${new Date(y, m - 1, 1).toLocaleDateString(lang === "pt" ? "pt-BR" : "en-US", { month: "short", year: "numeric" })})`;
+  };
+  return (
+    <details>
+      <summary>
+        {lang === "pt" ? `Ver a lista (${rows.length} veículos e órgãos)` : `See the list (${rows.length} outlets and bodies)`}
+      </summary>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>{lang === "pt" ? "Veículo" : "Outlet"}</th>
+              <th>{lang === "pt" ? "Classificação" : "Classification"}</th>
+              <th>{lang === "pt" ? "Fonte" : "Source"}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((o) => (
+              <tr key={`${o.name}-${o.line}`}>
+                <td>{o.name}</td>
+                <td>{LINE[o.line]?.[lang] ?? o.line}</td>
+                <td>
+                  {o.source.url ? (
+                    <a href={o.source.url} target="_blank" rel="noopener noreferrer">
+                      {o.source.label}
+                    </a>
+                  ) : (
+                    o.source.label
+                  )}
+                  {month(o.source.updated)}
+                  {o.source.note ? (
+                    <span className="note-inline"> — {lang === "en" ? o.source.note.replace(/^Avaliação:/, "Rating:") : o.source.note}</span>
+                  ) : null}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </details>
+  );
+}
+
 export function MethodologyPt() {
   return (
     <>
@@ -59,13 +133,19 @@ export function MethodologyPt() {
       <h2>Como uma análise acontece</h2>
       <ol>
         <li>
-          <strong>Extração.</strong> Separamos o texto principal de menus, anúncios e rodapés. Tabelas viram linhas
-          legíveis. PDFs são lidos no seu próprio navegador, na ordem certa mesmo em duas colunas, sem os cabeçalhos e
-          rodapés repetidos em cada página.
+          <strong>Extração.</strong> Separamos o texto principal de menus, anúncios e rodapés, e retiramos o que não é
+          conteúdo: chamadas de newsletter, pedidos de apoio ou doação, listas de tags, blocos de &ldquo;leia
+          também&rdquo; e parágrafos repetidos. Tabelas viram linhas legíveis. PDFs são lidos no seu próprio navegador,
+          na ordem certa mesmo em colunas de larguras diferentes, sem os cabeçalhos e rodapés repetidos; título, autores,
+          revista e data vêm da primeira página. Em papers, a lista de referências e os anúncios da editora ficam fora da
+          análise (as referências aparecem recolhidas no resultado). PDFs escaneados, sem texto selecionável, têm o texto
+          transcrito pela IA a partir das imagens das páginas (até {config.ocr.maxPages}), com um aviso de que pode haver
+          erros de leitura.
         </li>
         <li>
           <strong>Identificação.</strong> A IA identifica o tipo de texto (notícia, reportagem, análise, opinião,
-          editorial, paper…), o país e o contexto político relevante. O tipo segue critérios fixos (por exemplo: texto
+          editorial, paper e, para fontes históricas, discurso, documento oficial, propaganda, carta ou jornal
+          histórico), a época, o país e o contexto político relevante <em>naquela época</em>. O tipo segue critérios fixos (por exemplo: texto
           assinado que defende uma posição é opinião; texto que defende a posição do próprio veículo é editorial) e usa
           como pista a editoria indicada pela página, quando existe. O motivo da escolha aparece no resultado. Se você
           souber o tipo, pode informá-lo no formulário, e ele prevalece sobre o da IA.
@@ -78,8 +158,10 @@ export function MethodologyPt() {
         <li>
           <strong>Imagens e gráficos.</strong> Ao mesmo tempo, a IA examina as imagens do conteúdo: descreve cada
           gráfico, tabela ou foto, compara com o que o texto diz e procura gráficos enganosos (eixo que não começa no
-          zero, recorte escolhido a dedo, escala distorcida) e enquadramento por imagem. Ela só pode apontar figuras que
-          de fato recebeu.
+          zero, recorte escolhido a dedo, escala distorcida) e enquadramento por imagem. Problemas nas imagens também
+          entram na categoria que os descreve (por exemplo, fotos escolhidas para chocar contam em &ldquo;Medo e
+          indignação&rdquo;), e a nota da categoria considera o texto e as imagens. Figuras parecidas com o mesmo
+          problema são apontadas todas. Ela só pode apontar figuras que de fato recebeu.
         </li>
         <li>
           <strong>Conferência.</strong> Cada trecho citado como evidência é procurado no texto original. O que não for
@@ -87,8 +169,18 @@ export function MethodologyPt() {
         </li>
         <li>
           <strong>Síntese.</strong> Um resumo final junta os achados e sugere como um trecho problemático poderia ser
-          reescrito de forma neutra. A versão neutra nunca acrescenta fontes, números ou fatos que não estão no original;
-          o site confere isso automaticamente e descarta a sugestão se ela inventar algo.
+          reescrito de forma neutra. A versão neutra nunca acrescenta fontes, números ou fatos que não estão no original,
+          e um número que a análise marcou como &ldquo;sem fonte&rdquo; só aparece atribuído (&ldquo;segundo o
+          autor&rdquo;) ou com &ldquo;(sem fonte indicada)&rdquo;; o site confere isso automaticamente e descarta a
+          sugestão se ela inventar algo. Quando o texto rebate críticas conhecidas (comum em papers), a análise diz se
+          cada resposta do autor procede, procede em parte ou não procede, e até onde.
+        </li>
+        <li>
+          <strong>Conferência de coerência.</strong> No fim, o site compara as partes do relatório entre si: o resumo
+          não pode chamar o texto de um tipo diferente do identificado, dizer que ele favorece outro lado ou com outra
+          intensidade que a marcada na disputa, nem dizer &ldquo;sem viés&rdquo; ou &ldquo;viés leve&rdquo; quando as
+          notas são altas. Se houver contradição, a IA refaz o resumo; se o erro persistir, a frase contraditória é
+          retirada antes de você ver o resultado.
         </li>
       </ol>
       <p>
@@ -99,8 +191,9 @@ export function MethodologyPt() {
 
       <h2>Toda afirmação precisa de prova no próprio texto</h2>
       <p>
-        Por padrão, o texto analisado mostra só os destaques de nível moderado e forte; os leves podem ser exibidos com um
-        botão. Trechos apontados em mais de uma categoria aparecem como um destaque só, com todas as explicações. Verbos
+        Cada trecho destacado tem um peso próprio (sinal leve, médio ou forte), e a cor mostra esse peso, nunca acima da
+        nota da categoria a que ele pertence. Por padrão, o texto mostra os sinais médios e fortes; os leves podem ser
+        exibidos com um botão. Trechos apontados em mais de uma categoria aparecem como um destaque só, com todas as explicações. Verbos
         como &ldquo;afirmou&rdquo; ou &ldquo;alegou&rdquo; não são apontados sozinhos, só quando há tratamento desigual
         entre os lados.
       </p>
@@ -165,8 +258,9 @@ export function MethodologyPt() {
         texto trata de uma disputa concreta (governo × oposição, candidato A × candidato B), a IA diz se ele favorece um
         lado, se é equilibrado ou se não dá para afirmar. Para que a régua seja a mesma para os dois lados, eles são
         sempre apresentados na mesma ordem: primeiro quem está no poder, depois quem está fora. A classificação precisa
-        de um trecho do texto como prova e indica a intensidade (levemente, moderadamente ou fortemente). O resumo da
-        análise é instruído a dizer a mesma coisa que esse marcador.
+        de um trecho do texto como prova e indica a intensidade (levemente, moderadamente ou fortemente). Quando o texto
+        apoia um lado mas critica parte dele (por exemplo, defende o governo mas ataca a própria equipe econômica), isso
+        aparece como ressalva. O resumo da análise precisa dizer a mesma coisa que esse marcador, e o site confere.
       </p>
       <p>
         As outras duas são eixos ideológicos, preenchidos só quando o tema realmente envolve economia ou costumes. Uma
@@ -233,17 +327,27 @@ export function MethodologyPt() {
         </li>
         <li>
           <strong>Linha editorial.</strong> Cada sugestão mostra a linha editorial do veículo (esquerda, centro-esquerda,
-          centro, centro-direita, direita, oficial, jurídico, checagem, acadêmico, agência de notícias). Cerca de 78
-          veículos e órgãos vêm de uma lista fixa do site, e cada classificação tem uma fonte pública com link: a avaliação
-          do Media Bias/Fact Check ou, para veículos brasileiros que ele não avalia, a descrição da linha editorial na
-          Wikipédia, com o mês da avaliação. Órgãos públicos (governo, Congresso, STF, TSE) aparecem como &ldquo;oficial&rdquo;. Veículos sem
-          fonte clara ficam fora da lista: para eles, a IA faz uma estimativa, marcada como &ldquo;estimativa&rdquo;.
+          centro, centro-direita, direita, oficial, jurídico, checagem, acadêmico, agência de notícias, especializado).
+          Os veículos da lista fixa do site (abaixo) têm a classificação de uma fonte pública com link, conferida página
+          por página. Veículos sem fonte pública confiável ficam fora da lista de propósito: para eles, a IA faz uma
+          estimativa, marcada como &ldquo;estimativa da IA&rdquo;, com um aviso.
         </li>
         <li>
           <strong>Não é endosso.</strong> Recomendar um texto não significa que ele seja neutro ou correto: ele ajuda a ver o
           assunto por outro ângulo. Vale aplicar a ele o mesmo olhar crítico.
         </li>
       </ul>
+
+      <h2>Veículos com linha editorial conferida</h2>
+      <p>
+        Estes são os veículos e órgãos da lista fixa do site. A classificação política de cada veículo jornalístico vem
+        da fonte indicada: o Media Bias/Fact Check (que usa a mesma régua para todos: LEFT, LEFT-CENTER, LEAST BIASED,
+        RIGHT-CENTER, RIGHT) ou, para veículos brasileiros que ele não avalia, o que o artigo da Wikipédia em português
+        diz sobre a linha editorial. Antes de cada nova versão, um comando abre a página de cada fonte e confere se a
+        classificação continua a mesma. Os outros tipos (agência de notícias, checagem, jurídico, acadêmico,
+        especializado, oficial) não são classificações políticas.
+      </p>
+      <OutletsTable lang="pt" />
 
       <h2>Afirmações</h2>
       <p>
@@ -306,7 +410,8 @@ export function MethodologyPt() {
           <strong>Imagens: só o que é imagem.</strong> A IA examina as imagens dentro da matéria (até{" "}
           {config.visual.maxUrlImages}) e, em PDFs, as páginas com figuras, gráficos ou tabelas (até{" "}
           {config.visual.maxPdfPages}). Gráficos interativos embutidos (como Datawrapper ou Flourish), vídeos e textos
-          colados na aba Texto não têm imagens para analisar. PDFs escaneados (só imagem, sem texto) não são aceitos.
+          colados na aba Texto não têm imagens para analisar. Em PDFs escaneados, a IA transcreve só as primeiras{" "}
+          {config.ocr.maxPages} páginas.
         </li>
         <li>
           <strong>Textos longos levam mais tempo.</strong> Para respeitar o limite de uso por minuto da IA, textos
@@ -373,13 +478,18 @@ export function MethodologyEn() {
       <h2>How an analysis works</h2>
       <ol>
         <li>
-          <strong>Extraction.</strong> We separate the main text from menus, ads and footers. Tables become readable rows.
-          PDFs are read in your own browser, in the right order even in two columns, without the headers and footers
-          repeated on every page.
+          <strong>Extraction.</strong> We separate the main text from menus, ads and footers, and remove what is not
+          content: newsletter prompts, requests for support or donations, tag lists, &ldquo;read more&rdquo; blocks and
+          repeated paragraphs. Tables become readable rows. PDFs are read in your own browser, in the right order even with
+          columns of different widths, without repeated headers and footers; title, authors, journal and date come from the
+          first page. In papers, the reference list and publisher ads are left out of the analysis (the references are
+          shown collapsed in the result). Scanned PDFs, with no selectable text, have their text transcribed by the AI from
+          the page images (up to {config.ocr.maxPages}), with a warning that there may be reading errors.
         </li>
         <li>
           <strong>Identification.</strong> The AI identifies the type of text (news, feature, analysis, opinion,
-          editorial, paper…), the country and the relevant political context. The type follows fixed criteria (for
+          editorial, paper and, for historical sources, speech, official document, propaganda, letter or historical
+          newspaper), its period, the country and the relevant political context <em>at that time</em>. The type follows fixed criteria (for
           example: a signed piece arguing a position is opinion; a piece stating the outlet&rsquo;s own position is an
           editorial) and uses the section shown by the page as a hint, when there is one. The reason appears in the
           result. If you know the type, you can choose it in the form, and your choice overrides the AI.
@@ -392,8 +502,10 @@ export function MethodologyEn() {
         <li>
           <strong>Images and charts.</strong> At the same time, the AI examines the content&rsquo;s images: it describes
           each chart, table or photo, compares it with what the text says, and looks for misleading charts (an axis that
-          does not start at zero, a cherry-picked time window, a distorted scale) and visual framing. It can only point to
-          figures it actually received.
+          does not start at zero, a cherry-picked time window, a distorted scale) and visual framing. Problems in images also
+          count in the category that describes them (for example, photos chosen to shock count under &ldquo;Fear and
+          outrage&rdquo;), and the category score considers both text and images. Similar figures with the same problem
+          are all flagged. It can only point to figures it actually received.
         </li>
         <li>
           <strong>Verification.</strong> Every passage quoted as evidence is searched for in the original text. Anything
@@ -402,7 +514,17 @@ export function MethodologyEn() {
         <li>
           <strong>Synthesis.</strong> A final summary brings the findings together and suggests how a problematic passage
           could be rewritten neutrally. The neutral version never adds sources, numbers or facts that are not in the
-          original; the site checks this automatically and discards the suggestion if it invents anything.
+          original, and a number the analysis marked as &ldquo;unsourced&rdquo; only appears attributed (&ldquo;according
+          to the author&rdquo;) or with &ldquo;(no source given)&rdquo;; the site checks this automatically and discards
+          the suggestion if it invents anything. When the text rebuts well-known criticisms (common in papers), the
+          analysis says whether each of the author&rsquo;s replies holds up, partly holds up or doesn&rsquo;t, and how far.
+        </li>
+        <li>
+          <strong>Consistency check.</strong> At the end, the site compares the parts of the report with each other: the
+          summary cannot call the text a different type than the one identified, say it favors another side or with a
+          different intensity than the dispute marker, or say &ldquo;no bias&rdquo; or &ldquo;mild bias&rdquo; when the
+          scores are high. If there is a contradiction, the AI rewrites the summary; if the error persists, the
+          contradictory sentence is removed before you see the result.
         </li>
       </ol>
       <p>
@@ -413,7 +535,9 @@ export function MethodologyEn() {
 
       <h2>Every finding must be backed by the text itself</h2>
       <p>
-        By default, the analyzed text shows only moderate and strong highlights; mild ones can be revealed with a button.
+        Each highlighted passage has its own weight (mild, medium or strong signal), and the color shows that weight, never
+        above the score of its category. By default, the text shows medium and strong signals; mild ones can be revealed
+        with a button.
         Passages flagged in more than one category appear as a single highlight with all explanations. Verbs such as
         &ldquo;stated&rdquo; or &ldquo;claimed&rdquo; are not flagged on their own, only when the sides are treated
         unequally.
@@ -479,8 +603,9 @@ export function MethodologyEn() {
         the text covers a concrete dispute (government × opposition, candidate A × candidate B), the AI says whether it
         favors one side, is balanced, or cannot be determined. To apply the same yardstick to both sides, they are always
         listed in the same order: first whoever holds power, then whoever is outside it. The classification must be backed
-        by a passage from the text and states the intensity (slightly, moderately or strongly). The analysis summary is
-        instructed to say the same thing as this marker.
+        by a passage from the text and states the intensity (slightly, moderately or strongly). When the text supports one
+        side but criticizes part of it (for example, it defends the government but attacks its own economic team), this
+        appears as a caveat. The analysis summary must say the same thing as this marker, and the site checks it.
       </p>
       <p>
         The other two are ideological axes, filled in only when the topic really involves the economy or social values.
@@ -547,17 +672,27 @@ export function MethodologyEn() {
         </li>
         <li>
           <strong>Editorial line.</strong> Each suggestion shows the outlet&rsquo;s editorial line (left, center-left,
-          center, center-right, right, official, legal, fact-checking, academic, news agency). About 78 outlets and
-          bodies come from a fixed list kept by the site, and each classification has a public source with a link: the
-          Media Bias/Fact Check rating or, for Brazilian outlets it does not rate, the description of the editorial line on
-          Portuguese Wikipedia, with the month of the rating. Public bodies (government, Congress, courts) appear as &ldquo;official&rdquo;. Outlets
-          without a clear source are left off the list: for them the AI makes an estimate, marked as &ldquo;estimate&rdquo;.
+          center, center-right, right, official, legal, fact-checking, academic, news agency, specialized). Outlets on the
+          site&rsquo;s fixed list (below) take their classification from a public source with a link, checked page by
+          page. Outlets without a reliable public source are deliberately left off: for them the AI makes an estimate,
+          marked as &ldquo;AI estimate&rdquo;, with a warning.
         </li>
         <li>
           <strong>Not an endorsement.</strong> Recommending a text does not mean it is neutral or correct: it helps you see
           the topic from another angle. Read it with the same critical eye.
         </li>
       </ul>
+
+      <h2>Outlets with a checked editorial line</h2>
+      <p>
+        These are the outlets and bodies on the site&rsquo;s fixed list. The political classification of each news outlet
+        comes from the source shown: Media Bias/Fact Check (which applies the same scale to all: LEFT, LEFT-CENTER, LEAST
+        BIASED, RIGHT-CENTER, RIGHT) or, for Brazilian outlets it does not rate, what the Portuguese Wikipedia article says
+        about the editorial line. Before each new version, a command opens each source page and checks that the
+        classification is still the same. The other types (news agency, fact-checking, legal, academic, specialized,
+        official) are not political classifications.
+      </p>
+      <OutletsTable lang="en" />
 
       <h2>Claims</h2>
       <p>
@@ -620,7 +755,8 @@ export function MethodologyEn() {
           <strong>Images: only what is an image.</strong> The AI examines the images inside the article (up to{" "}
           {config.visual.maxUrlImages}) and, in PDFs, the pages with figures, charts or tables (up to{" "}
           {config.visual.maxPdfPages}). Embedded interactive charts (such as Datawrapper or Flourish), videos and text
-          pasted in the Text tab have no images to analyze. Scanned PDFs (images only, no text) are not accepted.
+          pasted in the Text tab have no images to analyze. For scanned PDFs, the AI transcribes only the first{" "}
+          {config.ocr.maxPages} pages.
         </li>
         <li>
           <strong>Long texts take longer.</strong> To respect the AI&rsquo;s per-minute usage limit, long texts are
