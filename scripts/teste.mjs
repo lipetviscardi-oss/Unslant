@@ -178,6 +178,8 @@ console.log("Cada análise leva cerca de 30 segundos. Custo estimado: cerca de U
 
 // 2. Analisa cada artigo do zero (um de cada vez, para não estourar o limite da IA)
 const runs = {};
+/** Mensagem de erro de cada caso que falhou (vai para as regras e para o arquivo -completo.json). */
+const errors = {};
 for (const c of manifest.casos) {
   const saved = JSON.parse(readFileSync(caseFile(c), "utf8"));
   process.stdout.write(`Analisando ${c.nome} `);
@@ -199,6 +201,7 @@ for (const c of manifest.casos) {
   } catch (err) {
     console.log(` ERRO: ${err.message} (${err.code})`);
     runs[c.id] = null;
+    errors[c.id] = `${err.code ?? "?"}: ${err.message}`;
     // Sem chave ou sem crédito, os outros artigos também falhariam: para aqui.
     if (["MISSING_API_KEY", "AI_AUTH", "AI_NO_CREDIT", "DAILY_LIMIT"].includes(err.code)) break;
   }
@@ -211,7 +214,7 @@ console.log("\nRESULTADOS");
 for (const c of manifest.casos) {
   const r = runs[c.id];
   if (!r) {
-    check(false, `${c.nome}: a análise falhou`);
+    check(false, `${c.nome}: a análise falhou${errors[c.id] ? ` (${errors[c.id].slice(0, 200)})` : ""}`);
     continue;
   }
   const score = r.overall.score;
@@ -377,7 +380,7 @@ if (previous) {
 writeFileSync(path.join(resultsDir, `${summary.data.replace(/[:.]/g, "-")}.json`), JSON.stringify(summary, null, 2));
 // Resultados completos (para anexar no chat e conferir os detalhes).
 const fullFile = path.join(resultsDir, `${summary.data.replace(/[:.]/g, "-")}-completo.json`);
-writeFileSync(fullFile, JSON.stringify({ data: summary.data, regras: checks, resultados: runs }));
+writeFileSync(fullFile, JSON.stringify({ data: summary.data, regras: checks, erros: errors, resultados: runs }));
 console.log(`Resultados completos: ${path.relative(root, fullFile)} (pode anexar no chat)`);
 
 console.log(summary.aprovado ? "\nTESTE APROVADO ✅" : "\nTESTE REPROVADO ❌ (veja as regras acima)");
