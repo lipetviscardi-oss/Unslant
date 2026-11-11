@@ -27,6 +27,11 @@
       "arquivo": "privados/telegrama-gordon-1964.pdf",
       "escaneado": true,
       "sobre": "Telegrama do embaixador Lincoln Gordon, março de 1964 (cópia escaneada, sem texto selecionável)."
+    },
+    {
+      "arquivo": "escaneado-sintetico.pdf",
+      "escaneado": true,
+      "sobre": "Imagem JPEG de um texto (sem texto selecionável)."
     }
   ]
 }

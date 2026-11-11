@@ -114,9 +114,28 @@ async function analyze(body) {
   return result;
 }
 
+/** PDF escaneado guardado como imagens: transcreve em lotes (como o navegador faz) e devolve o texto. */
+async function transcribe(saved) {
+  const texts = [];
+  for (let i = 0; i < saved.pages.length; i += 4) {
+    const res = await fetch(`${base}/api/transcribe`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lang: saved.lang ?? "pt", pages: saved.pages.slice(i, i + 4) }),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw Object.assign(new Error(data?.message ?? `transcrição: HTTP ${res.status}`), { code: data?.code ?? "OCR_FAILED" });
+    for (const p of data.pages) if (p.text) texts.push(p.text);
+    process.stdout.write("t");
+  }
+  return texts.join("\n\n");
+}
+
 function requestFor(saved, useUrl) {
   const common = { lang: saved.lang ?? "pt", ...(saved.contentType ? { contentType: saved.contentType } : {}) };
   if (saved.mode === "url" && useUrl) return { mode: "url", url: saved.url, ...common };
+  if (saved.mode === "pdf-escaneado")
+    return { mode: "pdf", text: saved.transcribed, meta: { ...(saved.meta ?? {}), transcribed: true, pages: saved.pages.length, totalPages: saved.meta?.totalPages ?? saved.pages.length }, ...common };
   if (saved.mode === "pdf")
     return { mode: "pdf", text: saved.text, meta: saved.meta ?? {}, ...(saved.images?.length ? { images: saved.images } : {}), ...common };
   return { mode: "text", text: saved.text, ...common };
@@ -157,6 +176,7 @@ for (const c of manifest.casos) {
   const t0 = Date.now();
   try {
     let r;
+    if (saved.mode === "pdf-escaneado") saved.transcribed = await transcribe(saved);
     try {
       r = await analyze(requestFor(saved, true));
     } catch (err) {
@@ -212,6 +232,11 @@ for (const c of manifest.casos) {
     const name = { left: "esquerda", right: "direita", center: "centro", unidentified: "não identificado", not_applicable: "não se aplica" };
     console.log(`  Eixo econômico: ${name[pos] ?? pos}`);
     check(pos === c.eixoEconomico, `${c.nome}: eixo econômico ${name[c.eixoEconomico]} (deu ${name[pos] ?? pos})`);
+  }
+  // PDF escaneado: a transcrição precisa conter os trechos esperados.
+  if (c.transcricaoContem) {
+    console.log(`  Transcrição: ${r.source.transcribed ? "sim" : "não"} — começo: ${r.text.slice(0, 120).replace(/\n/g, " ")}`);
+    check(r.source.transcribed === true && c.transcricaoContem.every((x) => r.text.includes(x)), `${c.nome}: texto transcrito pela IA contém ${c.transcricaoContem.map((x) => `"${x}"`).join(" e ")}`);
   }
   // Textos históricos: época, contexto da época, disputa da época, linguagem da época e nenhum anacronismo.
   if (c.historico || c.epoca) {

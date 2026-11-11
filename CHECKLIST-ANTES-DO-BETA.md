@@ -34,7 +34,7 @@ Ele roda, um depois do outro:
 npm run teste:beta
 ```
 
-Roda 11 casos: Séralini (PDF), Outras Palavras, Mother Jones, Federalist, Brasil de Fato, Terra, CNN Brasil, Reuters e 3 textos históricos (AI-5 de 1968, Doutrina Truman de 1947, Nabuco de 1883). No fim, mostra as **REGRAS** (✅/❌) e grava os resultados completos em `testes/resultados/…-completo.json`.
+Roda 12 casos: Séralini (PDF), Outras Palavras, Mother Jones, Federalist, Brasil de Fato, Terra, CNN Brasil, Reuters, 3 textos históricos (AI-5 de 1968, Doutrina Truman de 1947, Nabuco de 1883) e 1 PDF escaneado (transcrição pela IA). No fim, mostra as **REGRAS** (✅/❌) e grava os resultados completos em `testes/resultados/…-completo.json`.
 
 Se algo der ❌, anexe no chat o arquivo `…-completo.json` e o relatório `testes/resultados/lixo-….md`.
 
@@ -57,6 +57,10 @@ Se algo der ❌, anexe no chat o arquivo `…-completo.json` e o relatório `tes
 ### 4. Título de PDFs
 - ✅ quando `checar-pdfs` mostra ✓ em título, autores, revista e data de todos os PDFs.
 - O título nunca pode ser o nome do arquivo (o teste usa de propósito o nome "Teste unslant pdf.pdf").
+
+### 4b. PDFs escaneados
+- ✅ quando `checar-pdfs` reconhece os escaneados e, no `teste:beta`, o caso "PDF escaneado" tem o texto transcrito com os trechos esperados.
+- Lembrete: depois de mudar o SQL (`supabase/migrations/0001_unslant.sql`), rode-o de novo no Supabase.
 
 ### 5. Textos históricos
 - ✅ quando, no `teste:beta`, os 3 casos históricos têm: época identificada corretamente, reconhecido como histórico, nenhum partido ou figura atual na análise e (Nabuco) eixos "não se aplica".

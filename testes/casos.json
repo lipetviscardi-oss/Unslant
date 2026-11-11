@@ -179,6 +179,21 @@
       "eixosNaoSeAplicam": true,
       "titulo": "O Abolicionismo, cap. I",
       "link": "https://pt.wikisource.org/wiki/O_Abolicionismo/I"
+    },
+    {
+      "id": "escaneado-sintetico",
+      "nome": "PDF escaneado (sintético, 1968)",
+      "arquivo": "fixtures/escaneado-sintetico.json",
+      "transcricaoContem": [
+        "ATO DE TESTE",
+        "ameaçadas"
+      ],
+      "epoca": [
+        1968,
+        1968
+      ],
+      "titulo": "Ato de teste nº 1, de 1968 (sintético)",
+      "link": ""
     }
   ],
   "simetria": [

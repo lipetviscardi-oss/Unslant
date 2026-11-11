@@ -25,6 +25,7 @@ export type ErrorCode =
   | "PDF_INVALID"
   | "PDF_SCANNED"
   | "OCR_LIMIT"
+  | "PDF_IMAGE_FORMAT"
   | "OCR_FAILED"
   | "MISSING_API_KEY"
   | "AI_AUTH"
@@ -106,6 +107,10 @@ export const ERROR_MESSAGES: Record<ErrorCode, Record<Lang, string>> = {
   PDF_INVALID: {
     pt: "Não conseguimos abrir esse PDF. Ele pode estar corrompido ou protegido por senha.",
     en: "We couldn't open that PDF. It may be corrupted or password-protected.",
+  },
+  PDF_IMAGE_FORMAT: {
+    pt: "As páginas deste PDF escaneado usam um formato de imagem que o site ainda não consegue ler (comum em documentos de arquivo em preto e branco). Se tiver o texto, cole-o na aba \"Texto\".",
+    en: "This scanned PDF's pages use an image format the site can't read yet (common in black-and-white archival documents). If you have the text, paste it in the Text tab.",
   },
   OCR_LIMIT: {
     pt: "Você atingiu o limite de páginas escaneadas que a IA pode transcrever em 24 horas (proteção contra gastos). Tente amanhã ou cole o texto na aba \"Texto\".",

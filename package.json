@@ -15,7 +15,7 @@
     "checar-lixo": "node --no-warnings --experimental-transform-types --import ./scripts/lib/carregar-ts.mjs scripts/checar-lixo.mjs",
     "checar-pdfs": "node --no-warnings --experimental-transform-types --import ./scripts/lib/carregar-ts.mjs scripts/checar-pdfs.mjs",
     "checar-contradicoes": "node --no-warnings --experimental-transform-types --import ./scripts/lib/carregar-ts.mjs scripts/checar-contradicoes.mjs",
-    "teste:beta": "node scripts/teste.mjs --so seralini,outras-palavras,mother-jones,federalist,brasil-de-fato,terra-brasil,cnn,reuters,hist-ai5,hist-truman,hist-nabuco",
+    "teste:beta": "node scripts/teste.mjs --so seralini,outras-palavras,mother-jones,federalist,brasil-de-fato,terra-brasil,cnn,reuters,hist-ai5,hist-truman,hist-nabuco,escaneado-sintetico",
     "checar-beta": "node scripts/checar-beta.mjs"
   },
   "dependencies": {

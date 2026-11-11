@@ -143,7 +143,9 @@ export function AnalyzeForm({ onSubmit }: { onSubmit: (req: AnalyzeRequest) => v
         contentType,
       });
     } catch (err) {
-      const message = err instanceof Error && "code" in err ? err.message : errorMessage("OCR_FAILED", lang);
+      // AppError (do leitor de PDF) traz só o código; AnalyzeError (do servidor) já traz a mensagem pronta.
+      const message =
+        err instanceof AppError ? errorMessage(err.code, lang) : err instanceof Error && "code" in err ? err.message : errorMessage("OCR_FAILED", lang);
       setPdf((p) => ({ ...p, status: "scanned", error: message }));
     }
   }

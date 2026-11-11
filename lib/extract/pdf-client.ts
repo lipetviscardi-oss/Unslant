@@ -445,6 +445,22 @@ export async function extractFromPdf(file: File): Promise<{ text: string; source
   };
 }
 
+/** A página desenhada ficou em branco? (menos de 0,2% de pontos escuros, numa cópia reduzida) */
+function isBlank(canvas: HTMLCanvasElement): boolean {
+  const w = 200;
+  const h = Math.max(1, Math.round((canvas.height / canvas.width) * w));
+  const small = document.createElement("canvas");
+  small.width = w;
+  small.height = h;
+  const ctx = small.getContext("2d");
+  if (!ctx) return false;
+  ctx.drawImage(canvas, 0, 0, w, h);
+  const px = ctx.getImageData(0, 0, w, h).data;
+  let dark = 0;
+  for (let i = 0; i < px.length; i += 4) if (px[i] * 0.299 + px[i + 1] * 0.587 + px[i + 2] * 0.114 < 200) dark++;
+  return dark / (w * h) < 0.002;
+}
+
 /** Uma página escaneada em imagem, para a transcrição. */
 export interface ScannedPage {
   page: number;
@@ -461,12 +477,16 @@ export async function renderScannedPages(file: File, onProgress?: (done: number,
   const pdf = await getDocumentProxy(new Uint8Array(await file.arrayBuffer()));
   const total = Math.min(pdf.numPages, config.ocr.maxPages);
   const pages: ScannedPage[] = [];
+  let blank = 0;
   for (let i = 1; i <= total; i++) {
     const canvas = await renderPage(await pdf.getPage(i), config.ocr.longSide);
-    pages.push({ page: i, data: jpeg(canvas, config.ocr.jpegQuality).replace(/^data:image\/jpeg;base64,/, "") });
+    // Página em branco (ex.: imagem num formato que o navegador não conseguiu desenhar): não vale pagar a IA por ela.
+    if (isBlank(canvas)) blank++;
+    else pages.push({ page: i, data: jpeg(canvas, config.ocr.jpegQuality).replace(/^data:image\/jpeg;base64,/, "") });
     onProgress?.(i, total);
   }
   const totalPages = pdf.numPages;
   await pdf.cleanup();
+  if (pages.length === 0) throw new AppError(blank ? "PDF_IMAGE_FORMAT" : "PDF_SCANNED");
   return { pages, totalPages };
 }

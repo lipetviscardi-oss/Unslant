@@ -217,4 +217,7 @@ Plano: quando o PDF não tem texto, o navegador transforma as páginas (até 30)
 | O1 | Navegador: detectar escaneado e gerar imagens das páginas | feito |
 | O2 | /api/transcribe + prompt + limites (ocr_events) | feito (SQL: tabela ocr_events — o usuário precisa rodar o SQL de novo) |
 | O3 | Formulário (progresso), análise (aviso à IA e na tela), Privacidade e Metodologia | feito |
-| O4 | Testes (IA falsa, navegador) + caso do telegrama no teste:beta e no checar-pdfs | a fazer |
+| O4 | Testes (IA falsa, navegador) + caso do telegrama no teste:beta e no checar-pdfs | feito: fluxo completo testado no navegador (IA falsa) com escaneado JPEG ✅; caso escaneado-sintetico no teste:beta e no checar-pdfs. ⚠️ Telegrama 1964 usa JBIG2: páginas saem em branco sem os decodificadores do pdf.js (jbig2.wasm/openjpeg.wasm, pdfjs-dist 6.4.299) — o site agora detecta e avisa, sem gastar; pedir permissão ao usuário para acrescentar esses arquivos |
+
+### Onde paramos (Rodada 10b, 11/11/2026)
+- Leitura de escaneados pronta para JPEG/cores/cinza. Esperando o usuário: permissão para acrescentar os decodificadores oficiais do pdf.js (JBIG2/JPEG 2000) em public/; depois ele roda o SQL de novo (tabela ocr_events), checar-beta e teste:beta.
