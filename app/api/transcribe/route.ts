@@ -58,7 +58,7 @@ export async function POST(request: Request) {
       effort: "low",
       maxTokens: config.ocr.maxTokens,
       usage,
-      signal: request.signal,
+      // Sem request.signal: fechar a página não interrompe uma transcrição que já está sendo paga.
     });
     // Só as páginas pedidas, na ordem pedida.
     const byPage = new Map(out.pages.map((p) => [p.page, p.text.trim()]));
@@ -66,8 +66,10 @@ export async function POST(request: Request) {
     console.info(`[unslant] transcrição: ${pages.length} página(s), qualidade ${out.quality}, US$ ${usage.costUsd()}`);
     return Response.json({ pages: result, quality: out.quality, costUsd: usage.costUsd() }, { headers: { "Cache-Control": "no-store" } });
   } catch (err) {
-    if (typeof reservation === "number") await releaseOcrPages(reservation).catch(() => undefined);
     const e = err instanceof AppError ? err : mapApiError(err);
+    // Só devolve as páginas quando o erro aconteceu ANTES de qualquer gasto (chave, crédito, limite por minuto).
+    const beforeSpending = ["MISSING_API_KEY", "AI_AUTH", "AI_NO_CREDIT", "AI_RATE_LIMIT"].includes(e.code);
+    if (beforeSpending && typeof reservation === "number") await releaseOcrPages(reservation).catch(() => undefined);
     console.error(`[unslant] transcrição falhou: ${e.code}`, e.detail ?? "");
     return fail(e.code === "AI_AUTH" || e.code === "AI_NO_CREDIT" || e.code === "AI_RATE_LIMIT" ? e.code : "OCR_FAILED", 502);
   }
